@@ -10,6 +10,10 @@ var raycaster;
 var group;
 var gui;
 var obj;
+var addingObject;
+var cubeOne;
+var attachedComponent;
+var gridHelperGroup;
 
 window.addEventListener( 'resize', function()
 {
@@ -22,19 +26,61 @@ window.addEventListener( 'resize', function()
 
 window.addEventListener( 'mousedown', function(event)
 {
-	event.preventDefault();
-	mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
-	raycaster.setFromCamera( mouse, camera );
-	var intersects = raycaster.intersectObjects( group.children );
-	if ( intersects.length > 0 ) {
-		if(intersects[0].object.componentType == "Floor")
+	if(event.button == 0){
+		if(!addingObject){
+			event.preventDefault();
+			mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+			mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+			raycaster.setFromCamera( mouse, camera );
+			var intersects = raycaster.intersectObjects( group.children );
+			if ( intersects.length > 0 ) {
+				if(intersects[0].object.componentType == "Floor")
+				{
+					transformCOntrols.attach(intersects[0].object);
+					selectedObject = intersects[0].object;
+					obj.width = selectedObject.scale.x;
+					obj.length = selectedObject.scale.z;
+					gui.updateDisplay();
+				}
+			}
+		}
+		else
 		{
-			transformCOntrols.attach(intersects[0].object);
-			selectedObject = intersects[0].object;
+			transformCOntrols.attach(attachedComponent);
+			selectedObject = attachedComponent;
 			obj.width = selectedObject.scale.x;
 			obj.length = selectedObject.scale.z;
 			gui.updateDisplay();
+			addingObject = false;
+			attachedComponent = null;
+			transformCOntrols.visible = true;
+			transformCOntrols.enabled = true;
+		}
+	}
+	else if(event.button == 2)
+	{
+		if(addingObject)
+		{
+			group.remove( attachedComponent );
+			sceneLoop();
+			addingObject = false;
+			attachedComponent = null;
+			transformCOntrols.visible = true;
+			transformCOntrols.enabled = true;
+		}
+	}
+});
+
+window.addEventListener( 'mousemove', function(event)
+{
+	if(addingObject){
+		event.preventDefault();
+		mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+		raycaster.setFromCamera( mouse, camera );
+		var intersects = raycaster.intersectObjects( gridHelperGroup.children );
+		if ( intersects.length > 0 ) {
+			attachedComponent.position.set(Math.round(intersects[0].point.x), 0, Math.round(intersects[0].point.z));
 		}
 	}
 });
@@ -61,22 +107,12 @@ var init = function()
 	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0.5, 0, 0.5 ) );
 	var material = new THREE.MeshLambertMaterial( {color: 0xffffff, wireframe: false} );
 	
-	var cubeOne = new THREE.Mesh( geometry, material );
+	cubeOne = new THREE.Mesh( geometry, material );
 	//scene.add( cubeOne );
 	cubeOne.componentType = "Floor";
 	
-	var cubeTwo = new THREE.Mesh( geometry, material );
-	//scene.add( cubeTwo );
-	cubeTwo.componentType = "Floor";
-	cubeTwo.position.set(2,0,2);
-	
 	group = new THREE.Group();
-	group.add( cubeOne );
-	group.add( cubeTwo );
 	scene.add( group );
-	
-	transformCOntrols.attach(cubeOne);
-	selectedObject = cubeOne;
 	
 	//modifying transform controls
 	transformCOntrols.setTranslationSnap(1);
@@ -106,10 +142,14 @@ var init = function()
 	var divisions = 100;
 
 	var gridHelper = new THREE.GridHelper( size, divisions );
-	scene.add( gridHelper );
+	gridHelperGroup = new THREE.Group();
+	gridHelperGroup.add( gridHelper );
+	scene.add(gridHelperGroup);
 	
 	raycaster = new THREE.Raycaster();
 	mouse = new THREE.Vector2();
+	
+	addingObject = false;
 	
 	initDatGui();
 	
@@ -122,6 +162,21 @@ var initDatGui = function()
         recenter: function () {
 			camera.position.set(0, 8, 5);
 			camera.lookAt(0,0,0);
+        },
+		
+		floor: function () {
+			transformCOntrols.visible = false;
+			transformCOntrols.enabled = false;
+			var cube = cubeOne.clone();
+			cube.componentType = "Floor";
+			cube.position.set(10,0,10);
+			group.add(cube);
+			attachedComponent = cube;
+			addingObject = true;
+        },
+		
+		wall: function () {
+			
         },
 		
 		width: 1,
@@ -143,6 +198,14 @@ var initDatGui = function()
 	scaleFolder.add(obj, 'length').min(1).max(10).step(1).onFinishChange(function(){
 		selectedObject.scale.set(obj.width, 0.1, obj.length);
 	});;
+	
+	var itemsFolder = gui.addFolder('House Components');
+	
+	itemsFolder.add(obj, 'floor').name('Add floor');
+	itemsFolder.add(obj, 'wall').name('Add wall');
+	
+	scaleFolder.open();
+	itemsFolder.open();
 };
 
 var update = function()
