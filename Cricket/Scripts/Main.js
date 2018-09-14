@@ -8,17 +8,16 @@ var bowling;
 var ball;
 var gravity;
 var friction;
+var ballType;
+var ballShadow;
+var batmanAnimator;
+var clock;
+var batting;
 
 document.getElementById("HitButton").onclick = function() {
-	if(!bowling){
-		console.log("Hit");
-		bowlerSpeed = -0.1;
-		bowling = true;
-		ball.position.x = 0;
-		ball.position.z = -7;
-		ball.position.y = 2.5;
-		ball.dy = 0;
-	}
+	//if(!batting){
+		batting = true;
+	//}
 };
 
 window.addEventListener( 'resize', function()
@@ -46,7 +45,11 @@ var init = function()
 	traveledDistance = 0;
 	bowling = false;
 	gravity = 0.01;
-	friction = 0.9;
+	friction = 0.5;
+	ballType = 0;
+	batting  = false;
+	
+	clock = new THREE.Clock();
 	
 	initMeshes();
 	
@@ -112,6 +115,10 @@ var initMeshes = function()
 	initPlayer(15,0);
 	
 	initBall();
+	
+	initSprites();
+	
+	recursiveBalling();
 };
 
 var initWickets = function()
@@ -181,17 +188,26 @@ var initBall = function()
 	var material = new THREE.MeshBasicMaterial( {map: texture, alphaTest: 0.5} );
 	ball = new THREE.Mesh( geometry, material );
 	scene.add(ball);
-	ball.position.x = 0;
+	ball.position.x = 0.5;
 	ball.position.z = -7;
-	ball.position.y = 2.5;
+	ball.position.y = 2;
 	
 	ball.radius = 0.15;
 	ball.dy = 0;
+	ball.dx = 0;
 	ball.update = function()
 	{
-		if(this.position.y - this.radius < 0)
+		if(this.position.y - this.radius + ball.dy < 0)
 		{
 			ball.dy = -ball.dy * friction;
+			if(ballType == 1)
+			{
+				ball.dx = -ball.dx * 0.7 ;
+			}
+			else if(ballType == 2)
+			{
+				ball.dx = -0.035 ;
+			}
 		}
 		else
 		{
@@ -199,9 +215,108 @@ var initBall = function()
 		}
 		ball.position.y += ball.dy;
 		ball.position.z += 0.4;
+		ball.position.x += ball.dx;
 	};
 	
+	
+	var geometry = new THREE.CircleGeometry( 0.18,20 );
+	var material = new THREE.MeshBasicMaterial( {color: 0x000000, wireframe: false, transparent: true, opacity: 0.4} );
+	ballShadow = new THREE.Mesh( geometry, material );
+	scene.add(ballShadow);
+	ballShadow.rotation.x = - Math.PI / 2;
+	ballShadow.position.y = 0.002;
+	
+	ballShadow.update = function()
+	{
+		ballShadow.position.x = ball.position.x;
+		ballShadow.position.z = ball.position.z;
+	};
 };
+
+var recursiveBalling = function()
+{
+	if(!bowling){
+		bowlerSpeed = -0.1;
+		bowling = true;
+	}
+	setTimeout(recursiveBalling, 1500);
+};
+
+var startBowling = function()
+{
+	ball.position.x = 0.5;
+	ball.position.z = -7;
+	ball.position.y = 2;
+	ball.dy = 0;
+	ballType = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
+	if(ballType == 0)
+	{
+		ball.dx = -0.01;
+	}
+	else if(ballType == 1)
+	{
+		ball.dx = -0.04;
+	}
+	else if(ballType == 2)
+	{
+		ball.dx = 0;
+	}
+};
+
+var initSprites = function()
+{
+	var loader = new THREE.TextureLoader();
+	var texture = loader.load( 'Textures/sprite3.png' );
+	texture.anisotropy  = 16;
+	batmanAnimator = new TextureAnimator( texture, 62, 1, 62, 20); // texture, #horiz, #vert, #total, duration.
+	var batmanMat = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide , alphaTest: 0.5} );
+	var batmanGeo = new THREE.PlaneGeometry(2.5, 2.5, 1, 1);
+	var batman = new THREE.Mesh(batmanGeo, batmanMat);
+	batman.position.set(-0.4,2.5/2,6.6);
+	scene.add(batman);
+};
+
+function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
+{	
+	// note: texture passed by reference, will be updated by the update function.
+		
+	this.tilesHorizontal = tilesHoriz;
+	this.tilesVertical = tilesVert;
+	// how many images does this spritesheet contain?
+	//  usually equals tilesHoriz * tilesVert, but not necessarily,
+	//  if there at blank tiles at the bottom of the spritesheet. 
+	this.numberOfTiles = numTiles;
+	texture.wrapS = texture.wrapT = THREE.RepeatWrapping; 
+	texture.repeat.set( 1 / this.tilesHorizontal, 1 / this.tilesVertical );
+	// how long should each image be displayed?
+	this.tileDisplayDuration = tileDispDuration;
+	// how long has the current image been displayed?
+	this.currentDisplayTime = 0;
+	// which image is currently being displayed?
+	this.currentTile = 0;
+		
+	this.update = function( milliSec )
+	{
+		if(batting){
+			this.currentDisplayTime += milliSec;
+			while (this.currentDisplayTime > this.tileDisplayDuration)
+			{
+				this.currentDisplayTime -= this.tileDisplayDuration;
+				this.currentTile++;
+				if (this.currentTile == this.numberOfTiles){
+					this.currentTile = 0;
+					batting = false;
+				}
+				var currentColumn = this.currentTile % this.tilesHorizontal;
+				texture.offset.x = currentColumn / this.tilesHorizontal;
+				var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+				texture.offset.y = currentRow / this.tilesVertical;
+				console.log(currentColumn );
+				
+			}
+		}
+	};
+}		
 
 var update = function()
 {
@@ -217,8 +332,13 @@ var update = function()
 		bowlerSpeed = 0;
 		traveledDistance = 0;
 		bowling = false;
+		startBowling();
 	}
 	ball.update();
+	ballShadow.update();
+	
+	var delta = clock.getDelta(); 
+	batmanAnimator.update(1000 * delta);
 };
 
 var render = function()
