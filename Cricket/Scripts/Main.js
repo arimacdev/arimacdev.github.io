@@ -13,11 +13,32 @@ var ballShadow;
 var batmanAnimator;
 var clock;
 var batting;
+var shotInDisplay;
 
 document.getElementById("HitButton").onclick = function() {
-	//if(!batting){
-		batting = true;
-	//}
+	console.log("fdsfsdf");
+	batting = true;
+	batmanAnimator.startBattingAnimation();
+	calculateHit();
+};
+
+var calculateHit = function()
+{
+	console.log(ball.position);
+	if(ball.position.z >= 5 && ball.position.z < 6)
+	{
+		shotInDisplay = true;
+		ball.dx = -0.3;
+		ball.dz = -0.4;
+		ball.dy = 0.1;
+	}
+	else if(ball.position.z >= 6)
+	{
+		shotInDisplay = true;
+		ball.dx = -0.2;
+		ball.dz = -0.6;
+		ball.dy = 0.25;
+	}
 };
 
 window.addEventListener( 'resize', function()
@@ -27,6 +48,16 @@ window.addEventListener( 'resize', function()
 	renderer.setSize(width,height);
 	camera.aspect = width/ height;
 	camera.updateProjectionMatrix();
+});
+	
+window.addEventListener( 'keydown', function()
+{
+	var keyCode = event.which;
+	if (keyCode == 32) {
+		
+	console.log("sfsdf");
+		recursiveBalling();
+    }
 });
 
 var init = function()
@@ -48,6 +79,7 @@ var init = function()
 	friction = 0.5;
 	ballType = 0;
 	batting  = false;
+	shotInDisplay = false;
 	
 	clock = new THREE.Clock();
 	
@@ -118,7 +150,7 @@ var initMeshes = function()
 	
 	initSprites();
 	
-	recursiveBalling();
+	//recursiveBalling();
 };
 
 var initWickets = function()
@@ -195,26 +227,30 @@ var initBall = function()
 	ball.radius = 0.15;
 	ball.dy = 0;
 	ball.dx = 0;
+	ball.dz = 0.4;
 	ball.update = function()
 	{
 		if(this.position.y - this.radius + ball.dy < 0)
 		{
 			ball.dy = -ball.dy * friction;
-			if(ballType == 1)
-			{
-				ball.dx = -ball.dx * 0.7 ;
+			if(!shotInDisplay){
+				if(ballType == 1)
+				{
+					ball.dx = -ball.dx * 0.7 ;
+				}
+				else if(ballType == 2)
+				{
+					ball.dx = -0.035 ;
+				}
 			}
-			else if(ballType == 2)
-			{
-				ball.dx = -0.035 ;
-			}
+			//ball.dz *= 0.9;
 		}
 		else
 		{
 			this.dy -= gravity;
 		}
 		ball.position.y += ball.dy;
-		ball.position.z += 0.4;
+		ball.position.z += ball.dz;
 		ball.position.x += ball.dx;
 	};
 	
@@ -236,10 +272,12 @@ var initBall = function()
 var recursiveBalling = function()
 {
 	if(!bowling){
+		shotInDisplay = false;
 		bowlerSpeed = -0.1;
 		bowling = true;
+		ball.dz = 0.4;
 	}
-	setTimeout(recursiveBalling, 1500);
+	//setTimeout(recursiveBalling, 1500);
 };
 
 var startBowling = function()
@@ -311,10 +349,14 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 				texture.offset.x = currentColumn / this.tilesHorizontal;
 				var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
 				texture.offset.y = currentRow / this.tilesVertical;
-				console.log(currentColumn );
 				
 			}
 		}
+	};
+	
+	this.startBattingAnimation = function()
+	{
+		this.currentTile = 20;
 	};
 }		
 
