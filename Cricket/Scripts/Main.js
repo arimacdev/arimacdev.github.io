@@ -26,6 +26,7 @@ var catcherIndex;
 var throwMultiplier;
 var throwY;
 var batman1, batman2;
+var running;
 
 document.getElementById("HitButton").onclick = function() {
 	if(firstTime)
@@ -49,19 +50,17 @@ var calculateHit = function()
 	var direction = new THREE.Vector3();
 	if(batman1.inStrike)
 	{
-		batman1.dy = -1.05;
-		batman1.dz = -2.15;
-		batman1.x = 1;
-		console.log(batman1.dz);
-		//batman2.dy = 0;
-		//batman2.dz = 0;
+		batman1.dy = -0.22;
+		batman1.dz = -0.05;
+		batman2.dy = -0.22;
+		batman2.dz = 0.05;
 	}
 	else if(batman2.inStrike)
 	{
-		//batman2.dy = -0.05;
-		//batman2.dz = -0.15;
-		//batman1.dy = -0.05;
-		//batman1.dz = 0.15;
+		batman2.dy = -0.22;
+		batman2.dz = -0.05;
+		batman1.dy = -0.22;
+		batman1.dz = 0.05;
 	}
 	
 	if(ball.position.z >= 5 && ball.position.z < 6.3)
@@ -74,6 +73,7 @@ var calculateHit = function()
 		catcherIndex = 5;
 		throwMultiplier = 0.5;
 		throwY = 0.2;
+		running = true;
 	}
 	else if(ball.position.z >= 6.3)
 	{
@@ -85,6 +85,7 @@ var calculateHit = function()
 		catcherIndex = 1;
 		throwMultiplier = 1;
 		throwY = 0.2;
+		running = true;
 	}
 	
 	var startPos = new THREE.Vector3(ball.position.x, 1, ball.position.z);
@@ -153,6 +154,7 @@ var init = function()
 	catcherIndex = 10;
 	throwMultiplier = 0;
 	throwY = 0;
+	running = false;;
 	
 	camera.update = function()
 	{
@@ -239,6 +241,9 @@ var initMeshes = function()
 	
 	batman1 = initSprites(0);
 	batman2 = initSprites(1);
+	
+	scene.add(batman1);
+	scene.add(batman2);
 	//recursiveBalling();
 };
 
@@ -519,9 +524,7 @@ var initSprites = function(pos)
 	}
 	var batmanMat = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide , alphaTest: 0.5} );
 	var batmanGeo = new THREE.PlaneGeometry(2.5, 2.5, 1, 1);
-	batter = new THREE.Mesh(batmanGeo, batmanMat);
-	
-	scene.add(batter);
+	var batter = new THREE.Mesh(batmanGeo, batmanMat);
 	
 	batter.dx = 0;
 	batter.dy = 0;
@@ -543,7 +546,7 @@ var initSprites = function(pos)
 	
 	batter.update = function()
 	{
-		if(shotInDisplay)
+		if(running)
 		{
 			if(batter.position.y - batter.radius + batter.dy < 0)
 			{
@@ -553,7 +556,6 @@ var initSprites = function(pos)
 			{
 				batter.dy -= gravity;
 			}
-			
 			batter.position.y += batter.dy;
 			batter.position.z += batter.dz;
 			batter.position.x += batter.dx;
