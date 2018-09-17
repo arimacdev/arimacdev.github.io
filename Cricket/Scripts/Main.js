@@ -10,34 +10,95 @@ var gravity;
 var friction;
 var ballType;
 var ballShadow;
-var batmanAnimator;
+var batmanAnimator1,batmanAnimator2;
 var clock;
 var batting;
 var shotInDisplay;
+var ballCanMove;
+var originalPos;
+var camCounter;
+var camAnimation;
+var firstTime;
+var ballInHold;
+var players;
+var shotLine;
+var catcherIndex;
+var throwMultiplier;
+var throwY;
+var batman1, batman2;
 
 document.getElementById("HitButton").onclick = function() {
-	console.log("fdsfsdf");
+	if(firstTime)
+	{
+		ballCanMove = true;
+		firstTime = false;
+		recursiveBalling();
+	}
 	batting = true;
-	batmanAnimator.startBattingAnimation();
+	if(batman1.inStrike){
+		batmanAnimator1.startBattingAnimation();
+	}
+	else if(batman2.inStrike){
+		batmanAnimator2.startBattingAnimation();
+	}
 	calculateHit();
 };
 
 var calculateHit = function()
 {
-	console.log(ball.position);
-	if(ball.position.z >= 5 && ball.position.z < 6)
+	var direction = new THREE.Vector3();
+	if(batman1.inStrike)
+	{
+		batman1.dy = -1.05;
+		batman1.dz = -2.15;
+		batman1.x = 1;
+		console.log(batman1.dz);
+		//batman2.dy = 0;
+		//batman2.dz = 0;
+	}
+	else if(batman2.inStrike)
+	{
+		//batman2.dy = -0.05;
+		//batman2.dz = -0.15;
+		//batman1.dy = -0.05;
+		//batman1.dz = 0.15;
+	}
+	
+	if(ball.position.z >= 5 && ball.position.z < 6.3)
 	{
 		shotInDisplay = true;
 		ball.dx = -0.3;
 		ball.dz = -0.4;
 		ball.dy = 0.1;
+		direction = new THREE.Vector3(-0.3, 0, -0.4);
+		catcherIndex = 5;
+		throwMultiplier = 0.5;
+		throwY = 0.2;
 	}
-	else if(ball.position.z >= 6)
+	else if(ball.position.z >= 6.3)
 	{
 		shotInDisplay = true;
 		ball.dx = -0.2;
 		ball.dz = -0.6;
 		ball.dy = 0.25;
+		direction = new THREE.Vector3(-0.2, 0, -0.6);
+		catcherIndex = 1;
+		throwMultiplier = 1;
+		throwY = 0.2;
+	}
+	
+	var startPos = new THREE.Vector3(ball.position.x, 1, ball.position.z);
+	var distance1 = 7;
+	var distance2 = 50;
+	var newPos1 = new THREE.Vector3();
+	var newPos2 = new THREE.Vector3();
+	newPos1.addVectors ( startPos, direction.multiplyScalar( distance1 ) );
+	newPos2.addVectors ( startPos, direction.multiplyScalar( distance2 ) );
+	shotLine = new THREE.Line3(new THREE.Vector3(newPos1.x, 1, newPos1.z),new THREE.Vector3(newPos2.x, 1, newPos2.z));
+	
+	for(var i = 0; i < players.length; i++)
+	{
+		players[i].CalculateInteractPoint();
 	}
 };
 
@@ -54,8 +115,6 @@ window.addEventListener( 'keydown', function()
 {
 	var keyCode = event.which;
 	if (keyCode == 32) {
-		
-	console.log("sfsdf");
 		recursiveBalling();
     }
 });
@@ -66,8 +125,10 @@ var init = function()
 	scene.background = new THREE.Color( 0x111111 );
 	
 	camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
-	camera.position.set(0, 3.5, 12);
+	//camera.position.set(0, 3.5, 12);
+	camera.position.set(-5, 10, 20);
 	camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
+	
 	renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
@@ -80,8 +141,37 @@ var init = function()
 	ballType = 0;
 	batting  = false;
 	shotInDisplay = false;
-	
+	ballCanMove = false;
 	clock = new THREE.Clock();
+	originalPos = new THREE.Vector3( 0, 3.5, 12 );
+	camCounter = 0;
+	camAnimation = true;
+	firstTime = true;
+	ballInHold = true;
+	players = [];
+	shotLine = new THREE.Line3();
+	catcherIndex = 10;
+	throwMultiplier = 0;
+	throwY = 0;
+	
+	camera.update = function()
+	{
+		if(camAnimation){
+			var x = camera.position.x - (camera.position.x - originalPos.x) * 0.0005 * camCounter;
+			var y = camera.position.y - (camera.position.y - originalPos.y) * 0.0005 * camCounter;
+			var z = camera.position.z - (camera.position.z - originalPos.z) * 0.0005 * camCounter;
+			camera.position.set(x, y, z);
+			camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
+			camCounter++;
+			if(camCounter > 200)
+			{
+				camAnimation = false;
+				camera.position.set(0, 3.5, 12);
+				camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
+			}
+		}
+	};
+	
 	
 	initMeshes();
 	
@@ -137,19 +227,18 @@ var initMeshes = function()
 	
 	initWickets();
 	
-	initPlayer(8,-11);
-	initPlayer(-5,-40);
-	initPlayer(5,-40);
-	initPlayer(-4,-11);
-	initPlayer(-20,-15);
-	initPlayer(-23,-8);
-	initPlayer(	25,-15);
-	initPlayer(15,0);
-	
+	initPlayer(8,-11, 0);
+	initPlayer(-5,-40, 1);
+	initPlayer(5,-40, 2);
+	initPlayer(-4,-11, 3);
+	initPlayer(-20,-15, 4);
+	initPlayer(-23,-8, 5);
+	initPlayer(	25,-15, 6);
+	initPlayer(15,0, 7);
 	initBall();
 	
-	initSprites();
-	
+	batman1 = initSprites(0);
+	batman2 = initSprites(1);
 	//recursiveBalling();
 };
 
@@ -182,7 +271,7 @@ var initWickets = function()
 	wicket6.position.set(0, 0.5, -7);
 };
 
-var initPlayer = function(x, z)
+var initPlayer = function(x, z, index)
 {
 	var loader = new THREE.TextureLoader();
 	var geometry = new THREE.PlaneGeometry( 2, 2 );
@@ -199,7 +288,74 @@ var initPlayer = function(x, z)
 	player.position.z = z;
 	player.position.y = 1;
 	player.lookAt(new THREE.Vector3(0, 1, 12));
+	player.interactPoint = new THREE.Vector3();
+	player.initialPoint = new THREE.Vector3(x, 1, z);
+	player.playerCounter = 0;
+	player.movedToPos = false;
+	player.distanceToBall = 0;
+	player.index = index;
+	player.update = function()
+	{
+		if(shotInDisplay && !player.movedToPos)
+		{
+			var val = 0.004;
+			if(player.index == catcherIndex)
+			{
+				val = 0.06;
+			}
+			var x = player.position.x - (player.position.x - player.interactPoint.x) * val;
+			var y = player.position.y - (player.position.y - player.interactPoint.y) * val;
+			var z = player.position.z - (player.position.z - player.interactPoint.z) * val;
+			player.position.set(x, y, z);
+			player.lookAt(camera.position.x, 1, camera.position.z);
+			player.playerCounter++;
+			if(player.playerCounter > Math.ceil(10 - player.distanceToBall/4) * 7)
+			{
+				player.movedToPos = true;
+				player.playerCounter = 0;
+				//camAnimation = false;
+				//player.position.set(0, 3.5, 12);
+				//player.lookAt(new THREE.Vector3( 0, 0, 0 ));
+			}
+		}
+		else if(player.movedToPos && !shotInDisplay)
+		{
+			var x = player.position.x - (player.position.x - player.initialPoint.x) * 0.02;
+			var y = player.position.y - (player.position.y - player.initialPoint.y) * 0.02;
+			var z = player.position.z - (player.position.z - player.initialPoint.z) * 0.02;
+			player.position.set(x, y, z);
+			player.lookAt(camera.position.x, 1, camera.position.z);
+			player.playerCounter++;
+			if(player.playerCounter > 20)
+			{
+				player.movedToPos = false;
+				player.position = player.initialPoint;
+				//camAnimation = false;
+				//player.position.set(0, 3.5, 12);
+				//player.lookAt(new THREE.Vector3( 0, 0, 0 ));
+			}
+		}
+	};
+	
+	player.CalculateInteractPoint = function()
+	{
+		var h = new THREE.Vector3();
+		shotLine.closestPointToPoint(player.position, 0, h);
+		player.interactPoint = h;
+		player.distanceToBall = calculateDistance(player.position, player.interactPoint);
+	};
+	
+	players.push(player);
 
+};
+
+var calculateDistance = function(v1, v2)
+{
+    var dx = v1.x - v2.x;
+    var dy = v1.y - v2.y;
+    var dz = v1.z - v2.z;
+
+    return Math.sqrt( dx * dx + dy * dy + dz * dz );
 };
 
 var initCylinder = function(color, radius, height)
@@ -228,32 +384,72 @@ var initBall = function()
 	ball.dy = 0;
 	ball.dx = 0;
 	ball.dz = 0.4;
+	
 	ball.update = function()
 	{
-		if(this.position.y - this.radius + ball.dy < 0)
-		{
-			ball.dy = -ball.dy * friction;
-			if(!shotInDisplay){
-				if(ballType == 1)
-				{
-					ball.dx = -ball.dx * 0.7 ;
+		if(ballCanMove && !ballInHold){
+			if(this.position.y - this.radius + ball.dy < 0)
+			{
+				ball.dy = -ball.dy * friction;
+				if(!shotInDisplay){
+					if(ballType == 1)
+					{
+						ball.dx = -ball.dx * 0.7 ;
+					}
+					else if(ballType == 2)
+					{
+						ball.dx = -0.035 ;
+					}
 				}
-				else if(ballType == 2)
-				{
-					ball.dx = -0.035 ;
-				}
+				//ball.dz *= 0.9;
 			}
-			//ball.dz *= 0.9;
+			else
+			{
+				this.dy -= gravity;
+			}
+			ball.position.y += ball.dy;
+			ball.position.z += ball.dz;
+			ball.position.x += ball.dx;
+		}
+		else if(ballInHold)
+		{
+			ball.position.x = 0.5;
+			ball.position.z = bowler.position.z;
+			ball.position.y = 2;
+		}
+		
+		if(shotInDisplay)
+		{
+			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
+			if(travelD > 65)
+			{
+				shotInDisplay = false;
+				recursiveBalling();
+			}
+			else if(Math.ceil(players[catcherIndex].position.x) == Math.ceil(ball.position.x) && Math.ceil(players[catcherIndex].position.z) == Math.ceil(ball.position.z))
+			{
+				ball.position.x = players[catcherIndex].position.x;
+				ball.position.z = players[catcherIndex].position.z;
+				shotInDisplay = false;
+				var dir = calculateDirection(ball.position, bowler.position);
+				ball.dx = dir.x * throwMultiplier;
+				ball.dy = throwY;
+				ball.dz = dir.z  * throwMultiplier;
+				ballType = 0;
+			}
 		}
 		else
 		{
-			this.dy -= gravity;
+			if(!ballInHold)
+			{
+				if(Math.ceil(ball.position.x) == bowler.position.x && Math.ceil(ball.position.z) == bowler.position.z)
+				{
+					ballInHold = true;
+					recursiveBalling();
+				}
+			}
 		}
-		ball.position.y += ball.dy;
-		ball.position.z += ball.dz;
-		ball.position.x += ball.dx;
 	};
-	
 	
 	var geometry = new THREE.CircleGeometry( 0.18,20 );
 	var material = new THREE.MeshBasicMaterial( {color: 0x000000, wireframe: false, transparent: true, opacity: 0.4} );
@@ -269,6 +465,14 @@ var initBall = function()
 	};
 };
 
+var calculateDirection = function(v1, v2)
+{
+	var dir = new THREE.Vector3();
+
+	dir.subVectors( v2, v1 ).normalize();
+	return dir;
+};
+
 var recursiveBalling = function()
 {
 	if(!bowling){
@@ -276,15 +480,16 @@ var recursiveBalling = function()
 		bowlerSpeed = -0.1;
 		bowling = true;
 		ball.dz = 0.4;
+		ballInHold = true;
+		ball.position.x = 0.5;
+		ball.position.z = -7;
+		ball.position.y = 2;
 	}
 	//setTimeout(recursiveBalling, 1500);
 };
 
 var startBowling = function()
 {
-	ball.position.x = 0.5;
-	ball.position.z = -7;
-	ball.position.y = 2;
 	ball.dy = 0;
 	ballType = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
 	if(ballType == 0)
@@ -301,20 +506,64 @@ var startBowling = function()
 	}
 };
 
-var initSprites = function()
+var initSprites = function(pos)
 {
 	var loader = new THREE.TextureLoader();
 	var texture = loader.load( 'Textures/sprite3.png' );
 	texture.anisotropy  = 16;
-	batmanAnimator = new TextureAnimator( texture, 62, 1, 62, 20); // texture, #horiz, #vert, #total, duration.
+	if(pos == 0){
+		batmanAnimator1 = new TextureAnimator1( texture, 62, 1, 62, 20);
+	}	
+	else if(pos == 1){
+		batmanAnimator2 = new TextureAnimator2( texture, 62, 1, 62, 20);
+	}
 	var batmanMat = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide , alphaTest: 0.5} );
 	var batmanGeo = new THREE.PlaneGeometry(2.5, 2.5, 1, 1);
-	var batman = new THREE.Mesh(batmanGeo, batmanMat);
-	batman.position.set(-0.4,2.5/2,6.6);
-	scene.add(batman);
+	batter = new THREE.Mesh(batmanGeo, batmanMat);
+	
+	scene.add(batter);
+	
+	batter.dx = 0;
+	batter.dy = 0;
+	batter.dz = 0;
+	batter.x = 0;
+	batter.radius = 2.5/2;
+	batter.inStrike = false;
+	
+	if(pos == 0)
+	{
+		batter.position.set(-0.6,0.8,6);
+		batter.inStrike = true;
+	}
+	else if(pos == 1)
+	{
+		batter.position.set(-0.6,0.8,-6);
+		batter.inStrike = false;
+	}
+	
+	batter.update = function()
+	{
+		if(shotInDisplay)
+		{
+			if(batter.position.y - batter.radius + batter.dy < 0)
+			{
+				batter.dy = -batter.dy;
+			}
+			else
+			{
+				batter.dy -= gravity;
+			}
+			
+			batter.position.y += batter.dy;
+			batter.position.z += batter.dz;
+			batter.position.x += batter.dx;
+		}
+	};
+	
+	return batter;
 };
 
-function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
+function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
 {	
 	// note: texture passed by reference, will be updated by the update function.
 		
@@ -335,7 +584,7 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 		
 	this.update = function( milliSec )
 	{
-		if(batting){
+		if(batting && batman1.inStrike){
 			this.currentDisplayTime += milliSec;
 			while (this.currentDisplayTime > this.tileDisplayDuration)
 			{
@@ -358,7 +607,53 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 	{
 		this.currentTile = 20;
 	};
-}		
+};
+
+function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
+{	
+	// note: texture passed by reference, will be updated by the update function.
+		
+	this.tilesHorizontal = tilesHoriz;
+	this.tilesVertical = tilesVert;
+	// how many images does this spritesheet contain?
+	//  usually equals tilesHoriz * tilesVert, but not necessarily,
+	//  if there at blank tiles at the bottom of the spritesheet. 
+	this.numberOfTiles = numTiles;
+	texture.wrapS = texture.wrapT = THREE.RepeatWrapping; 
+	texture.repeat.set( 1 / this.tilesHorizontal, 1 / this.tilesVertical );
+	// how long should each image be displayed?
+	this.tileDisplayDuration = tileDispDuration;
+	// how long has the current image been displayed?
+	this.currentDisplayTime = 0;
+	// which image is currently being displayed?
+	this.currentTile = 0;
+		
+	this.update = function( milliSec )
+	{
+		if(batting && batman2.inStrike){
+			this.currentDisplayTime += milliSec;
+			while (this.currentDisplayTime > this.tileDisplayDuration)
+			{
+				this.currentDisplayTime -= this.tileDisplayDuration;
+				this.currentTile++;
+				if (this.currentTile == this.numberOfTiles){
+					this.currentTile = 0;
+					batting = false;
+				}
+				var currentColumn = this.currentTile % this.tilesHorizontal;
+				texture.offset.x = currentColumn / this.tilesHorizontal;
+				var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+				texture.offset.y = currentRow / this.tilesVertical;
+				
+			}
+		}
+	};
+	
+	this.startBattingAnimation = function()
+	{
+		this.currentTile = 20;
+	};
+};		
 
 var update = function()
 {
@@ -374,13 +669,24 @@ var update = function()
 		bowlerSpeed = 0;
 		traveledDistance = 0;
 		bowling = false;
+		ballInHold = false;
 		startBowling();
 	}
 	ball.update();
 	ballShadow.update();
+	camera.update();
+	
+	for(var i = 0; i < players.length; i++)
+	{
+		players[i].update();
+	}
+	
+	batman1.update();
+	batman2.update();
 	
 	var delta = clock.getDelta(); 
-	batmanAnimator.update(1000 * delta);
+	batmanAnimator1.update(1000 * delta);
+	batmanAnimator2.update(1000 * delta);
 };
 
 var render = function()
