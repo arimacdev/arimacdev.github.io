@@ -27,22 +27,26 @@ var throwMultiplier;
 var throwY;
 var batman1, batman2;
 var running;
+var ballIsThrwoing;
+var initRotaton;
 
 document.getElementById("HitButton").onclick = function() {
-	if(firstTime)
-	{
-		ballCanMove = true;
-		firstTime = false;
-		recursiveBalling();
+	if(!shotInDisplay && !ballIsThrwoing){
+		if(firstTime)
+		{
+			ballCanMove = true;
+			firstTime = false;
+			recursiveBalling();
+		}
+		batting = true;
+		if(batman1.inStrike){
+			batmanAnimator1.startBattingAnimation();
+		}
+		else if(batman2.inStrike){
+			batmanAnimator2.startBattingAnimation();
+		}
+		calculateHit();
 	}
-	batting = true;
-	if(batman1.inStrike){
-		batmanAnimator1.startBattingAnimation();
-	}
-	else if(batman2.inStrike){
-		batmanAnimator2.startBattingAnimation();
-	}
-	calculateHit();
 };
 
 var calculateHit = function()
@@ -50,17 +54,17 @@ var calculateHit = function()
 	var direction = new THREE.Vector3();
 	if(batman1.inStrike)
 	{
-		batman1.dy = -0.22;
-		batman1.dz = -0.05;
-		batman2.dy = -0.22;
-		batman2.dz = 0.05;
+		batman1.dy = -0.05;
+		batman1.dz = -0.2;
+		batman2.dy = -0.05;
+		batman2.dz = 0.2;
 	}
 	else if(batman2.inStrike)
 	{
-		batman2.dy = -0.22;
-		batman2.dz = -0.05;
-		batman1.dy = -0.22;
-		batman1.dz = 0.05;
+		batman1.dy = -0.05;
+		batman1.dz = 0.2;
+		batman2.dy = -0.05;
+		batman2.dz = -0.2;
 	}
 	
 	if(ball.position.z >= 5 && ball.position.z < 6.3)
@@ -73,7 +77,9 @@ var calculateHit = function()
 		catcherIndex = 5;
 		throwMultiplier = 0.5;
 		throwY = 0.2;
-		running = true;
+		
+		batman1.running = true;
+		batman2.running = true;
 	}
 	else if(ball.position.z >= 6.3)
 	{
@@ -85,7 +91,8 @@ var calculateHit = function()
 		catcherIndex = 1;
 		throwMultiplier = 1;
 		throwY = 0.2;
-		running = true;
+		batman1.running = true;
+		batman2.running = true;
 	}
 	
 	var startPos = new THREE.Vector3(ball.position.x, 1, ball.position.z);
@@ -155,22 +162,30 @@ var init = function()
 	throwMultiplier = 0;
 	throwY = 0;
 	running = false;;
+	ballIsThrwoing = false;
+	initRotaton = camera.rotation;
+	
+	if(camAnimation)
+	{
+		TweenMax.to(camera.position,2,{x:0,y:3.5,z:12,
+			onUpdate:function(){
+				
+				camera.lookAt(0,0,0);
+				camera.updateProjectionMatrix();
+			},
+			onComplete: function() {
+				
+				initRotaton = camera.rotation;
+				camAnimation = false;
+			}
+		});
+	}
 	
 	camera.update = function()
 	{
-		if(camAnimation){
-			var x = camera.position.x - (camera.position.x - originalPos.x) * 0.0005 * camCounter;
-			var y = camera.position.y - (camera.position.y - originalPos.y) * 0.0005 * camCounter;
-			var z = camera.position.z - (camera.position.z - originalPos.z) * 0.0005 * camCounter;
-			camera.position.set(x, y, z);
-			camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
-			camCounter++;
-			if(camCounter > 200)
-			{
-				camAnimation = false;
-				camera.position.set(0, 3.5, 12);
-				camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
-			}
+		if(shotInDisplay || ballIsThrwoing)
+		{
+			camera.lookAt(ball.position.x, 0, ball.position.z);
 		}
 	};
 	
@@ -428,8 +443,15 @@ var initBall = function()
 			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
 			if(travelD > 65)
 			{
-				shotInDisplay = false;
-				recursiveBalling();
+				TweenMax.to(camera.rotation,2,{x:initRotaton.x,y:initRotaton.y,z:initRotaton.z,
+				onUpdate:function(){
+					camera.updateProjectionMatrix();
+				},
+				onComplete: function() {
+					shotInDisplay = false;
+					recursiveBalling();
+				}
+			});
 			}
 			else if(Math.ceil(players[catcherIndex].position.x) == Math.ceil(ball.position.x) && Math.ceil(players[catcherIndex].position.z) == Math.ceil(ball.position.z))
 			{
@@ -441,14 +463,16 @@ var initBall = function()
 				ball.dy = throwY;
 				ball.dz = dir.z  * throwMultiplier;
 				ballType = 0;
+				ballIsThrwoing = true;
 			}
 		}
 		else
 		{
-			if(!ballInHold)
+			if(!ballInHold && ballIsThrwoing)
 			{
 				if(Math.ceil(ball.position.x) == bowler.position.x && Math.ceil(ball.position.z) == bowler.position.z)
 				{
+					ballIsThrwoing = false;
 					ballInHold = true;
 					recursiveBalling();
 				}
@@ -523,16 +547,16 @@ var initSprites = function(pos)
 		batmanAnimator2 = new TextureAnimator2( texture, 62, 1, 62, 20);
 	}
 	var batmanMat = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide , alphaTest: 0.5} );
-	var batmanGeo = new THREE.PlaneGeometry(2.5, 2.5, 1, 1);
+	var batmanGeo = new THREE.PlaneGeometry(2.5, 2.5);
 	var batter = new THREE.Mesh(batmanGeo, batmanMat);
 	
 	batter.dx = 0;
 	batter.dy = 0;
 	batter.dz = 0;
 	batter.x = 0;
-	batter.radius = 2.5/2;
+	batter.radius = 1.25;
 	batter.inStrike = false;
-	
+	batter.running  = false;
 	if(pos == 0)
 	{
 		batter.position.set(-0.6,0.8,6);
@@ -546,9 +570,9 @@ var initSprites = function(pos)
 	
 	batter.update = function()
 	{
-		if(running)
+		if(this.running)
 		{
-			if(batter.position.y - batter.radius + batter.dy < 0)
+			if(batter.position.y - batter.radius + batter.dy < -0.5)
 			{
 				batter.dy = -batter.dy;
 			}
@@ -558,7 +582,44 @@ var initSprites = function(pos)
 			}
 			batter.position.y += batter.dy;
 			batter.position.z += batter.dz;
-			batter.position.x += batter.dx;
+			//batter.position.x += batter.dx;
+			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
+			if(this.inStrike)
+			{
+				if(this.position.z < -6)
+				{
+					this.inStrike = false;
+					if(shotInDisplay && travelD < 65){
+						this.dz = -this.dz;
+						//this.position.set(-0.6,0.8,-6);
+					}
+					else
+					{
+						//this.position.set(-0.6,0.8,-6);
+						this.running = false;
+						this.dz = 0;
+						this.dy = 0;
+					}
+				}
+			}
+			else
+			{
+				if(this.position.z > 6)
+				{
+					this.inStrike = true;
+					if(shotInDisplay && travelD < 65){
+						this.dz = -this.dz;
+						//this.position.set(-0.6,0.8,6);
+					}
+					else
+					{
+						//this.position.set(-0.6,0.8,6);
+						this.running = false;
+						this.dz = 0;
+						this.dy = 0;
+					}
+				}
+			}
 		}
 	};
 	
