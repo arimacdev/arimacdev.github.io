@@ -60,6 +60,7 @@ window.addEventListener( 'mousedown', function()
 var calculateHit = function()
 {
 	var direction = new THREE.Vector3();
+	var hitted = false;
 	if(batman1.inStrike)
 	{
 		batman1.dy = -0.05;
@@ -86,11 +87,8 @@ var calculateHit = function()
 		throwMultiplier = 0.5;
 		throwY = 0.2;
 		
-		batman1.running = true;
-		batman2.running = true;
+		hitted = true;
 		
-		batmanAnimator1.runToWicket();
-		batmanAnimator2.runFromWicket();
 	}
 	else if(ball.position.z >= 6.3  && ball.position.z < 7.5)
 	{
@@ -102,11 +100,24 @@ var calculateHit = function()
 		catcherIndex = 1;
 		throwMultiplier = 1;
 		throwY = 0.2;
+		
+		hitted = true;
+	}
+	
+	if(hitted)
+	{
+		
 		batman1.running = true;
 		batman2.running = true;
 		
-		batmanAnimator2.runToWicket();
-		batmanAnimator1.runFromWicket();
+		if(batman1.inStrike){
+			batmanAnimator1.runToWicket();
+			batmanAnimator2.runFromWicket();
+		}
+		else if(batman2.inStrike){
+			batmanAnimator2.runToWicket();
+			batmanAnimator1.runFromWicket();
+		}
 	}
 	
 	var startPos = new THREE.Vector3(ball.position.x, 1, ball.position.z);
@@ -295,7 +306,6 @@ var initWickets = function()
 	scene.add( batter );
 	batter.position.set(0, 0.48, 7.9);
 	
-	
 	var loader2 = new THREE.TextureLoader();
 	var texture2 = loader.load( 'Textures/wicket4.png' );
 	texture2.anisotropy = renderer.getMaxAnisotropy();
@@ -462,15 +472,9 @@ var initBall = function()
 			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
 			if(travelD > 65)
 			{
-				TweenMax.to(camera.rotation,2,{x:0,y:0,z:0,
-				onUpdate:function(){
-					camera.updateProjectionMatrix();
-				},
-				onComplete: function() {
-					shotInDisplay = false;
-					recursiveBalling();
-				}
-			});
+				camera.lookAt(0,0,0);
+				shotInDisplay = false;
+				recursiveBalling();
 			}
 			else if(Math.ceil(players[catcherIndex].position.x) == Math.ceil(ball.position.x) && Math.ceil(players[catcherIndex].position.z) == Math.ceil(ball.position.z))
 			{
@@ -590,13 +594,13 @@ var initSprites = function(pos)
 	
 	if(pos == 0)
 	{
-		batter.position.set(-0.6,0.8,6);
+		batter.position.set(-0.6,0.75,6);
 		batter.inStrike = true;
 		batter.animator = batmanAnimator1;
 	}
 	else if(pos == 1)
 	{
-		batter.position.set(-0.6,0.8,-6);
+		batter.position.set(-0.6,0.75,-6);
 		batter.inStrike = false;
 		batter.animator = batmanAnimator2;
 	}
@@ -624,14 +628,14 @@ var initSprites = function(pos)
 					this.inStrike = false;
 					if(shotInDisplay && travelD < 65){
 						this.dz = -this.dz;
-						//this.position.set(-0.6,0.8,-6);
+						this.animator.runFromWicket();
 					}
 					else
 					{
-						this.position.set(-0.6,0.8,-6);
 						this.running = false;
 						this.dz = 0;
 						this.dy = 0;
+						batter.position.set(-0.6,0.75,-6);
 						this.animator.startBattingAnimation();
 					}
 				}
@@ -643,14 +647,14 @@ var initSprites = function(pos)
 					this.inStrike = true;
 					if(shotInDisplay && travelD < 65){
 						this.dz = -this.dz;
-						//this.position.set(-0.6,0.8,6);
+						this.animator.runToWicket();
 					}
 					else
 					{
-						//this.position.set(-0.6,0.8,6);
 						this.running = false;
 						this.dz = 0;
 						this.dy = 0;
+						batter.position.set(-0.6,0.75,6);
 						this.animator.startBattingAnimation();
 					}
 				}
@@ -834,6 +838,8 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.startBattingAnimation = function()
 	{
+		this.tileDisplayDuration = 20;
+		
 		this.currentTile = 0;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -843,6 +849,8 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.runToWicket = function()
 	{
+		this.tileDisplayDuration = 120;
+		
 		this.currentTile = this.numberOfTiles - 4;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -851,6 +859,8 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	};
 	this.runFromWicket = function()
 	{
+		this.tileDisplayDuration = 120;
+		
 		this.currentTile = this.numberOfTiles - 2;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -932,6 +942,8 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.startBattingAnimation = function()
 	{
+		this.tileDisplayDuration = 20;
+		
 		this.currentTile = 0;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -941,6 +953,8 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.runToWicket = function()
 	{
+		this.tileDisplayDuration = 120;
+		
 		this.currentTile = this.numberOfTiles - 4;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -950,6 +964,8 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.runFromWicket = function()
 	{
+		this.tileDisplayDuration = 120;
+		
 		this.currentTile = this.numberOfTiles - 2;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
