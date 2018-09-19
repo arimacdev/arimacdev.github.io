@@ -32,9 +32,11 @@ var initRotaton;
 var wicketAnim;
 var out;
 var bowlerAnim;
+var xBarrier;
 
 window.addEventListener( 'mousedown', function()
 {
+	//console.log(ball.position.z);
 	if(!shotInDisplay && !ballIsThrwoing){
 		if((batman1.inStrike && !batman1.running) ||(batman2.inStrike && !batman2.running))
 		{
@@ -76,22 +78,99 @@ var calculateHit = function()
 		batman2.dz = -0.2;
 	}
 	
-	if(ball.position.z >= 5 && ball.position.z < 6.3)
+	if(ball.position.z >= 3  && ball.position.z < 4)
 	{
+		console.log("shot 1");
+		
+		shotInDisplay = true;
+		ball.dx = -0.35;
+		ball.dz = -0.1;
+		ball.dy = 0.3;
+		direction = new THREE.Vector3(-0.35, 0, -0.1);
+		catcherIndex = 5;
+		throwMultiplier = 0.5;
+		throwY = 0.2;
+		
+		if(ball.position.x > xBarrier)
+		{
+			ball.dx = -ball.dx;
+			direction.x = -direction.x;
+			catcherIndex = 7;
+		}
+		
+		hitted = true;
+	}
+	else if(ball.position.z >= 4  && ball.position.z < 4.5)
+	{
+		console.log("shot 2");
+		
+		shotInDisplay = true;
+		ball.dx = -0.1;
+		ball.dz = -0.1;
+		ball.dy = 0.2;
+		direction = new THREE.Vector3(-0.1, 0, -0.1);
+		catcherIndex = 3;
+		throwMultiplier = 0.5;
+		throwY = 0.2;
+		
+		if(ball.position.x > xBarrier)
+		{
+			ball.dx = -ball.dx;
+			direction.x = -direction.x;
+			catcherIndex = 0;
+		}
+		
+		hitted = true;
+	}
+	else if(ball.position.z >= 4.5  && ball.position.z < 5)
+	{
+		console.log("shot 3");
+		
+		shotInDisplay = true;
+		ball.dx = -0.2;
+		ball.dz = -0.5;
+		ball.dy = 0.45;
+		direction = new THREE.Vector3(-0.2, 0, -0.5);
+		catcherIndex = 6;
+		throwMultiplier = 0.5;
+		throwY = 0.2;
+		
+		if(ball.position.x > xBarrier)
+		{
+			ball.dx = -ball.dx;
+			direction.x = -direction.x;
+			catcherIndex = 2;
+		}
+		
+		hitted = true;
+	}
+	else if(ball.position.z >= 5 && ball.position.z < 5.5)
+	{
+		console.log("shot 4");
+		
 		shotInDisplay = true;
 		ball.dx = -0.3;
 		ball.dz = -0.4;
 		ball.dy = 0.1;
 		direction = new THREE.Vector3(-0.3, 0, -0.4);
-		catcherIndex = 5;
+		catcherIndex = 4;
 		throwMultiplier = 0.5;
 		throwY = 0.2;
+		
+		if(ball.position.x > xBarrier)
+		{
+			ball.dx = -ball.dx;
+			direction.x = -direction.x;
+			catcherIndex = 6;
+		}
 		
 		hitted = true;
 		
 	}
-	else if(ball.position.z >= 6.3  && ball.position.z < 7.5)
+	else if(ball.position.z >= 5.5  && ball.position.z < 6)
 	{
+		console.log("shot 5");
+		
 		shotInDisplay = true;
 		ball.dx = -0.2;
 		ball.dz = -0.6;
@@ -100,6 +179,35 @@ var calculateHit = function()
 		catcherIndex = 1;
 		throwMultiplier = 1;
 		throwY = 0.2;
+		
+		if(ball.position.x > xBarrier)
+		{
+			ball.dx = -ball.dx;
+			direction.x = -direction.x;
+			catcherIndex = 2;
+		}
+		
+		hitted = true;
+	}
+	else if(ball.position.z >= 6  && ball.position.z < 7)
+	{
+		console.log("shot 6");
+		
+		shotInDisplay = true;
+		ball.dx = -0.03;
+		ball.dz = -0.5;
+		ball.dy = 0.3;
+		direction = new THREE.Vector3(-0.03, 0, -0.5);
+		catcherIndex = 1;
+		throwMultiplier = 1;
+		throwY = 0.2;
+		
+		if(ball.position.x > xBarrier)
+		{
+			ball.dx = -ball.dx;
+			direction.x = -direction.x;
+			catcherIndex = 2;
+		}
 		
 		hitted = true;
 	}
@@ -143,19 +251,11 @@ window.addEventListener( 'resize', function()
 	camera.aspect = width/ height;
 	camera.updateProjectionMatrix();
 });
-	
-window.addEventListener( 'keydown', function()
-{
-	var keyCode = event.which;
-	if (keyCode == 32) {
-		recursiveBalling();
-    }
-});
 
 var init = function()
 {
 	scene = new THREE.Scene();
-	scene.background = new THREE.Color( 0x111111 );
+	scene.background = new THREE.Color( 0x0C162F );
 	
 	camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
 	//camera.position.set(0, 3.5, 12);
@@ -190,6 +290,7 @@ var init = function()
 	ballIsThrwoing = false;
 	initRotaton = camera.rotation;
 	out = false;
+	xBarrier = 0.05;
 	
 	if(camAnimation)
 	{
@@ -289,6 +390,8 @@ var initMeshes = function()
 	
 	scene.add(batman1);
 	scene.add(batman2);
+	
+	batmanAnimator2.setNonStrikeBatman();
 	
 	//recursiveBalling();
 };
@@ -434,6 +537,7 @@ var initBall = function()
 	
 	ball.update = function()
 	{
+		ball.lookAt(camera.position.x, ball.position.y, camera.position.z);
 		if(ballCanMove && !ballInHold){
 			if(this.position.y - this.radius + ball.dy < 0)
 			{
@@ -446,6 +550,10 @@ var initBall = function()
 					else if(ballType == 2)
 					{
 						ball.dx = -0.035 ;
+					}
+					else if(ballType == 3)
+					{
+						ball.dx = 0.02 ;
 					}
 				}
 				//ball.dz *= 0.9;
@@ -476,7 +584,7 @@ var initBall = function()
 				shotInDisplay = false;
 				recursiveBalling();
 			}
-			else if(Math.ceil(players[catcherIndex].position.x) == Math.ceil(ball.position.x) && Math.ceil(players[catcherIndex].position.z) == Math.ceil(ball.position.z))
+			else if(Math.round(players[catcherIndex].position.x) == Math.round(ball.position.x) && Math.round(players[catcherIndex].position.z) == Math.round(ball.position.z) && Math.round(ball.position.y) < Math.round(players[catcherIndex].position.y ) + 2)
 			{
 				ball.position.x = players[catcherIndex].position.x;
 				ball.position.z = players[catcherIndex].position.z;
@@ -493,7 +601,7 @@ var initBall = function()
 		{
 			if(!ballInHold && ballIsThrwoing)
 			{
-				if(Math.ceil(ball.position.x) == bowler.position.x && Math.ceil(ball.position.z) == bowler.position.z)
+				if(Math.round(ball.position.x) == Math.round(bowler.position.x) && Math.round(ball.position.z) == Math.round(bowler.position.z))
 				{
 					ballIsThrwoing = false;
 					ballInHold = true;
@@ -502,7 +610,7 @@ var initBall = function()
 				}
 			}
 			
-			if(ball.position.z >= 7)
+			if(ball.position.z >= 7.9)
 			{
 				ball.position.z = -100;
 				ball.dz = 0;
@@ -530,7 +638,6 @@ var initBall = function()
 var calculateDirection = function(v1, v2)
 {
 	var dir = new THREE.Vector3();
-
 	dir.subVectors( v2, v1 ).normalize();
 	return dir;
 };
@@ -553,7 +660,7 @@ var recursiveBalling = function()
 var startBowling = function()
 {
 	ball.dy = 0.1;
-	ballType = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
+	ballType = Math.floor(Math.random() * (3 - 0 + 1)) + 0;
 	if(ballType == 0)
 	{
 		ball.dx = -0.01;
@@ -565,6 +672,10 @@ var startBowling = function()
 	else if(ballType == 2)
 	{
 		ball.dx = 0;
+	}
+	else if(ballType == 3)
+	{
+		ball.dx = -0.01;
 	}
 };
 
@@ -637,6 +748,7 @@ var initSprites = function(pos)
 						this.dy = 0;
 						batter.position.set(-0.6,0.75,-6);
 						this.animator.startBattingAnimation();
+						this.animator.setNonStrikeBatman();
 					}
 				}
 			}
@@ -867,6 +979,14 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 		var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
 		texture.offset.y = currentRow / this.tilesVertical;
 	};
+	this.setNonStrikeBatman = function()
+	{
+		this.currentTile = this.numberOfTiles - 1;
+		var currentColumn = this.currentTile % this.tilesHorizontal;
+		texture.offset.x = currentColumn / this.tilesHorizontal;
+		var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+		texture.offset.y = currentRow / this.tilesVertical;
+	};
 };
 
 function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
@@ -967,6 +1087,15 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 		this.tileDisplayDuration = 120;
 		
 		this.currentTile = this.numberOfTiles - 2;
+		var currentColumn = this.currentTile % this.tilesHorizontal;
+		texture.offset.x = currentColumn / this.tilesHorizontal;
+		var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+		texture.offset.y = currentRow / this.tilesVertical;
+	};
+	
+	this.setNonStrikeBatman = function()
+	{
+		this.currentTile = this.numberOfTiles - 1;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
 		var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
