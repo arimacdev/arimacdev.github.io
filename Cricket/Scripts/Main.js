@@ -49,33 +49,50 @@ var boundry;
 var ballT;
 var middleScore;
 var firstT;
+var scoreCard;
+var scoreCardR;
+var gameOver;
 
 window.addEventListener( 'mousedown', function(event)
 {
-	event.preventDefault();
-	mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
-	raycaster.setFromCamera( mouse, camera );
-	var intersects = raycaster.intersectObjects( uiGroup.children );
-	if ( intersects.length > 0 ) {
-		if(intersects[0].object.buttonType == "Play")
-		{
-			camera.position.set(-5, 10, 20);
-			uiGroup.visible = false;
-			TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
-				onUpdate:function(){
-					camera.lookAt(0,0,0);
-					camera.updateProjectionMatrix();
-				},
-				onComplete: function() {
-					camAnimation = false;
-					camBox.visible = true;
-				}
-			});
+	if(camAnimation){
+		event.preventDefault();
+		mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+		raycaster.setFromCamera( mouse, camera );
+		var intersects = raycaster.intersectObjects( uiGroup.children );
+		if ( intersects.length > 0 ) {
+			if(intersects[0].object.buttonType == "Play")
+			{
+				camera.position.set(-5, 10, 20);
+				uiGroup.visible = false;
+				TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
+					onUpdate:function(){
+						camera.lookAt(0,0,0);
+						camera.updateProjectionMatrix();
+					},
+					onComplete: function() {
+						camAnimation = false;
+						camBox.visible = true;
+					}
+				});
+			}
 		}
 	}
-	
-	if(!camAnimation){
+	else if(gameOver){
+		event.preventDefault();
+		mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+		raycaster.setFromCamera( mouse, camera );
+		var intersects = raycaster.intersectObjects( scene.children, true );
+		if ( intersects.length > 0 ) {
+			if(intersects[0].object.buttonType == "Return")
+			{
+				restartGame();
+			}
+		}
+	}
+	else {
 	//console.log(ball.position.z);
 		if(!shotInDisplay && !ballIsThrwoing){
 			if((batman1.inStrike && !batman1.running) ||(batman2.inStrike && !batman2.running))
@@ -99,6 +116,55 @@ window.addEventListener( 'mousedown', function(event)
 		}
 	}
 });
+
+var restartGame = function()
+{
+	TweenMax.to(scoreCard.position,0.4,{ease: Bounce.easeOut,y:2,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+			scoreCard.visible = false;
+		}
+	});
+	
+	TweenMax.to(scoreCardR.position,0.4,{ease: Bounce.easeOut,y:2 - 0.35,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+			scoreCardR.visible = false;
+		}
+	});
+	
+	bowlerSpeed = 0;
+	traveledDistance = 0;
+	bowling = false;
+	gravity = 0.01;
+	friction = 0.5;
+	ballType = 0;
+	batting  = false;
+	shotInDisplay = false;
+	ballCanMove = false;
+	camCounter = 0;
+	camAnimation = false;
+	ballInHold = true;
+	catcherIndex = 10;
+	throwMultiplier = 0;
+	throwY = 0;
+	running = false;
+	ballIsThrwoing = false;
+	out = false;
+	xBarrier = 0.05;
+	score = 0;
+	scoreForBall = 0;
+	wicketsLeft = 3;
+	bounce = false;
+	runs = 0;
+	boundry = false;
+	firstT = true;
+	recursiveBalling();
+};
 
 var calculateHit = function()
 {
@@ -371,16 +437,19 @@ var init = function()
 		{
 			camera.lookAt(ball.position.x, 0, ball.position.z);
 		}
-		camBox.position.set(camera.position.x, camera.position.y, camera.position.z);
-		camBox.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
-		scoreT[0].rotation.set(0,0,0);
-		scoreT[1].rotation.set(0,0,0);
-		scoreT[2].rotation.set(0,0,0);
-		ballT[0].rotation.set(0,0,0);
-		ballT[1].rotation.set(0,0,0);
-		ballT[2].rotation.set(0,0,0);
+		if(!gameOver){
+			camBox.position.set(camera.position.x, camera.position.y, camera.position.z);
+			camBox.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+			scoreT[0].rotation.set(0,0,0);
+			scoreT[1].rotation.set(0,0,0);
+			scoreT[2].rotation.set(0,0,0);
+			ballT[0].rotation.set(0,0,0);
+			ballT[1].rotation.set(0,0,0);
+			ballT[2].rotation.set(0,0,0);
+			scoreCard.rotation.set(0,0,0);
+			scoreCardR.rotation.set(0,0,0);
+		}
 	};
-	
 	
 	initMeshes();
 	
@@ -429,6 +498,7 @@ var initUI = function()
 	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
 	var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
 	camBox = new THREE.Mesh( geometry, material );
+	camBox.name = "fdsfdsf";
 	scene.add( camBox );
 	
 	spriteMap = new THREE.TextureLoader().load( "UI/t.png" );
@@ -493,6 +563,30 @@ var initUI = function()
 	middleScore.scale.x = 2;
 	middleScore.scale.y = 2;
 	middleScore.visible = false;
+	
+	scoreCard = (scoreT[0].clone());
+	scoreCard.material = createMaterial(loader.load( 'UI/t.png' ));;
+	camBox.add(scoreCard);
+	scoreCard.position.x = 0;
+	scoreCard.position.y = 0;
+	scoreCard.scale.x = 0.9;
+	scoreCard.scale.y = 0.9;
+	scoreCard.position.z = -1;
+	
+	var spriteMapa = new THREE.TextureLoader().load( "UI/return.png" );
+	var spriteMateriala = new THREE.SpriteMaterial( { map: spriteMapa, useScreenCoordinates: true, color: 0xffffff } );
+	scoreCardR = new THREE.Sprite(spriteMateriala);
+	camBox.add(scoreCardR);
+	console.log(scoreCardR);
+	scoreCardR.position.x = 0;
+	scoreCardR.position.y = 0;
+	scoreCardR.scale.x = 0.3;
+	scoreCardR.scale.y = 0.3;
+	scoreCardR.position.z = -1;
+	scoreCardR.buttonType = "Return";
+	
+	scoreCard.visible = false;
+	scoreCardR.visible = false;
 };
 
 var initMeshes = function()
@@ -915,6 +1009,12 @@ var calculateDirection = function(v1, v2)
 var recursiveBalling = function()
 {
 	if(!bowling){
+		if(wicketsLeft == 0)
+		{
+			gameOver = true;
+			showGameOver();
+			return;
+		}
 		bounce = false;
 		if(firstT)
 		{
@@ -960,6 +1060,29 @@ var startBowling = function()
 	{
 		ball.dx = -0.01;
 	}
+};
+
+var showGameOver = function(){
+	
+	scoreCard.position.y = 2;
+	scoreCard.visible = true;
+	TweenMax.to(scoreCard.position,0.8,{ease: Bounce.easeOut,y:0,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+		}
+	});
+	
+	scoreCardR.position.y = 2 - 0.35;
+	scoreCardR.visible = true;
+	TweenMax.to(scoreCardR.position,0.8,{ease: Bounce.easeOut,y:-0.35,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+		}
+	});
 };
 
 var initSprites = function(pos)
@@ -1026,6 +1149,7 @@ var initSprites = function(pos)
 				{
 					if(runs <= 4){
 						runs += 1;
+						console.log("run");
 					}
 					this.inStrike = false;
 					if(shotInDisplay && travelD < 65){
@@ -1431,6 +1555,7 @@ var update = function()
 	
 	wicketAnim.update(1000 * delta);
 	bowlerAnim.update(1000 * delta);
+	
 };
 
 var render = function()
