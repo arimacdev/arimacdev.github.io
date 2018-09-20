@@ -33,28 +33,69 @@ var wicketAnim;
 var out;
 var bowlerAnim;
 var xBarrier;
+var canvas;
+var uiGroup;
+var raycaster;
+var mouse;
+var scoreT;
+var camBox;
+var score;
+var scoreForBall;
+var numberArray;
+var wicketsLeft;
+var bounce;
+var runs;
+var boundry;
+var ballT;
+var middleScore;
+var firstT;
 
-window.addEventListener( 'mousedown', function()
+window.addEventListener( 'mousedown', function(event)
 {
-	//console.log(ball.position.z);
-	if(!shotInDisplay && !ballIsThrwoing){
-		if((batman1.inStrike && !batman1.running) ||(batman2.inStrike && !batman2.running))
+	event.preventDefault();
+	mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+	raycaster.setFromCamera( mouse, camera );
+	var intersects = raycaster.intersectObjects( uiGroup.children );
+	if ( intersects.length > 0 ) {
+		if(intersects[0].object.buttonType == "Play")
 		{
-			if(firstTime)
+			camera.position.set(-5, 10, 20);
+			uiGroup.visible = false;
+			TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
+				onUpdate:function(){
+					camera.lookAt(0,0,0);
+					camera.updateProjectionMatrix();
+				},
+				onComplete: function() {
+					camAnimation = false;
+					camBox.visible = true;
+				}
+			});
+		}
+	}
+	
+	if(!camAnimation){
+	//console.log(ball.position.z);
+		if(!shotInDisplay && !ballIsThrwoing){
+			if((batman1.inStrike && !batman1.running) ||(batman2.inStrike && !batman2.running))
 			{
-				initRotaton = camera.rotation;
-				ballCanMove = true;
-				firstTime = false;
-				recursiveBalling();
+				if(firstTime)
+				{
+					initRotaton = camera.rotation;
+					ballCanMove = true;
+					firstTime = false;
+					recursiveBalling();
+				}
+				batting = true;
+				if(batman1.inStrike){
+					batmanAnimator1.startBattingAnimation();
+				}
+				else if(batman2.inStrike){
+					batmanAnimator2.startBattingAnimation();
+				}
+				calculateHit();
 			}
-			batting = true;
-			if(batman1.inStrike){
-				batmanAnimator1.startBattingAnimation();
-			}
-			else if(batman2.inStrike){
-				batmanAnimator2.startBattingAnimation();
-			}
-			calculateHit();
 		}
 	}
 });
@@ -69,6 +110,7 @@ var calculateHit = function()
 		batman1.dz = -0.2;
 		batman2.dy = -0.05;
 		batman2.dz = 0.2;
+		batman2.dx = 0.1;
 	}
 	else if(batman2.inStrike)
 	{
@@ -76,6 +118,7 @@ var calculateHit = function()
 		batman1.dz = 0.2;
 		batman2.dy = -0.05;
 		batman2.dz = -0.2;
+		batman1.dx = 0.1;
 	}
 	
 	if(ball.position.z >= 3  && ball.position.z < 4)
@@ -129,7 +172,7 @@ var calculateHit = function()
 		shotInDisplay = true;
 		ball.dx = -0.2;
 		ball.dz = -0.5;
-		ball.dy = 0.45;
+		ball.dy = 0.55;
 		direction = new THREE.Vector3(-0.2, 0, -0.5);
 		catcherIndex = 6;
 		throwMultiplier = 0.5;
@@ -214,7 +257,6 @@ var calculateHit = function()
 	
 	if(hitted)
 	{
-		
 		batman1.running = true;
 		batman2.running = true;
 		
@@ -226,6 +268,7 @@ var calculateHit = function()
 			batmanAnimator2.runToWicket();
 			batmanAnimator1.runFromWicket();
 		}
+		bounce = false;
 	}
 	
 	var startPos = new THREE.Vector3(ball.position.x, 1, ball.position.z);
@@ -240,6 +283,7 @@ var calculateHit = function()
 	for(var i = 0; i < players.length; i++)
 	{
 		players[i].CalculateInteractPoint();
+		players[i].MoveToBall();
 	}
 };
 
@@ -257,14 +301,29 @@ var init = function()
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0x0C162F );
 	
-	camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
+	canvas = document.getElementById("GameCanvas");
+	renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+	canvas.width  = canvas.clientWidth;
+	canvas.height = canvas.clientHeight;
+	renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+	document.body.appendChild(renderer.domElement);
+	
+	camera = new THREE.PerspectiveCamera(75, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
 	//camera.position.set(0, 3.5, 12);
 	camera.position.set(-5, 10, 20);
 	camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
 	
-	renderer = new THREE.WebGLRenderer({ antialias: true });
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	document.body.appendChild(renderer.domElement);
+	// camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
+	//camera.position.set(0, 3.5, 12);
+	// camera.position.set(-5, 10, 20);
+	// camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
+	
+	// renderer = new THREE.WebGLRenderer({ antialias: true });
+	// renderer.setSize(window.innerWidth, window.innerHeight);
+	// document.body.appendChild(renderer.domElement);
+	
+	raycaster = new THREE.Raycaster();
+	mouse = new THREE.Vector2();
 	
 	bowlerSpeed = 0;
 	traveledDistance = 0;
@@ -291,20 +350,20 @@ var init = function()
 	initRotaton = camera.rotation;
 	out = false;
 	xBarrier = 0.05;
+	score = 0;
+	scoreForBall = 0;
+	numberArray = [];
+	scoreT = [];
+	camera.rotation.set(0,0,0);
+	camera.position.set(0,0,100);
+	wicketsLeft = 3;
+	bounce = false;
+	runs = 0;
+	boundry = false;
+	ballT = [];
+	firstT = true;
 	
-	if(camAnimation)
-	{
-		TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
-			onUpdate:function(){
-				
-				camera.lookAt(0,0,0);
-				camera.updateProjectionMatrix();
-			},
-			onComplete: function() {
-				camAnimation = false;
-			}
-		});
-	}
+	initUI();
 	
 	camera.update = function()
 	{
@@ -312,12 +371,128 @@ var init = function()
 		{
 			camera.lookAt(ball.position.x, 0, ball.position.z);
 		}
+		camBox.position.set(camera.position.x, camera.position.y, camera.position.z);
+		camBox.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+		scoreT[0].rotation.set(0,0,0);
+		scoreT[1].rotation.set(0,0,0);
+		scoreT[2].rotation.set(0,0,0);
+		ballT[0].rotation.set(0,0,0);
+		ballT[1].rotation.set(0,0,0);
+		ballT[2].rotation.set(0,0,0);
 	};
 	
 	
 	initMeshes();
 	
 	sceneLoop();
+};
+
+var initUI = function()
+{
+	uiGroup = new THREE.Group();
+	
+	var spriteMap = new THREE.TextureLoader().load( "UI/menu.jpg" );
+	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	var backgroundSprite = new THREE.Sprite( spriteMaterial );
+	uiGroup.add( backgroundSprite );
+	backgroundSprite.scale.x = 19.20 * 1.65;
+	backgroundSprite.scale.y = 10.80 * 1.5;
+	backgroundSprite.position.z = 90;
+	backgroundSprite.lookAt(camera.position);
+	
+	spriteMap = new THREE.TextureLoader().load( "UI/play.png" );
+	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	var playButton = new THREE.Sprite( spriteMaterial );
+	uiGroup.add( playButton );
+	playButton.scale.x = 2.5;
+	playButton.scale.y = 2.5;
+	playButton.position.z = 91;
+	playButton.position.y = -4;
+	playButton.position.x = -9.7;
+	playButton.lookAt(camera.position);
+	playButton.buttonType = "Play";
+	
+	spriteMap = new THREE.TextureLoader().load( "UI/soundOn.png" );
+	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	var soundBuuton = new THREE.Sprite( spriteMaterial );
+	uiGroup.add( soundBuuton );
+	soundBuuton.scale.x = 2.5;
+	soundBuuton.scale.y = 2.5;
+	soundBuuton.position.z = 91;
+	soundBuuton.position.y = -4;
+	soundBuuton.position.x = -7.3;
+	soundBuuton.lookAt(camera.position);
+	soundBuuton.buttonType = "Sound";
+	
+	scene.add(uiGroup);
+	
+	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+	var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+	camBox = new THREE.Mesh( geometry, material );
+	scene.add( camBox );
+	
+	spriteMap = new THREE.TextureLoader().load( "UI/t.png" );
+	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	scoreT.push(new THREE.Sprite( spriteMaterial ));
+	scoreT[0].scale.x = 0.8;
+	scoreT[0].scale.y = 0.8;
+	scoreT[0].position.z = camBox.position.z - 9;
+	scoreT[0].position.y = camBox.position.y + 6;
+	scoreT[0].lookAt(camBox.position);
+	scoreT[0].buttonType = "score";
+	scoreT.push(scoreT[0].clone());
+	scoreT.push(scoreT[0].clone());
+	
+	scoreT[0].position.x = camBox.position.x + 11;
+	scoreT[1].position.x = camBox.position.x + 12;
+	scoreT[2].position.x = camBox.position.x + 13;
+	
+	camBox.add( scoreT[0] );
+	camBox.add( scoreT[1] );
+	camBox.add( scoreT[2] );
+	
+	camBox.visible = false;
+	
+	var loader = new THREE.TextureLoader();
+	numberArray.push(createMaterial(loader.load( 'UI/0.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/1.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/2.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/3.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/4.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/5.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/6.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/7.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/8.png' )));
+	numberArray.push(createMaterial(loader.load( 'UI/9.png' )));
+	
+	scoreT[0].material = numberArray[0];
+	scoreT[1].material = numberArray[0];
+	scoreT[2].material = numberArray[0];
+	
+	ballT.push(scoreT[0].clone());
+	ballT.push(scoreT[0].clone());
+	ballT.push(scoreT[0].clone());
+	
+	camBox.add( ballT[0] );
+	camBox.add( ballT[1] );
+	camBox.add( ballT[2] );
+	
+	ballT[0].position.x = camBox.position.x - 13;
+	ballT[1].position.x = camBox.position.x - 12;
+	ballT[2].position.x = camBox.position.x - 11;
+	
+	var mat = createMaterial(loader.load( 'Textures/ballN.png' ));;
+	ballT[0].material = mat;
+	ballT[1].material = mat;
+	ballT[2].material = mat;
+	
+	middleScore = scoreT[0].clone();
+	camBox.add(middleScore);
+	middleScore.position.x = 0;
+	middleScore.position.y = 5;
+	middleScore.scale.x = 2;
+	middleScore.scale.y = 2;
+	middleScore.visible = false;
 };
 
 var initMeshes = function()
@@ -420,6 +595,78 @@ var initWickets = function()
 	batter2.position.set(0, 0.48, -7.9);
 };
 
+var createMaterial = function( texture ) {
+    return new THREE.MeshBasicMaterial( { map: texture, transparent: true} );
+};
+
+var showScore = function()
+{
+	if(scoreForBall >= runs)
+	{
+		score += scoreForBall;
+		middleScore.material = numberArray[scoreForBall];
+	}
+	else
+	{
+		score += runs-1;
+		middleScore.material = numberArray[runs-1];
+	}
+	
+	middleScore.scale.x = 0;
+	middleScore.scale.y = 0;
+	middleScore.visible = true;
+	
+	TweenMax.to(middleScore.scale,0.8,{ease: Elastic.easeOut,x:1.6,y:1.6,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+			TweenMax.to(middleScore.scale,0.8,{ease: Elastic.easeOut,x:0,y:0,
+				onUpdate:function(){
+					camera.updateProjectionMatrix();
+				},
+				onComplete: function() {
+					initB();
+				}
+			}).delay(0.3);
+		}
+	});
+	
+	middleScore.position.y = 2;
+	TweenMax.to(middleScore.position,0.8,{ease: Elastic.easeOut,y:5,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+			TweenMax.to(middleScore.position,0.8,{ease: Elastic.easeOut,y:2,
+				onUpdate:function(){
+					camera.updateProjectionMatrix();
+				},
+				onComplete: function() {
+					
+				}
+			}).delay(0.3);
+		}
+	});
+	
+	scoreForBall = 0;
+	runs = 0;
+	boundry = false;
+	var s = score.pad(3);
+	var a = parseInt(s[2]);
+	scoreT[2].material = numberArray[a];
+	a = parseInt(s[1]);
+	scoreT[1].material = numberArray[a];
+	a = parseInt(s[0]);
+	scoreT[0].material = numberArray[a];
+};
+
+Number.prototype.pad = function(size) {
+  var s = String(this);
+  while (s.length < (size || 2)) {s = "0" + s;}
+  return s;
+}
+
 var initPlayer = function(x, z, index)
 {
 	var loader = new THREE.TextureLoader();
@@ -443,48 +690,6 @@ var initPlayer = function(x, z, index)
 	player.movedToPos = false;
 	player.distanceToBall = 0;
 	player.index = index;
-	player.update = function()
-	{
-		if(shotInDisplay && !player.movedToPos)
-		{
-			var val = 0.004;
-			if(player.index == catcherIndex)
-			{
-				val = 0.06;
-			}
-			var x = player.position.x - (player.position.x - player.interactPoint.x) * val;
-			var y = player.position.y - (player.position.y - player.interactPoint.y) * val;
-			var z = player.position.z - (player.position.z - player.interactPoint.z) * val;
-			player.position.set(x, y, z);
-			player.lookAt(camera.position.x, 1, camera.position.z);
-			player.playerCounter++;
-			if(player.playerCounter > Math.ceil(10 - player.distanceToBall/4) * 7)
-			{
-				player.movedToPos = true;
-				player.playerCounter = 0;
-				//camAnimation = false;
-				//player.position.set(0, 3.5, 12);
-				//player.lookAt(new THREE.Vector3( 0, 0, 0 ));
-			}
-		}
-		else if(player.movedToPos && !shotInDisplay)
-		{
-			var x = player.position.x - (player.position.x - player.initialPoint.x) * 0.02;
-			var y = player.position.y - (player.position.y - player.initialPoint.y) * 0.02;
-			var z = player.position.z - (player.position.z - player.initialPoint.z) * 0.02;
-			player.position.set(x, y, z);
-			player.lookAt(camera.position.x, 1, camera.position.z);
-			player.playerCounter++;
-			if(player.playerCounter > 20)
-			{
-				player.movedToPos = false;
-				player.position = player.initialPoint;
-				//camAnimation = false;
-				//player.position.set(0, 3.5, 12);
-				//player.lookAt(new THREE.Vector3( 0, 0, 0 ));
-			}
-		}
-	};
 	
 	player.CalculateInteractPoint = function()
 	{
@@ -492,6 +697,43 @@ var initPlayer = function(x, z, index)
 		shotLine.closestPointToPoint(player.position, 0, h);
 		player.interactPoint = h;
 		player.distanceToBall = calculateDistance(player.position, player.interactPoint);
+	};
+	
+	player.MoveToBall = function()
+	{
+		var pX = player.interactPoint.x;
+		var pZ = player.interactPoint.z;
+		
+		if(player.index != catcherIndex){
+			pX = player.interactPoint.x * 0.5 + player.initialPoint.x;
+			pZ = player.interactPoint.z * 0.5 + player.initialPoint.z;
+		}
+		TweenMax.to(player.position,2,{x:pX,z:pZ,
+			onUpdate:function(){
+				player.lookAt(camera.position.x,player.position.y,camera.position.z);
+				camera.updateProjectionMatrix();
+			},
+		});
+	};
+	
+	player.MoveFromBall = function()
+	{
+		TweenMax.to(player.position,2,{x:player.initialPoint.x,z:player.initialPoint.z,
+			onUpdate:function(){
+				player.lookAt(camera.position.x,player.position.y,camera.position.z);
+				camera.updateProjectionMatrix();
+			},
+			onComplete: function() {
+				// TweenMax.to(player.position,2,{x:player.initialPoint.x,z:player.initialPoint.z,
+					// onUpdate:function(){
+						// player.lookAt(camera.position.x,player.position.y,camera.position.z);
+						// camera.updateProjectionMatrix();
+					// },
+					// onComplete: function() {
+					// }
+				// });
+			}
+		});
 	};
 	
 	players.push(player);
@@ -556,8 +798,10 @@ var initBall = function()
 						ball.dx = 0.02 ;
 					}
 				}
-				//ball.dz *= 0.9;
-				
+				else
+				{
+					bounce = true;
+				}
 				bowlerAnim.startAnimation();
 			}
 			else
@@ -578,10 +822,28 @@ var initBall = function()
 		if(shotInDisplay)
 		{
 			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
+			if(travelD > 50)
+			{
+				if(!boundry){
+					if(bounce)
+					{
+						scoreForBall = 4;
+					}
+					else
+					{
+						scoreForBall = 6;
+					}
+					boundry = true;
+				}
+			}
 			if(travelD > 65)
 			{
 				camera.lookAt(0,0,0);
 				shotInDisplay = false;
+				for(var i = 0; i < players.length; i++)
+				{
+					players[i].MoveFromBall();
+				}
 				recursiveBalling();
 			}
 			else if(Math.round(players[catcherIndex].position.x) == Math.round(ball.position.x) && Math.round(players[catcherIndex].position.z) == Math.round(ball.position.z) && Math.round(ball.position.y) < Math.round(players[catcherIndex].position.y ) + 2)
@@ -595,6 +857,10 @@ var initBall = function()
 				ball.dz = dir.z  * throwMultiplier;
 				ballType = 0;
 				ballIsThrwoing = true;
+				for(var i = 0; i < players.length; i++)
+				{
+					players[i].MoveFromBall();
+				}
 			}
 		}
 		else
@@ -617,6 +883,10 @@ var initBall = function()
 				ball.dy = 0;
 				ball.dx = 0;
 				out = true;
+				if(wicketsLeft > 0){
+					wicketsLeft--;
+				}
+				ballT[wicketsLeft].visible = false;
 			}
 		}
 	};
@@ -645,16 +915,29 @@ var calculateDirection = function(v1, v2)
 var recursiveBalling = function()
 {
 	if(!bowling){
-		shotInDisplay = false;
-		bowlerSpeed = -0.1;
-		bowling = true;
-		ball.dz = 0.4;
-		ballInHold = true;
-		ball.position.x = 0.5;
-		ball.position.z = -7.1;
-		ball.position.y = 1;
+		bounce = false;
+		if(firstT)
+		{
+			initB();
+			firstT = false;
+		}
+		else{
+			showScore();
+		}
 	}
 	//setTimeout(recursiveBalling, 1500);
+};
+
+var initB = function()
+{
+	shotInDisplay = false;
+	bowlerSpeed = -0.1;
+	bowling = true;
+	ball.dz = 0.4;
+	ballInHold = true;
+	ball.position.x = 0.5;
+	ball.position.z = -7.1;
+	ball.position.y = 1;
 };
 
 var startBowling = function()
@@ -667,7 +950,7 @@ var startBowling = function()
 	}
 	else if(ballType == 1)
 	{
-		ball.dx = -0.04;
+		ball.dx = -0.02;
 	}
 	else if(ballType == 2)
 	{
@@ -728,17 +1011,26 @@ var initSprites = function(pos)
 			{
 				batter.dy -= gravity;
 			}
+			if(!this.inStrike){
+				batter.dx -= 0.003;
+			}
 			batter.position.y += batter.dy;
 			batter.position.z += batter.dz;
+			batter.position.x += batter.dx;
+			
 			//batter.position.x += batter.dx;
 			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
 			if(this.inStrike)
 			{
 				if(this.position.z < -6)
 				{
+					if(runs <= 4){
+						runs += 1;
+					}
 					this.inStrike = false;
 					if(shotInDisplay && travelD < 65){
 						this.dz = -this.dz;
+						this.dx = 0.1;
 						this.animator.runFromWicket();
 					}
 					else
@@ -746,6 +1038,7 @@ var initSprites = function(pos)
 						this.running = false;
 						this.dz = 0;
 						this.dy = 0;
+						this.dx = 0;
 						batter.position.set(-0.6,0.75,-6);
 						this.animator.startBattingAnimation();
 						this.animator.setNonStrikeBatman();
@@ -759,6 +1052,7 @@ var initSprites = function(pos)
 					this.inStrike = true;
 					if(shotInDisplay && travelD < 65){
 						this.dz = -this.dz;
+						this.dx = 0;
 						this.animator.runToWicket();
 					}
 					else
@@ -766,6 +1060,7 @@ var initSprites = function(pos)
 						this.running = false;
 						this.dz = 0;
 						this.dy = 0;
+						this.dx = 0;
 						batter.position.set(-0.6,0.75,6);
 						this.animator.startBattingAnimation();
 					}
@@ -1123,18 +1418,12 @@ var update = function()
 		ball.position.x = 0.4;
 		ball.position.y = 1.4;
 	}
+	
 	ball.update();
 	ballShadow.update();
 	camera.update();
-	
-	for(var i = 0; i < players.length; i++)
-	{
-		players[i].update();
-	}
-	
 	batman1.update();
 	batman2.update();
-	
 	
 	var delta = clock.getDelta(); 
 	batmanAnimator1.update(1000 * delta);
