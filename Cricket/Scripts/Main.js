@@ -65,6 +65,8 @@ var scoreSound;
 var batSound;
 var batSwingSound;
 
+var finalScore;
+
 window.addEventListener( 'mousedown', function(event)
 {
 	if(camAnimation){
@@ -150,6 +152,17 @@ var restartGame = function()
 			scoreCardR.visible = false;
 		}
 	});
+	
+	for(var i = 0; i < finalScore.length; i++){
+		TweenMax.to(finalScore[i].position,0.4,{ease: Bounce.easeOut,y:2,
+			onUpdate:function(){
+				camera.updateProjectionMatrix();
+			},
+			onComplete: function() {
+				finalScore[i].visible = false;
+			}
+		});
+	}
 	
 	bowlerSpeed = 0;
 	traveledDistance = 0;
@@ -452,6 +465,7 @@ var init = function()
 	boundry = false;
 	ballT = [];
 	firstT = true;
+	finalScore = [];
 	
 	initUI();
 	
@@ -472,6 +486,9 @@ var init = function()
 			ballT[2].rotation.set(0,0,0);
 			scoreCard.rotation.set(0,0,0);
 			scoreCardR.rotation.set(0,0,0);
+			finalScore[0].rotation.set(0,0,0);
+			finalScore[1].rotation.set(0,0,0);
+			finalScore[2].rotation.set(0,0,0);
 		}
 	};
 	
@@ -681,11 +698,34 @@ var initUI = function()
 	scoreCardR.position.y = 0;
 	scoreCardR.scale.x = 0.3;
 	scoreCardR.scale.y = 0.3;
-	scoreCardR.position.z = -1;
+	scoreCardR.position.z = -0.98;
 	scoreCardR.buttonType = "Return";
 	
 	scoreCard.visible = false;
 	scoreCardR.visible = false;
+	
+	finalScore.push(scoreT[0].clone());
+	finalScore.push(scoreT[0].clone());
+	finalScore.push(scoreT[0].clone());
+	
+	camBox.add( finalScore[0] );
+	camBox.add( finalScore[1] );
+	camBox.add( finalScore[2] );
+	
+	finalScore[0].position.set(0.12,0, -0.98);
+	finalScore[1].position.set(0,0, -0.98);
+	finalScore[2].position.set(-0.12,0, -0.98);
+	
+	finalScore[0].scale.x = 0.1;
+	finalScore[1].scale.x = 0.1;
+	finalScore[2].scale.x = 0.1;
+	finalScore[0].scale.y = 0.1;
+	finalScore[1].scale.y = 0.1;
+	finalScore[2].scale.y = 0.1;
+	
+	finalScore[0].visible = false;
+	finalScore[1].visible = false;
+	finalScore[2].visible = false;
 };
 
 var initMeshes = function()
@@ -855,10 +895,13 @@ var updateScore = function()
 	var s = score.pad(3);
 	var a = parseInt(s[2]);
 	scoreT[2].material = numberArray[a];
+	finalScore[0].material = numberArray[a];
 	a = parseInt(s[1]);
 	scoreT[1].material = numberArray[a];
+	finalScore[1].material = numberArray[a];
 	a = parseInt(s[0]);
 	scoreT[0].material = numberArray[a];
+	finalScore[2].material = numberArray[a];
 };
 
 Number.prototype.pad = function(size) {
@@ -1191,6 +1234,18 @@ var showGameOver = function(){
 		onComplete: function() {
 		}
 	});
+	
+	for(var i = 0; i < finalScore.length; i++){
+		finalScore[i].position.y = 2;
+		finalScore[i].visible = true;
+		TweenMax.to(finalScore[i].position,0.8,{ease: Bounce.easeOut,y:0,
+			onUpdate:function(){
+				camera.updateProjectionMatrix();
+			},
+			onComplete: function() {
+			}
+		});
+	}
 };
 
 var initSprites = function(pos)
