@@ -79,18 +79,7 @@ window.addEventListener( 'mousedown', function(event)
 			if(intersects[0].object.buttonType == "Play")
 			{
 				buttonSound.play();
-				camera.position.set(-5, 10, 20);
-				uiGroup.visible = false;
-				TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
-					onUpdate:function(){
-						camera.lookAt(0,0,0);
-						camera.updateProjectionMatrix();
-					},
-					onComplete: function() {
-						camAnimation = false;
-						camBox.visible = true;
-					}
-				});
+				API.spendcoins(playGame);
 			}
 		}
 	}
@@ -133,6 +122,23 @@ window.addEventListener( 'mousedown', function(event)
 	}
 });
 
+var playGame = function()
+{
+	API.setscore(0);
+	camera.position.set(-5, 10, 20);
+	uiGroup.visible = false;
+	TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
+		onUpdate:function(){
+			camera.lookAt(0,0,0);
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+			camAnimation = false;
+			camBox.visible = true;
+		}
+	});
+};
+
 var restartGame = function()
 {
 	TweenMax.to(scoreCard.position,0.4,{ease: Bounce.easeOut,y:2,
@@ -153,16 +159,21 @@ var restartGame = function()
 		}
 	});
 	
-	for(var i = 0; i < finalScore.length; i++){
-		TweenMax.to(finalScore[i].position,0.4,{ease: Bounce.easeOut,y:2,
-			onUpdate:function(){
-				camera.updateProjectionMatrix();
-			},
-			onComplete: function() {
-				finalScore[i].visible = false;
-			}
-		});
-	}
+	finalScore[0].visible = false;
+	finalScore[1].visible = false;
+	finalScore[2].visible = false;
+	// for(var i = 0; i < finalScore.length; i++){
+		// TweenMax.to(finalScore[i].position,0.4,{ease: Bounce.easeOut,y:2,
+			// onUpdate:function(){
+				// camera.updateProjectionMatrix();
+			// },
+			// onComplete: function() {
+				// finalScore[i].visible = false;
+			// }
+		// });
+	// }
+	
+	API.setscore(0);
 	
 	bowlerSpeed = 0;
 	traveledDistance = 0;
@@ -404,26 +415,26 @@ var init = function()
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0x0C162F );
 	
-	canvas = document.getElementById("GameCanvas");
-	renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-	canvas.width  = canvas.clientWidth;
-	canvas.height = canvas.clientHeight;
-	renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
-	document.body.appendChild(renderer.domElement);
+	// canvas = document.getElementById("GameCanvas");
+	// renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+	// canvas.width  = canvas.clientWidth;
+	// canvas.height = canvas.clientHeight;
+	// renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+	// document.body.appendChild(renderer.domElement);
 	
-	camera = new THREE.PerspectiveCamera(75, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
-	//camera.position.set(0, 3.5, 12);
-	camera.position.set(-5, 10, 20);
-	camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
-	
-	// camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
+	// camera = new THREE.PerspectiveCamera(75, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
 	//camera.position.set(0, 3.5, 12);
 	// camera.position.set(-5, 10, 20);
 	// camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
 	
-	// renderer = new THREE.WebGLRenderer({ antialias: true });
-	// renderer.setSize(window.innerWidth, window.innerHeight);
-	// document.body.appendChild(renderer.domElement);
+	camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
+	camera.position.set(0, 3.5, 12);
+	camera.position.set(-5, 10, 20);
+	camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
+	
+	renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	document.body.appendChild(renderer.domElement);
 	
 	raycaster = new THREE.Raycaster();
 	mouse = new THREE.Vector2();
@@ -496,6 +507,12 @@ var init = function()
 	
 	initSound();
 	
+	API.savetoken(startScene);
+	
+};
+
+var startScene = function()
+{
 	sceneLoop();
 };
 
@@ -693,7 +710,6 @@ var initUI = function()
 	var spriteMateriala = new THREE.SpriteMaterial( { map: spriteMapa, useScreenCoordinates: true, color: 0xffffff } );
 	scoreCardR = new THREE.Sprite(spriteMateriala);
 	camBox.add(scoreCardR);
-	console.log(scoreCardR);
 	scoreCardR.position.x = 0;
 	scoreCardR.position.y = 0;
 	scoreCardR.scale.x = 0.3;
@@ -836,14 +852,18 @@ var showScore = function()
 {
 	if(scoreForBall >= runs)
 	{
+		API.appendscore(scoreForBall);
 		score += scoreForBall;
 		middleScore.material = numberArray[scoreForBall];
 	}
 	else
 	{
+		API.appendscore(runs-1);
 		score += runs-1;
 		middleScore.material = numberArray[runs-1];
 	}
+	
+	
 	
 	middleScore.scale.x = 0;
 	middleScore.scale.y = 0;
@@ -892,7 +912,7 @@ var showScore = function()
 
 var updateScore = function()
 {
-	var s = score.pad(3);
+	var s = API.getscore().pad(3);
 	var a = parseInt(s[2]);
 	scoreT[2].material = numberArray[a];
 	finalScore[0].material = numberArray[a];
@@ -1215,6 +1235,12 @@ var startBowling = function()
 
 var showGameOver = function(){
 	
+	console.log(API.getscore());
+	API.submitscore(submitScoreCall);
+};
+
+var submitScoreCall = function()
+{
 	scoreCard.position.y = 2;
 	scoreCard.visible = true;
 	TweenMax.to(scoreCard.position,0.8,{ease: Bounce.easeOut,y:0,
