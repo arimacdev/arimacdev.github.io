@@ -53,6 +53,18 @@ var scoreCard;
 var scoreCardR;
 var gameOver;
 
+var cheerSadSound;
+var cheerHappySound;
+var papareSound;
+var papareSound;
+var batSound;
+var batRunSound;
+var ballRunSound;
+var buttonSound;
+var scoreSound;
+var batSound;
+var batSwingSound;
+
 window.addEventListener( 'mousedown', function(event)
 {
 	if(camAnimation){
@@ -64,6 +76,7 @@ window.addEventListener( 'mousedown', function(event)
 		if ( intersects.length > 0 ) {
 			if(intersects[0].object.buttonType == "Play")
 			{
+				buttonSound.play();
 				camera.position.set(-5, 10, 20);
 				uiGroup.visible = false;
 				TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
@@ -88,13 +101,14 @@ window.addEventListener( 'mousedown', function(event)
 		if ( intersects.length > 0 ) {
 			if(intersects[0].object.buttonType == "Return")
 			{
+				buttonSound.play();
 				restartGame();
 			}
 		}
 	}
 	else {
 	//console.log(ball.position.z);
-		if(!shotInDisplay && !ballIsThrwoing){
+		if(!shotInDisplay && !ballIsThrwoing && !batting){
 			if((batman1.inStrike && !batman1.running) ||(batman2.inStrike && !batman2.running))
 			{
 				if(firstTime)
@@ -163,7 +177,14 @@ var restartGame = function()
 	runs = 0;
 	boundry = false;
 	firstT = true;
-	recursiveBalling();
+	firstTime = true;
+	gameOver = false;
+	
+	ballT[0].visible = true;
+	ballT[1].visible = true;
+	ballT[2].visible = true;
+	
+	updateScore();
 };
 
 var calculateHit = function()
@@ -323,6 +344,9 @@ var calculateHit = function()
 	
 	if(hitted)
 	{
+		batSound.play();
+		batRunSound.play();
+		
 		batman1.running = true;
 		batman2.running = true;
 		
@@ -453,7 +477,82 @@ var init = function()
 	
 	initMeshes();
 	
+	initSound();
+	
 	sceneLoop();
+};
+
+var initSound = function()
+{
+	var listener = new THREE.AudioListener();
+	camera.add( listener );
+	
+	cheerSadSound = new THREE.Audio( listener );
+	
+	var audioLoader = new THREE.AudioLoader();
+	audioLoader.load( 'Sounds/cheerS.ogg', function( buffer ) {
+		cheerSadSound.setBuffer( buffer );
+		cheerSadSound.setLoop( false );
+		cheerSadSound.setVolume( 1 );
+	});
+	
+	cheerHappySound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/cheerH.ogg', function( buffer ) {
+		cheerHappySound.setBuffer( buffer );
+		cheerHappySound.setLoop( false );
+		cheerHappySound.setVolume( 1 );
+	});
+	
+	papareSound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/papare.ogg', function( buffer ) {
+		papareSound.setBuffer( buffer );
+		papareSound.setLoop( true );
+		papareSound.setVolume( 0.5 );
+		papareSound.play();
+	});
+	
+	batRunSound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/runBat.ogg', function( buffer ) {
+		batRunSound.setBuffer( buffer );
+		batRunSound.setLoop( true );
+		batRunSound.setVolume( 1 );
+	});
+	
+	ballRunSound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/runBall.ogg', function( buffer ) {
+		ballRunSound.setBuffer( buffer );
+		ballRunSound.setLoop( true );
+		ballRunSound.setVolume( 1 );
+	});
+	
+	buttonSound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/button.mp3', function( buffer ) {
+		buttonSound.setBuffer( buffer );
+		buttonSound.setLoop( false );
+		buttonSound.setVolume( 1 );
+	});
+	
+	scoreSound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/score.mp3', function( buffer ) {
+		scoreSound.setBuffer( buffer );
+		scoreSound.setLoop( false );
+		scoreSound.setVolume( 1 );
+	});
+	
+	batSound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/bat.mp3', function( buffer ) {
+		batSound.setBuffer( buffer );
+		batSound.setLoop( false );
+		batSound.setVolume( 1 );
+	});
+	
+	batSwingSound = new THREE.Audio( listener );
+	audioLoader.load( 'Sounds/batSwing.mp3', function( buffer ) {
+		batSwingSound.setBuffer( buffer );
+		batSwingSound.setLoop( false );
+		batSwingSound.setVolume( 1 );
+	});
+	
 };
 
 var initUI = function()
@@ -710,6 +809,8 @@ var showScore = function()
 	middleScore.scale.y = 0;
 	middleScore.visible = true;
 	
+	scoreSound.play();
+	
 	TweenMax.to(middleScore.scale,0.8,{ease: Elastic.easeOut,x:1.6,y:1.6,
 		onUpdate:function(){
 			camera.updateProjectionMatrix();
@@ -746,6 +847,11 @@ var showScore = function()
 	scoreForBall = 0;
 	runs = 0;
 	boundry = false;
+	updateScore();
+};
+
+var updateScore = function()
+{
 	var s = score.pad(3);
 	var a = parseInt(s[2]);
 	scoreT[2].material = numberArray[a];
@@ -918,6 +1024,7 @@ var initBall = function()
 			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
 			if(travelD > 50)
 			{
+				cheerHappySound.play();
 				if(!boundry){
 					if(bounce)
 					{
@@ -972,6 +1079,7 @@ var initBall = function()
 			
 			if(ball.position.z >= 7.9)
 			{
+				cheerSadSound.play();
 				ball.position.z = -100;
 				ball.dz = 0;
 				ball.dy = 0;
@@ -1025,11 +1133,11 @@ var recursiveBalling = function()
 			showScore();
 		}
 	}
-	//setTimeout(recursiveBalling, 1500);
 };
 
 var initB = function()
 {
+	ballRunSound.play();
 	shotInDisplay = false;
 	bowlerSpeed = -0.1;
 	bowling = true;
@@ -1159,6 +1267,7 @@ var initSprites = function(pos)
 					}
 					else
 					{
+						batRunSound.stop();
 						this.running = false;
 						this.dz = 0;
 						this.dy = 0;
@@ -1369,6 +1478,7 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.startBattingAnimation = function()
 	{
+		batSwingSound.play();
 		this.tileDisplayDuration = 20;
 		
 		this.currentTile = 0;
@@ -1481,6 +1591,8 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.startBattingAnimation = function()
 	{
+		batSwingSound.play();
+		
 		this.tileDisplayDuration = 20;
 		
 		this.currentTile = 0;
@@ -1533,6 +1645,7 @@ var update = function()
 	}
 	else if(traveledDistance >= 4)
 	{
+		ballRunSound.stop();
 		bowlerSpeed = 0;
 		traveledDistance = 0;
 		bowling = false;
