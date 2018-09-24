@@ -67,6 +67,10 @@ var batSwingSound;
 
 var finalScore;
 
+var backgroundSprite;
+var playButton;
+var soundBuuton;
+
 window.addEventListener( 'mousedown', function(event)
 {
 	if(camAnimation){
@@ -403,12 +407,58 @@ var calculateHit = function()
 
 window.addEventListener( 'resize', function()
 {
+	
+	setUISizes();
 	var width = window.innerWidth;
 	var height = window.innerHeight;
-	renderer.setSize(width,height);
 	camera.aspect = width/ height;
 	camera.updateProjectionMatrix();
+	renderer.setSize(width,height);
+	
 });
+
+var setUISizes = function()
+{
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	
+	backgroundSprite.scale.x = (width/100) * 1.7;
+	backgroundSprite.scale.y = (height/100) * 1.7;
+	
+	playButton.scale.x = width/800;
+	playButton.scale.y = height/450;
+	soundBuuton.scale.x = width/800;
+	soundBuuton.scale.y = height/450;
+	
+	playButton.position.x = width/-192;
+	soundBuuton.position.x = width/-256;
+	playButton.position.y = height/-240;
+	soundBuuton.position.y = height/-240;
+	
+	ballT[0].position.x = camBox.position.x - width/148;
+	ballT[1].position.x = camBox.position.x - width/160;
+	ballT[2].position.x = camBox.position.x - width/175;
+	
+	ballT[0].scale.x = width/2400;
+	ballT[1].scale.x = width/2400;
+	ballT[2].scale.x = width/2400;
+	
+	ballT[0].scale.y = height/1350;
+	ballT[1].scale.y = height/1350;
+	ballT[2].scale.y = height/1350;
+	
+	scoreT[0].position.x = camBox.position.x + width/175;
+	scoreT[1].position.x = camBox.position.x + width/160;
+	scoreT[2].position.x = camBox.position.x + width/148;
+	
+	scoreT[0].scale.x = width/2400;
+	scoreT[1].scale.x = width/2400;
+	scoreT[2].scale.x = width/2400;
+	
+	scoreT[0].scale.y = height/1350;
+	scoreT[1].scale.y = height/1350;
+	scoreT[2].scale.y = height/1350;
+};
 
 var init = function()
 {
@@ -595,34 +645,24 @@ var initUI = function()
 	
 	var spriteMap = new THREE.TextureLoader().load( "UI/menu.jpg" );
 	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
-	var backgroundSprite = new THREE.Sprite( spriteMaterial );
+	backgroundSprite = new THREE.Sprite( spriteMaterial );
 	uiGroup.add( backgroundSprite );
-	backgroundSprite.scale.x = 19.20 * 1.65;
-	backgroundSprite.scale.y = 10.80 * 1.5;
 	backgroundSprite.position.z = 90;
 	backgroundSprite.lookAt(camera.position);
 	
 	spriteMap = new THREE.TextureLoader().load( "UI/play.png" );
 	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
-	var playButton = new THREE.Sprite( spriteMaterial );
+	playButton = new THREE.Sprite( spriteMaterial );
 	uiGroup.add( playButton );
-	playButton.scale.x = 2.5;
-	playButton.scale.y = 2.5;
 	playButton.position.z = 91;
-	playButton.position.y = -4;
-	playButton.position.x = -9.7;
 	playButton.lookAt(camera.position);
 	playButton.buttonType = "Play";
 	
 	spriteMap = new THREE.TextureLoader().load( "UI/soundOn.png" );
 	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
-	var soundBuuton = new THREE.Sprite( spriteMaterial );
+	soundBuuton = new THREE.Sprite( spriteMaterial );
 	uiGroup.add( soundBuuton );
-	soundBuuton.scale.x = 2.5;
-	soundBuuton.scale.y = 2.5;
 	soundBuuton.position.z = 91;
-	soundBuuton.position.y = -4;
-	soundBuuton.position.x = -7.3;
 	soundBuuton.lookAt(camera.position);
 	soundBuuton.buttonType = "Sound";
 	
@@ -679,10 +719,6 @@ var initUI = function()
 	camBox.add( ballT[0] );
 	camBox.add( ballT[1] );
 	camBox.add( ballT[2] );
-	
-	ballT[0].position.x = camBox.position.x - 13;
-	ballT[1].position.x = camBox.position.x - 12;
-	ballT[2].position.x = camBox.position.x - 11;
 	
 	var mat = createMaterial(loader.load( 'Textures/ballN.png' ));;
 	ballT[0].material = mat;
@@ -742,6 +778,8 @@ var initUI = function()
 	finalScore[0].visible = false;
 	finalScore[1].visible = false;
 	finalScore[2].visible = false;
+	
+	setUISizes();
 };
 
 var initMeshes = function()
@@ -858,9 +896,9 @@ var showScore = function()
 	}
 	else
 	{
-		API.appendscore(runs-1);
-		score += runs-1;
-		middleScore.material = numberArray[runs-1];
+		API.appendscore(runs);
+		score += runs;
+		middleScore.material = numberArray[runs];
 	}
 	
 	
@@ -1336,10 +1374,6 @@ var initSprites = function(pos)
 			{
 				if(this.position.z < -6)
 				{
-					if(runs <= 4){
-						runs += 1;
-						console.log("run");
-					}
 					this.inStrike = false;
 					if(shotInDisplay && travelD < 65){
 						this.dz = -this.dz;
@@ -1581,6 +1615,11 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	};
 	this.runFromWicket = function()
 	{
+		if(runs <= 4){
+			runs += 1;
+			console.log("run");
+		}
+		
 		this.tileDisplayDuration = 120;
 		
 		this.currentTile = this.numberOfTiles - 2;
@@ -1696,6 +1735,10 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.runFromWicket = function()
 	{
+		if(runs <= 4){
+			runs += 1;
+			console.log("run");
+		}
 		this.tileDisplayDuration = 120;
 		
 		this.currentTile = this.numberOfTiles - 2;
