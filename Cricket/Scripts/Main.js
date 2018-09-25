@@ -241,74 +241,65 @@ var calculateHit = function()
 		hitted = true;
 		shotInDisplay = true;
 		
-		var x = Math.floor(Math.random() * 4) + 1;
-		var z = Math.floor(Math.random() * 4) + 1;
-		x = x/10;
-		z = -z/10;
+		var x = -0.4;
+		var z = -0.6;
 		
+		catcherIndex = 3;
 		if(ball.position.x > xBarrier)
 		{
 			x = -x;
+			catcherIndex = 0;
 		}
 		 
 		console.log(x + " " + z); 
 		ball.dx = x;
 		ball.dz = z;
-		direction = new THREE.Vector3(x, 0, z);
-		 
-		if(ball.position.z >= 3  && ball.position.z < 4)
-		{
-			console.log("shot 1");
-			ball.dy = 0.3;
-			catcherIndex = 5;
-			throwMultiplier = 0.5;
-			throwY = 0.2;catcherIndex = 7;
-		}
-		else if(ball.position.z >= 4  && ball.position.z < 4.5)
-		{
-			console.log("shot 2");
-			ball.dy = 0.2;
-			catcherIndex = 3;
-			throwMultiplier = 0.5;
-			throwY = 0.2;
-		}
-		else if(ball.position.z >= 4.5  && ball.position.z < 5)
-		{
-			console.log("shot 3");
-			ball.dy = 0.55;
-			catcherIndex = 6;
-			throwMultiplier = 0.5;
-			throwY = 0.2;
-		}
-		else if(ball.position.z >= 5 && ball.position.z < 5.5)
-		{
-			console.log("shot 4");
-			ball.dy = 0.1;
-			direction = new THREE.Vector3(-0.3, 0, -0.4);
-			catcherIndex = 4;
-			throwMultiplier = 0.5;
-			throwY = 0.2;
-			
-		}
-		else if(ball.position.z >= 5.5  && ball.position.z < 6)
-		{
-			console.log("shot 5");
-			ball.dy = 0.25;
-			direction = new THREE.Vector3(-0.2, 0, -0.6);
-			catcherIndex = 1;
-			throwMultiplier = 1;
-			throwY = 0.2;
-		}
-		else if(ball.position.z >= 6  && ball.position.z < 7)
-		{
-			console.log("shot 6");
-			ball.dy = 0.3;
-			direction = new THREE.Vector3(-0.03, 0, -0.5);
-			catcherIndex = 1;
-			throwMultiplier = 1;
-			throwY = 0.2;
-		}
 		ball.dy = 0.3;
+		direction = new THREE.Vector3(x, 0, z);
+		throwMultiplier = 0.5;
+		throwY = 0.35;
+		 
+		// if(ball.position.z >= 3  && ball.position.z < 4)
+		// {
+			// console.log("shot 1");
+			// ball.dy = 0.1;
+			// catcherIndex = 5;
+			// throwMultiplier = 0.5;
+			// throwY = 0.2;catcherIndex = 7;
+		// }
+		// else if(ball.position.z >= 4  && ball.position.z < 4.5)
+		// {
+			// console.log("shot 2");
+			// ball.dy = 0.2;
+			// catcherIndex = 3;
+			// throwMultiplier = 0.5;
+			// throwY = 0.2;
+		// }
+		// else if(ball.position.z >= 4.5  && ball.position.z < 5)
+		// {
+			// console.log("shot 3");
+			// ball.dy = 0.3;
+			// catcherIndex = 6;
+			// throwMultiplier = 0.5;
+			// throwY = 0.2;
+		// }
+		// else if(ball.position.z >= 5 && ball.position.z < 5.5)
+		// {
+			// console.log("shot 4");
+			// ball.dy = 0.4;
+			// catcherIndex = 4;
+			// throwMultiplier = 0.5;
+			// throwY = 0.2;
+			
+		// }
+		// else if(ball.position.z >= 5.5  && ball.position.z < 6)
+		// {
+			// console.log("shot 5");
+			// ball.dy = 0.55;
+			// catcherIndex = 1;
+			// throwMultiplier = 1;
+			// throwY = 0.2;
+		// }
 	}
 	
 	if(hitted)
@@ -782,7 +773,7 @@ var initMeshes = function()
 	initPlayer(-20,-15, 4);
 	initPlayer(-23,-8, 5);
 	initPlayer(	25,-15, 6);
-	initPlayer(15,0, 7);
+	initPlayer(25,-2, 7);
 	initBall();
 	
 	batman1 = initSprites(0);
@@ -951,7 +942,7 @@ var initPlayer = function(x, z, index)
 			pX = player.interactPoint.x * 0.5 + player.initialPoint.x;
 			pZ = player.interactPoint.z * 0.5 + player.initialPoint.z;
 		}
-		TweenMax.to(player.position,2,{x:pX,z:pZ,
+		TweenMax.to(player.position,0.1,{x:pX,z:pZ,
 			onUpdate:function(){
 				player.lookAt(camera.position.x,player.position.y,camera.position.z);
 				camera.updateProjectionMatrix();
@@ -1028,7 +1019,7 @@ var initBall = function()
 			if(this.position.y - this.radius + ball.dy < 0)
 			{
 				ball.dy = -ball.dy * friction;
-				if(!shotInDisplay){
+				if(!shotInDisplay && !ballIsThrwoing){
 					switch(ballType) {
 						case 0:
 							ball.dx = -0.01;
@@ -1159,6 +1150,26 @@ var initBall = function()
 	ballShadow.rotation.x = - Math.PI / 2;
 	ballShadow.position.y = 0.002;
 	
+	var bs1 = ballShadow.clone();
+	scene.add(bs1);
+	bs1.position.set(0,0.002, 3);
+	bs1 = ballShadow.clone();
+	scene.add(bs1);
+	bs1.position.set(0,0.002, 3.5);
+	bs1 = ballShadow.clone();
+	scene.add(bs1);
+	bs1.position.set(0,0.002, 4);
+	bs1 = ballShadow.clone();
+	scene.add(bs1);
+	bs1.position.set(0,0.002, 4.5);
+	bs1 = ballShadow.clone();
+	scene.add(bs1);
+	bs1.position.set(0,0.002, 5);
+	bs1 = ballShadow.clone();
+	scene.add(bs1);
+	bs1.position.set(0,0.002, 5.5);
+	
+	
 	ballShadow.update = function()
 	{
 		ballShadow.position.x = ball.position.x;
@@ -1228,12 +1239,12 @@ var startBowling = function()
 		case 3:
 			ball.dx = -0.01;
 			ball.dy = 0.1;
-			ball.dz = 0.5;
+			ball.dz = 0.45;
 			break;
 		case 4:
 			ball.dx = -0.01;
 			ball.dy = 0.03;
-			ball.dz = 0.6;
+			ball.dz = 0.5;
 			break;
 		case 5:
 			ball.dx = -0.01;
