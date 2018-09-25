@@ -236,138 +236,79 @@ var calculateHit = function()
 		batman1.dx = 0.1;
 	}
 	
-	if(ball.position.z >= 3  && ball.position.z < 4)
-	{
-		console.log("shot 1");
-		
-		shotInDisplay = true;
-		ball.dx = -0.35;
-		ball.dz = -0.1;
-		ball.dy = 0.3;
-		direction = new THREE.Vector3(-0.35, 0, -0.1);
-		catcherIndex = 5;
-		throwMultiplier = 0.5;
-		throwY = 0.2;
-		
-		if(ball.position.x > xBarrier)
-		{
-			ball.dx = -ball.dx;
-			direction.x = -direction.x;
-			catcherIndex = 7;
-		}
+	if(ball.position.z >= 3  && ball.position.z <= 6.7){
 		
 		hitted = true;
-	}
-	else if(ball.position.z >= 4  && ball.position.z < 4.5)
-	{
-		console.log("shot 2");
-		
 		shotInDisplay = true;
-		ball.dx = -0.1;
-		ball.dz = -0.1;
-		ball.dy = 0.2;
-		direction = new THREE.Vector3(-0.1, 0, -0.1);
-		catcherIndex = 3;
-		throwMultiplier = 0.5;
-		throwY = 0.2;
+		
+		var x = Math.floor(Math.random() * 4) + 1;
+		var z = Math.floor(Math.random() * 4) + 1;
+		x = x/10;
+		z = -z/10;
 		
 		if(ball.position.x > xBarrier)
 		{
-			ball.dx = -ball.dx;
-			direction.x = -direction.x;
-			catcherIndex = 0;
+			x = -x;
 		}
-		
-		hitted = true;
-	}
-	else if(ball.position.z >= 4.5  && ball.position.z < 5)
-	{
-		console.log("shot 3");
-		
-		shotInDisplay = true;
-		ball.dx = -0.2;
-		ball.dz = -0.5;
-		ball.dy = 0.55;
-		direction = new THREE.Vector3(-0.2, 0, -0.5);
-		catcherIndex = 6;
-		throwMultiplier = 0.5;
-		throwY = 0.2;
-		
-		if(ball.position.x > xBarrier)
+		 
+		console.log(x + " " + z); 
+		ball.dx = x;
+		ball.dz = z;
+		direction = new THREE.Vector3(x, 0, z);
+		 
+		if(ball.position.z >= 3  && ball.position.z < 4)
 		{
-			ball.dx = -ball.dx;
-			direction.x = -direction.x;
-			catcherIndex = 2;
+			console.log("shot 1");
+			ball.dy = 0.3;
+			catcherIndex = 5;
+			throwMultiplier = 0.5;
+			throwY = 0.2;catcherIndex = 7;
 		}
-		
-		hitted = true;
-	}
-	else if(ball.position.z >= 5 && ball.position.z < 5.5)
-	{
-		console.log("shot 4");
-		
-		shotInDisplay = true;
-		ball.dx = -0.3;
-		ball.dz = -0.4;
-		ball.dy = 0.1;
-		direction = new THREE.Vector3(-0.3, 0, -0.4);
-		catcherIndex = 4;
-		throwMultiplier = 0.5;
-		throwY = 0.2;
-		
-		if(ball.position.x > xBarrier)
+		else if(ball.position.z >= 4  && ball.position.z < 4.5)
 		{
-			ball.dx = -ball.dx;
-			direction.x = -direction.x;
+			console.log("shot 2");
+			ball.dy = 0.2;
+			catcherIndex = 3;
+			throwMultiplier = 0.5;
+			throwY = 0.2;
+		}
+		else if(ball.position.z >= 4.5  && ball.position.z < 5)
+		{
+			console.log("shot 3");
+			ball.dy = 0.55;
 			catcherIndex = 6;
+			throwMultiplier = 0.5;
+			throwY = 0.2;
 		}
-		
-		hitted = true;
-		
-	}
-	else if(ball.position.z >= 5.5  && ball.position.z < 6)
-	{
-		console.log("shot 5");
-		
-		shotInDisplay = true;
-		ball.dx = -0.2;
-		ball.dz = -0.6;
-		ball.dy = 0.25;
-		direction = new THREE.Vector3(-0.2, 0, -0.6);
-		catcherIndex = 1;
-		throwMultiplier = 1;
-		throwY = 0.2;
-		
-		if(ball.position.x > xBarrier)
+		else if(ball.position.z >= 5 && ball.position.z < 5.5)
 		{
-			ball.dx = -ball.dx;
-			direction.x = -direction.x;
-			catcherIndex = 2;
+			console.log("shot 4");
+			ball.dy = 0.1;
+			direction = new THREE.Vector3(-0.3, 0, -0.4);
+			catcherIndex = 4;
+			throwMultiplier = 0.5;
+			throwY = 0.2;
+			
 		}
-		
-		hitted = true;
-	}
-	else if(ball.position.z >= 6  && ball.position.z < 7)
-	{
-		console.log("shot 6");
-		
-		shotInDisplay = true;
-		ball.dx = -0.03;
-		ball.dz = -0.5;
+		else if(ball.position.z >= 5.5  && ball.position.z < 6)
+		{
+			console.log("shot 5");
+			ball.dy = 0.25;
+			direction = new THREE.Vector3(-0.2, 0, -0.6);
+			catcherIndex = 1;
+			throwMultiplier = 1;
+			throwY = 0.2;
+		}
+		else if(ball.position.z >= 6  && ball.position.z < 7)
+		{
+			console.log("shot 6");
+			ball.dy = 0.3;
+			direction = new THREE.Vector3(-0.03, 0, -0.5);
+			catcherIndex = 1;
+			throwMultiplier = 1;
+			throwY = 0.2;
+		}
 		ball.dy = 0.3;
-		direction = new THREE.Vector3(-0.03, 0, -0.5);
-		catcherIndex = 1;
-		throwMultiplier = 1;
-		throwY = 0.2;
-		
-		if(ball.position.x > xBarrier)
-		{
-			ball.dx = -ball.dx;
-			direction.x = -direction.x;
-			catcherIndex = 2;
-		}
-		
-		hitted = true;
 	}
 	
 	if(hitted)
@@ -407,7 +348,6 @@ var calculateHit = function()
 
 window.addEventListener( 'resize', function()
 {
-	
 	setUISizes();
 	var width = window.innerWidth;
 	var height = window.innerHeight;
@@ -465,18 +405,6 @@ var init = function()
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0x0C162F );
 	
-	// canvas = document.getElementById("GameCanvas");
-	// renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-	// canvas.width  = canvas.clientWidth;
-	// canvas.height = canvas.clientHeight;
-	// renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
-	// document.body.appendChild(renderer.domElement);
-	
-	// camera = new THREE.PerspectiveCamera(75, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
-	//camera.position.set(0, 3.5, 12);
-	// camera.position.set(-5, 10, 20);
-	// camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
-	
 	camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
 	camera.position.set(0, 3.5, 12);
 	camera.position.set(-5, 10, 20);
@@ -520,7 +448,7 @@ var init = function()
 	scoreT = [];
 	camera.rotation.set(0,0,0);
 	camera.position.set(0,0,100);
-	wicketsLeft = 3;
+	wicketsLeft = 30;
 	bounce = false;
 	runs = 0;
 	boundry = false;
@@ -570,6 +498,7 @@ var initSound = function()
 {
 	var listener = new THREE.AudioListener();
 	camera.add( listener );
+	listener.setMasterVolume(0) ;
 	
 	cheerSadSound = new THREE.Audio( listener );
 	
@@ -644,14 +573,16 @@ var initUI = function()
 	uiGroup = new THREE.Group();
 	
 	var spriteMap = new THREE.TextureLoader().load( "UI/menu.jpg" );
-	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	spriteMap.minFilter = THREE.minFilter;
+	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	backgroundSprite = new THREE.Sprite( spriteMaterial );
 	uiGroup.add( backgroundSprite );
 	backgroundSprite.position.z = 90;
 	backgroundSprite.lookAt(camera.position);
 	
 	spriteMap = new THREE.TextureLoader().load( "UI/play.png" );
-	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	spriteMap.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	playButton = new THREE.Sprite( spriteMaterial );
 	uiGroup.add( playButton );
 	playButton.position.z = 91;
@@ -659,7 +590,8 @@ var initUI = function()
 	playButton.buttonType = "Play";
 	
 	spriteMap = new THREE.TextureLoader().load( "UI/soundOn.png" );
-	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	spriteMap.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	soundBuuton = new THREE.Sprite( spriteMaterial );
 	uiGroup.add( soundBuuton );
 	soundBuuton.position.z = 91;
@@ -675,7 +607,8 @@ var initUI = function()
 	scene.add( camBox );
 	
 	spriteMap = new THREE.TextureLoader().load( "UI/t.png" );
-	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, useScreenCoordinates: true, color: 0xffffff } );
+	spriteMap.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	scoreT.push(new THREE.Sprite( spriteMaterial ));
 	scoreT[0].scale.x = 0.8;
 	scoreT[0].scale.y = 0.8;
@@ -743,7 +676,7 @@ var initUI = function()
 	scoreCard.position.z = -1;
 	
 	var spriteMapa = new THREE.TextureLoader().load( "UI/return.png" );
-	var spriteMateriala = new THREE.SpriteMaterial( { map: spriteMapa, useScreenCoordinates: true, color: 0xffffff } );
+	var spriteMateriala = new THREE.SpriteMaterial( { map: spriteMapa, color: 0xffffff } );
 	scoreCardR = new THREE.Sprite(spriteMateriala);
 	camBox.add(scoreCardR);
 	scoreCardR.position.x = 0;
@@ -789,6 +722,7 @@ var initMeshes = function()
 	crowdTexture.wrapS = crowdTexture.wrapT = THREE.RepeatWrapping;
 	crowdTexture.repeat.set( 6, 1 );
 	crowdTexture.anisotropy = 16;
+	crowdTexture.minFilter = THREE.minFilter;
 	
 	var crowdMaterial = new THREE.MeshBasicMaterial( { map: crowdTexture, alphaTest: 0.7} );
 	crowdMaterial.side = THREE.DoubleSide
@@ -802,6 +736,8 @@ var initMeshes = function()
 	var groundTexture = loadera.load( 'Textures/ground.png' );
 	groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
 	groundTexture.repeat.set( 150, 150 );
+	groundTexture.anisotropy = 16;
+	groundTexture.minFilter = THREE.minFilter;
 	var geometry = new THREE.CircleGeometry( 150,150 );
 	var material = new THREE.MeshBasicMaterial( { map: groundTexture} );
 	var floor = new THREE.Mesh( geometry, material );
@@ -811,6 +747,7 @@ var initMeshes = function()
 	var geometryf = new THREE.PlaneGeometry( 4, 16 );
 	var pitchTexture = loader.load( 'Textures/pitch.png' );
 	pitchTexture.anisotropy  = 16;
+	pitchTexture.minFilter = THREE.minFilter;
 	var materialf = new THREE.MeshBasicMaterial( {map: pitchTexture, transparent: true} );
 	var pitch = new THREE.Mesh( geometryf, materialf );
 	scene.add(pitch);
@@ -818,7 +755,8 @@ var initMeshes = function()
 	pitch.position.y = 0.001;
 	
 	var texture = loader.load( 'Textures/bowler2.png' );
-	texture.anisotropy = renderer.getMaxAnisotropy();
+	texture.anisotropy = 16;
+	texture.minFilter = THREE.minFilter;
 	bowlerAnim = new TextureAnimatorBowler( texture, 4, 1, 4, 120);
 	var bowlerMat = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide, alphaTest: 0.5} );
 	bowlerMat.transparent = true;
@@ -862,7 +800,8 @@ var initWickets = function()
 {
 	var loader = new THREE.TextureLoader();
 	var texture = loader.load( 'Textures/wicket2.png' );
-	texture.anisotropy = renderer.getMaxAnisotropy();
+	texture.anisotropy = 16;
+	texture.minFilter = THREE.minFilter;
 	wicketAnim = new TextureAnimatorWicket( texture, 20, 1, 20, 40);
 	var batmanMat = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide} );
 	batmanMat.transparent = true;
@@ -873,7 +812,8 @@ var initWickets = function()
 	
 	var loader2 = new THREE.TextureLoader();
 	var texture2 = loader.load( 'Textures/wicket4.png' );
-	texture2.anisotropy = renderer.getMaxAnisotropy();
+	texture2.anisotropy = 16;
+	texture2.minFilter = THREE.minFilter;
 	var batmanMat2 = new THREE.MeshBasicMaterial( { map: texture2, side:THREE.DoubleSide, alphaTest: 0.5} );
 
 	var batmanGeo2 = new THREE.PlaneGeometry(1.1, 1.25);
@@ -883,6 +823,7 @@ var initWickets = function()
 };
 
 var createMaterial = function( texture ) {
+	texture.minFilter = THREE.minFilter;
     return new THREE.MeshBasicMaterial( { map: texture, transparent: true} );
 };
 
@@ -973,7 +914,8 @@ var initPlayer = function(x, z, index)
 	var loader = new THREE.TextureLoader();
 	var geometry = new THREE.PlaneGeometry( 3.95/3, 6.29/3 );
 	var texture = loader.load( 'Textures/player4.png' );
-	texture.anisotropy  = renderer.getMaxAnisotropy();
+	texture.minFilter = THREE.minFilter;
+	texture.anisotropy  = 16;
 	texture.wrapS = THREE.RepeatWrapping;
 	if(x > 0){
 		texture.repeat.x = - 1;
@@ -1065,6 +1007,7 @@ var initBall = function()
 	var geometry = new THREE.PlaneGeometry( 0.2, 0.2 );
 	var texture = loader.load( 'Textures/ballN.png' );
 	texture.anisotropy  = 16;
+	texture.minFilter = THREE.minFilter;
 	var material = new THREE.MeshBasicMaterial( {map: texture} );
 	material.transparent = true;
 	ball = new THREE.Mesh( geometry, material );
@@ -1086,17 +1029,32 @@ var initBall = function()
 			{
 				ball.dy = -ball.dy * friction;
 				if(!shotInDisplay){
-					if(ballType == 1)
-					{
-						ball.dx = -ball.dx * 0.7 ;
-					}
-					else if(ballType == 2)
-					{
-						ball.dx = -0.035 ;
-					}
-					else if(ballType == 3)
-					{
-						ball.dx = 0.02 ;
+					switch(ballType) {
+						case 0:
+							ball.dx = -0.01;
+							break;
+						case 1:
+							ball.dx = -0.05;
+							break;
+						case 2:
+							ball.dx = 0.05;
+							break;
+						case 3:
+							ball.dx = -0.01;
+							break;
+						case 4:
+							ball.dx = -0.03;
+							break;
+						case 5:
+							ball.dx = -0.01;
+							break;
+						case 6:
+							ball.dx = 0.04;
+							break;
+						case 7:
+							ball.dx = -0.04;
+							break;
+						default:
 					}
 				}
 				else
@@ -1242,7 +1200,6 @@ var initB = function()
 	shotInDisplay = false;
 	bowlerSpeed = -0.1;
 	bowling = true;
-	ball.dz = 0.4;
 	ballInHold = true;
 	ball.position.x = 0.5;
 	ball.position.z = -7.1;
@@ -1251,23 +1208,50 @@ var initB = function()
 
 var startBowling = function()
 {
-	ball.dy = 0.1;
-	ballType = Math.floor(Math.random() * (3 - 0 + 1)) + 0;
-	if(ballType == 0)
-	{
-		ball.dx = -0.01;
-	}
-	else if(ballType == 1)
-	{
-		ball.dx = -0.02;
-	}
-	else if(ballType == 2)
-	{
-		ball.dx = 0;
-	}
-	else if(ballType == 3)
-	{
-		ball.dx = -0.01;
+	ballType = Math.floor(Math.random() * (7 - 0 + 1)) + 0;
+	switch(ballType) {
+		case 0:
+			ball.dx = -0.01;
+			ball.dy = 0.1;
+			ball.dz = 0.4;
+			break;
+		case 1:
+			ball.dx = 0;
+			ball.dy = 0.1;
+			ball.dz = 0.4;
+			break;
+		case 2:
+			ball.dx = -0.04;
+			ball.dy = 0.1;
+			ball.dz = 0.4;
+			break;
+		case 3:
+			ball.dx = -0.01;
+			ball.dy = 0.1;
+			ball.dz = 0.5;
+			break;
+		case 4:
+			ball.dx = -0.01;
+			ball.dy = 0.03;
+			ball.dz = 0.6;
+			break;
+		case 5:
+			ball.dx = -0.01;
+			ball.dy = 0.15;
+			ball.dz = 0.3;
+			break;
+		case 6:
+			ball.dx = -0.03;
+			ball.dy = 0.15;
+			ball.dz = 0.3;
+			break;
+		case 7:
+			ball.dx = 0;
+			ball.dy = 0.15;
+			ball.dz = 0.3;
+			break;
+		default:
+			
 	}
 };
 
@@ -1317,6 +1301,7 @@ var initSprites = function(pos)
 	var loader = new THREE.TextureLoader();
 	var texture = loader.load( 'Textures/batmanNN.png' );
 	texture.anisotropy  = 16;
+	texture.minFilter = THREE.minFilter;
 	if(pos == 0){
 		batmanAnimator1 = new TextureAnimator1( texture, 14, 1, 14, 20);
 	}	
@@ -1615,9 +1600,8 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	};
 	this.runFromWicket = function()
 	{
-		if(runs <= 4){
+		if(runs < 4){
 			runs += 1;
-			console.log("run");
 		}
 		
 		this.tileDisplayDuration = 120;
@@ -1735,9 +1719,8 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.runFromWicket = function()
 	{
-		if(runs <= 4){
+		if(runs < 4){
 			runs += 1;
-			console.log("run");
 		}
 		this.tileDisplayDuration = 120;
 		
@@ -1792,6 +1775,7 @@ var update = function()
 	
 	wicketAnim.update(1000 * delta);
 	bowlerAnim.update(1000 * delta);
+	
 	
 };
 
