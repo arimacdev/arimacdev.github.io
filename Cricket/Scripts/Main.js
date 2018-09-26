@@ -70,6 +70,35 @@ var finalScore;
 var backgroundSprite;
 var playButton;
 var soundBuuton;
+var sinhalaBuuton;
+var tamilBuuton;
+var englishBuuton;
+
+var moverTime;
+
+var soundOnMat = null;
+var soundOffMat = null;
+var soundOnDMat = null;
+var soundOffDMat = null;
+
+var listener;
+
+var sOn;
+var sOff;
+
+var eOn;
+var eOff;
+
+var tOn;
+var tOff;
+
+var outMaterial;
+var languageSelected;
+
+var gameName;
+var sName;
+var eName;
+var tName;
 
 window.addEventListener( 'mousedown', function(event)
 {
@@ -84,6 +113,26 @@ window.addEventListener( 'mousedown', function(event)
 			{
 				buttonSound.play();
 				API.spendcoins(playGame);
+			}
+			else if(intersects[0].object.buttonType == "Sound")
+			{
+				buttonSound.play();
+				handleAudio();
+			}
+			else if(intersects[0].object.buttonType == "Sinhala")
+			{
+				buttonSound.play();
+				changeLanguage(0);
+			}
+			else if(intersects[0].object.buttonType == "English")
+			{
+				buttonSound.play();
+				changeLanguage(1);
+			}
+			else if(intersects[0].object.buttonType == "Tamil")
+			{
+				buttonSound.play();
+				changeLanguage(2);
 			}
 		}
 	}
@@ -126,11 +175,148 @@ window.addEventListener( 'mousedown', function(event)
 	}
 });
 
+var handleAudio = function()
+{
+	var loader = new THREE.TextureLoader();
+	
+	if(soundOnMat == null)
+	{
+		soundOnMat = loader.load( 'UI/soundOn.png' );
+	}
+	if(soundOnDMat == null)
+	{
+		soundOnDMat = loader.load( 'UI/soundOnD.png' );
+	}
+	if(soundOffMat == null)
+	{
+		soundOffMat = loader.load( 'UI/soundOff.png' );
+	}
+	if(soundOffDMat == null)
+	{
+		soundOffDMat = loader.load( 'UI/soundOffD.png' );
+	}
+	
+	var s = listener.getMasterVolume() ;
+	
+	var map1;
+	var map2;
+	var map3;
+	
+	if(s == 1)
+	{
+		map1 = soundOnDMat;
+		map2 = soundOffDMat;
+		map3 = soundOffMat;
+		listener.setMasterVolume(0) ;
+	}
+	else if(s == 0)
+	{
+		map1 = soundOffDMat;
+		map2 = soundOnDMat;;
+		map3 = soundOnMat;
+		listener.setMasterVolume(1) ;
+	}
+	
+	soundBuuton.material.map = map1;
+	
+	TweenMax.to(soundBuuton.position,0.1,{z:soundBuuton.position.z - 0.02,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+			soundBuuton.material.map = map2;
+			TweenMax.to(soundBuuton.position,0.1,{z:soundBuuton.position.z + 0.02,
+				onUpdate:function(){
+					camera.updateProjectionMatrix();
+				},
+				onComplete: function() {
+					soundBuuton.material.map = map3;
+				}
+			});
+		}
+	});
+	
+};
+
+var changeLanguage = function(lang)
+{
+	languageSelected = lang;
+	var loader = new THREE.TextureLoader();
+	if(lang == 0){
+		if(sOff == null)
+		{
+			sOff = loader.load( 'UI/sF.png' );
+		}
+		if(sName == null)
+		{
+			sName = loader.load( 'UI/nameS.png' );
+		}
+		animateButton(sinhalaBuuton, sOff, sOn, sName);
+	}
+	else if(lang == 1){
+		if(eOff == null)
+		{
+			eOff = loader.load( 'UI/eF.png' );
+		}
+		if(eName == null)
+		{
+			eName = loader.load( 'UI/nameE.png' );
+		}
+		animateButton(englishBuuton, eOff, eOn, eName);
+	}
+	else if(lang == 2){
+		if(tOff == null)
+		{
+			tOff = loader.load( 'UI/tF.png' );
+		}
+		if(tName == null)
+		{
+			tName = loader.load( 'UI/nameT.png' );
+		}
+		animateButton(tamilBuuton, tOff, tOn, tName);
+	}
+};
+
+var animateButton = function(button, map1, map2, map3)
+{
+	button.material.map = map1;
+	
+	TweenMax.to(button.position,0.1,{z:button.position.z - 0.02,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+			gameName.material.map = map3;
+			TweenMax.to(button.position,0.1,{z:button.position.z + 0.02,
+				onUpdate:function(){
+					camera.updateProjectionMatrix();
+				},
+				onComplete: function() {
+					button.material.map = map2;
+				}
+			});
+		}
+	});
+};
+
 var playGame = function()
 {
 	API.setscore(0);
 	camera.position.set(-5, 10, 20);
 	uiGroup.visible = false;
+	
+	var loader = new THREE.TextureLoader();
+	
+	if(languageSelected == 0){
+		outMaterial = createMaterial(loader.load( 'UI/outS.png' ))
+	}
+	else if(languageSelected == 1){
+		outMaterial = createMaterial(loader.load( 'UI/outE.png' ))
+	}
+	else if(languageSelected == 2){
+		outMaterial = createMaterial(loader.load( 'UI/outT.png' ))
+	}
+	
 	TweenMax.to(camera.position,2,{x:0,y:1.5,z:10,
 		onUpdate:function(){
 			camera.lookAt(0,0,0);
@@ -207,7 +393,7 @@ var restartGame = function()
 	firstT = true;
 	firstTime = true;
 	gameOver = false;
-	
+	moverTime = 0;
 	ballT[0].visible = true;
 	ballT[1].visible = true;
 	ballT[2].visible = true;
@@ -236,70 +422,134 @@ var calculateHit = function()
 		batman1.dx = 0.1;
 	}
 	
-	if(ball.position.z >= 3  && ball.position.z <= 6.7){
+	if(ball.position.z >= 3  && ball.position.z <= 6){
 		
 		hitted = true;
 		shotInDisplay = true;
 		
-		var x = -0.4;
-		var z = -0.6;
-		
-		catcherIndex = 3;
-		if(ball.position.x > xBarrier)
+		if(ball.position.z >= 3  && ball.position.z < 3.5)
 		{
-			x = -x;
-			catcherIndex = 0;
+			var x = -0.15;
+			var z = -0.5;
+			catcherIndex = 3;
+			throwMultiplier = 0.25;
+			throwY = 0.22;
+			moverTime = 0.2;
+			if(ball.position.x > xBarrier)
+			{
+				x = -x/2;
+				z = z/2;
+				catcherIndex = 2;
+				throwMultiplier = 0.5;
+				throwY = 0.26;
+				moverTime = 1.5;
+			}
+			ball.dx = x;
+			ball.dz = z;
+			ball.dy = 0.1;
+			direction = new THREE.Vector3(x, 0, z);
 		}
-		 
-		console.log(x + " " + z); 
-		ball.dx = x;
-		ball.dz = z;
-		ball.dy = 0.3;
-		direction = new THREE.Vector3(x, 0, z);
-		throwMultiplier = 0.5;
-		throwY = 0.35;
-		 
-		// if(ball.position.z >= 3  && ball.position.z < 4)
-		// {
-			// console.log("shot 1");
-			// ball.dy = 0.1;
-			// catcherIndex = 5;
-			// throwMultiplier = 0.5;
-			// throwY = 0.2;catcherIndex = 7;
-		// }
-		// else if(ball.position.z >= 4  && ball.position.z < 4.5)
-		// {
-			// console.log("shot 2");
-			// ball.dy = 0.2;
-			// catcherIndex = 3;
-			// throwMultiplier = 0.5;
-			// throwY = 0.2;
-		// }
-		// else if(ball.position.z >= 4.5  && ball.position.z < 5)
-		// {
-			// console.log("shot 3");
-			// ball.dy = 0.3;
-			// catcherIndex = 6;
-			// throwMultiplier = 0.5;
-			// throwY = 0.2;
-		// }
-		// else if(ball.position.z >= 5 && ball.position.z < 5.5)
-		// {
-			// console.log("shot 4");
-			// ball.dy = 0.4;
-			// catcherIndex = 4;
-			// throwMultiplier = 0.5;
-			// throwY = 0.2;
-			
-		// }
-		// else if(ball.position.z >= 5.5  && ball.position.z < 6)
-		// {
-			// console.log("shot 5");
-			// ball.dy = 0.55;
-			// catcherIndex = 1;
-			// throwMultiplier = 1;
-			// throwY = 0.2;
-		// }
+		else if(ball.position.z >= 3.5  && ball.position.z < 4)
+		{
+			var x = -0.3;
+			var z = -0.3;
+			catcherIndex = 4;
+			throwMultiplier = 0.5;
+			throwY = 0.27;
+			if(ball.position.x > xBarrier)
+			{
+				x = -x;
+				catcherIndex = 6;
+				throwMultiplier = 0.5;
+				throwY = 0.27;
+			}
+			ball.dx = x;
+			ball.dz = z;
+			ball.dy = 0.2;
+			direction = new THREE.Vector3(x, 0, z);
+			moverTime = 0.1;
+		}
+		else if(ball.position.z >= 4  && ball.position.z < 4.5)
+		{
+			var x = -0.4;
+			var z = -0.15;
+			catcherIndex = 5;
+			throwMultiplier = 0.5;
+			throwY = 0.27;
+			if(ball.position.x > xBarrier)
+			{
+				x = -x;
+				catcherIndex = 7;
+				throwMultiplier = 0.5;
+				throwY = 0.26;
+			}
+			ball.dx = x;
+			ball.dz = z;
+			ball.dy = 0.25;
+			direction = new THREE.Vector3(x, 0, z);
+			moverTime = 0.1;
+		}
+		else if(ball.position.z >= 4.5  && ball.position.z < 5)
+		{
+			var x = -0.4;
+			var z = -0.6;
+			catcherIndex = 3;
+			throwMultiplier = 0.5;
+			throwY = 0.27;
+			if(ball.position.x > xBarrier)
+			{
+				x = -x;
+				catcherIndex = 0;
+				throwMultiplier = 0.5;
+				throwY = 0.26;
+			}
+			ball.dx = x;
+			ball.dz = z;
+			ball.dy = 0.3;
+			direction = new THREE.Vector3(x, 0, z);
+			moverTime = 2;
+		}
+		else if(ball.position.z >= 5  && ball.position.z < 5.5)
+		{
+			var x = -0.16;
+			var z = -0.16;
+			catcherIndex = 3;
+			throwMultiplier = 0.25;
+			throwY = 0.22;
+			moverTime = 0.7;
+			if(ball.position.x > xBarrier)
+			{
+				x = -x;
+				catcherIndex = 0;
+				throwMultiplier = 0.3;
+				throwY = 0.25;
+				moverTime = 0.35;
+			}
+			ball.dx = x;
+			ball.dz = z;
+			ball.dy = 0.2;
+			direction = new THREE.Vector3(x, 0, z);
+		}
+		else if(ball.position.z >= 5.5  && ball.position.z <= 6)
+		{
+			var x = -0.2;
+			var z = -0.8;
+			catcherIndex = 1;
+			throwMultiplier = 0.5;
+			throwY = 0.27;
+			if(ball.position.x > xBarrier)
+			{
+				x = -x;
+				catcherIndex = 2;
+				throwMultiplier = 0.5;
+				throwY = 0.26;
+			}
+			ball.dx = x;
+			ball.dz = z;
+			ball.dy = 0.55;
+			direction = new THREE.Vector3(x, 0, z);
+			moverTime = 2;
+		}
 	}
 	
 	if(hitted)
@@ -389,6 +639,26 @@ var setUISizes = function()
 	scoreT[0].scale.y = height/1350;
 	scoreT[1].scale.y = height/1350;
 	scoreT[2].scale.y = height/1350;
+	
+	sinhalaBuuton.scale.x = width/800;
+	sinhalaBuuton.scale.y = height/450;
+	sinhalaBuuton.position.x = width/-170;
+	sinhalaBuuton.position.y = height/-150;
+	
+	englishBuuton.scale.x = width/800;
+	englishBuuton.scale.y = height/450;
+	englishBuuton.position.x = width/-220;
+	englishBuuton.position.y = height/-150;
+	
+	tamilBuuton.scale.x = width/800;
+	tamilBuuton.scale.y = height/450;
+	tamilBuuton.position.x = width/-310;
+	tamilBuuton.position.y = height/-150;
+	
+	gameName.scale.x = width/170;
+	gameName.scale.y = height/225;
+	gameName.position.x = width/-220;
+	gameName.position.y = height/-1820;
 };
 
 var init = function()
@@ -439,13 +709,15 @@ var init = function()
 	scoreT = [];
 	camera.rotation.set(0,0,0);
 	camera.position.set(0,0,100);
-	wicketsLeft = 30;
+	wicketsLeft = 3;
 	bounce = false;
 	runs = 0;
 	boundry = false;
 	ballT = [];
 	firstT = true;
 	finalScore = [];
+	moverTime = 0;
+	languageSelected = 1;
 	
 	initUI();
 	
@@ -487,9 +759,8 @@ var startScene = function()
 
 var initSound = function()
 {
-	var listener = new THREE.AudioListener();
+	listener = new THREE.AudioListener();
 	camera.add( listener );
-	listener.setMasterVolume(0) ;
 	
 	cheerSadSound = new THREE.Audio( listener );
 	
@@ -563,7 +834,7 @@ var initUI = function()
 {
 	uiGroup = new THREE.Group();
 	
-	var spriteMap = new THREE.TextureLoader().load( "UI/menu.jpg" );
+	var spriteMap = new THREE.TextureLoader().load( "UI/menu2.jpg" );
 	spriteMap.minFilter = THREE.minFilter;
 	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	backgroundSprite = new THREE.Sprite( spriteMaterial );
@@ -580,21 +851,55 @@ var initUI = function()
 	playButton.lookAt(camera.position);
 	playButton.buttonType = "Play";
 	
-	spriteMap = new THREE.TextureLoader().load( "UI/soundOn.png" );
-	spriteMap.minFilter = THREE.minFilter;
-	spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
+	soundOnMat = new THREE.TextureLoader().load( "UI/soundOn.png" );
+	soundOnMat.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: soundOnMat, color: 0xffffff } );
 	soundBuuton = new THREE.Sprite( spriteMaterial );
 	uiGroup.add( soundBuuton );
 	soundBuuton.position.z = 91;
 	soundBuuton.lookAt(camera.position);
 	soundBuuton.buttonType = "Sound";
 	
+	sOn = new THREE.TextureLoader().load( "UI/sN.png" );
+	sOn.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: sOn, color: 0xffffff } );
+	sinhalaBuuton = new THREE.Sprite( spriteMaterial );
+	uiGroup.add(sinhalaBuuton);
+	sinhalaBuuton.position.z = 91;
+	sinhalaBuuton.lookAt(camera.position);
+	sinhalaBuuton.buttonType = "Sinhala";
+	
+	eOn = new THREE.TextureLoader().load( "UI/eN.png" );
+	eOn.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: eOn, color: 0xffffff } );
+	englishBuuton = new THREE.Sprite( spriteMaterial );
+	uiGroup.add(englishBuuton);
+	englishBuuton.position.z = 91;
+	englishBuuton.lookAt(camera.position);
+	englishBuuton.buttonType = "English";
+	
+	tOn = new THREE.TextureLoader().load( "UI/tN.png" );
+	tOn.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: tOn, color: 0xffffff } );
+	tamilBuuton = new THREE.Sprite( spriteMaterial );
+	uiGroup.add(tamilBuuton);
+	tamilBuuton.position.z = 91;
+	tamilBuuton.lookAt(camera.position);
+	tamilBuuton.buttonType = "Tamil";
+	
+	eName = new THREE.TextureLoader().load( "UI/nameE.png" );
+	eName.minFilter = THREE.minFilter;
+	spriteMaterial = new THREE.SpriteMaterial( { map: eName, color: 0xffffff } );
+	gameName = new THREE.Sprite( spriteMaterial );
+	uiGroup.add(gameName);
+	gameName.position.z = 91;
+	gameName.lookAt(camera.position);
+	
 	scene.add(uiGroup);
 	
 	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
 	var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
 	camBox = new THREE.Mesh( geometry, material );
-	camBox.name = "fdsfdsf";
 	scene.add( camBox );
 	
 	spriteMap = new THREE.TextureLoader().load( "UI/t.png" );
@@ -766,10 +1071,10 @@ var initMeshes = function()
 	
 	initWickets();
 	
-	initPlayer(8,-11, 0);
+	initPlayer(11,-11, 0);
 	initPlayer(-5,-40, 1);
 	initPlayer(5,-40, 2);
-	initPlayer(-4,-11, 3);
+	initPlayer(-6,-11, 3);
 	initPlayer(-20,-15, 4);
 	initPlayer(-23,-8, 5);
 	initPlayer(	25,-15, 6);
@@ -824,7 +1129,14 @@ var showScore = function()
 	{
 		API.appendscore(scoreForBall);
 		score += scoreForBall;
-		middleScore.material = numberArray[scoreForBall];
+		if(runs == 0)
+		{
+			middleScore.material = outMaterial;
+		}
+		else
+		{
+			middleScore.material = numberArray[scoreForBall];
+		}
 	}
 	else
 	{
@@ -832,8 +1144,6 @@ var showScore = function()
 		score += runs;
 		middleScore.material = numberArray[runs];
 	}
-	
-	
 	
 	middleScore.scale.x = 0;
 	middleScore.scale.y = 0;
@@ -942,7 +1252,7 @@ var initPlayer = function(x, z, index)
 			pX = player.interactPoint.x * 0.5 + player.initialPoint.x;
 			pZ = player.interactPoint.z * 0.5 + player.initialPoint.z;
 		}
-		TweenMax.to(player.position,0.1,{x:pX,z:pZ,
+		TweenMax.to(player.position,moverTime,{x:pX,z:pZ,
 			onUpdate:function(){
 				player.lookAt(camera.position.x,player.position.y,camera.position.z);
 				camera.updateProjectionMatrix();
@@ -958,14 +1268,7 @@ var initPlayer = function(x, z, index)
 				camera.updateProjectionMatrix();
 			},
 			onComplete: function() {
-				// TweenMax.to(player.position,2,{x:player.initialPoint.x,z:player.initialPoint.z,
-					// onUpdate:function(){
-						// player.lookAt(camera.position.x,player.position.y,camera.position.z);
-						// camera.updateProjectionMatrix();
-					// },
-					// onComplete: function() {
-					// }
-				// });
+				moverTime = 0;
 			}
 		});
 	};
@@ -1040,10 +1343,10 @@ var initBall = function()
 							ball.dx = -0.01;
 							break;
 						case 6:
-							ball.dx = 0.04;
+							ball.dx = 0.035;
 							break;
 						case 7:
-							ball.dx = -0.04;
+							ball.dx = -0.035;
 							break;
 						default:
 					}
@@ -1150,26 +1453,6 @@ var initBall = function()
 	ballShadow.rotation.x = - Math.PI / 2;
 	ballShadow.position.y = 0.002;
 	
-	var bs1 = ballShadow.clone();
-	scene.add(bs1);
-	bs1.position.set(0,0.002, 3);
-	bs1 = ballShadow.clone();
-	scene.add(bs1);
-	bs1.position.set(0,0.002, 3.5);
-	bs1 = ballShadow.clone();
-	scene.add(bs1);
-	bs1.position.set(0,0.002, 4);
-	bs1 = ballShadow.clone();
-	scene.add(bs1);
-	bs1.position.set(0,0.002, 4.5);
-	bs1 = ballShadow.clone();
-	scene.add(bs1);
-	bs1.position.set(0,0.002, 5);
-	bs1 = ballShadow.clone();
-	scene.add(bs1);
-	bs1.position.set(0,0.002, 5.5);
-	
-	
 	ballShadow.update = function()
 	{
 		ballShadow.position.x = ball.position.x;
@@ -1239,27 +1522,27 @@ var startBowling = function()
 		case 3:
 			ball.dx = -0.01;
 			ball.dy = 0.1;
-			ball.dz = 0.45;
+			ball.dz = 0.5;
 			break;
 		case 4:
 			ball.dx = -0.01;
 			ball.dy = 0.03;
-			ball.dz = 0.5;
+			ball.dz = 0.55;
 			break;
 		case 5:
 			ball.dx = -0.01;
 			ball.dy = 0.15;
-			ball.dz = 0.3;
+			ball.dz = 0.25;
 			break;
 		case 6:
 			ball.dx = -0.03;
 			ball.dy = 0.15;
-			ball.dz = 0.3;
+			ball.dz = 0.25;
 			break;
 		case 7:
 			ball.dx = 0;
 			ball.dy = 0.15;
-			ball.dz = 0.3;
+			ball.dz = 0.25;
 			break;
 		default:
 			
@@ -1267,8 +1550,6 @@ var startBowling = function()
 };
 
 var showGameOver = function(){
-	
-	console.log(API.getscore());
 	API.submitscore(submitScoreCall);
 };
 
