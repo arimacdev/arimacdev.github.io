@@ -100,6 +100,8 @@ var sName;
 var eName;
 var tName;
 
+var yourScore;
+
 window.addEventListener( 'mousedown', function(event)
 {
 	if(camAnimation){
@@ -251,6 +253,8 @@ var changeLanguage = function(lang)
 		{
 			sName = loader.load( 'UI/nameS.png' );
 		}
+		
+		yourScore.material = createMaterial(loader.load( 'UI/scoreS.png' ));
 		animateButton(sinhalaBuuton, sOff, sOn, sName);
 	}
 	else if(lang == 1){
@@ -262,6 +266,8 @@ var changeLanguage = function(lang)
 		{
 			eName = loader.load( 'UI/nameE.png' );
 		}
+		
+		yourScore.material = createMaterial(loader.load( 'UI/scoreE.png' ));
 		animateButton(englishBuuton, eOff, eOn, eName);
 	}
 	else if(lang == 2){
@@ -273,8 +279,11 @@ var changeLanguage = function(lang)
 		{
 			tName = loader.load( 'UI/nameT.png' );
 		}
+		
+		yourScore.material = createMaterial(loader.load( 'UI/scoreT.png' ));
 		animateButton(tamilBuuton, tOff, tOn, tName);
 	}
+	console.log("set m");
 };
 
 var animateButton = function(button, map1, map2, map3)
@@ -352,6 +361,8 @@ var restartGame = function()
 	finalScore[0].visible = false;
 	finalScore[1].visible = false;
 	finalScore[2].visible = false;
+	
+	yourScore.visible = false;
 	// for(var i = 0; i < finalScore.length; i++){
 		// TweenMax.to(finalScore[i].position,0.4,{ease: Bounce.easeOut,y:2,
 			// onUpdate:function(){
@@ -741,12 +752,15 @@ var init = function()
 			finalScore[0].rotation.set(0,0,0);
 			finalScore[1].rotation.set(0,0,0);
 			finalScore[2].rotation.set(0,0,0);
+			yourScore.rotation.set(0,0,0);
 		}
 	};
 	
 	initMeshes();
 	
 	initSound();
+	
+	changeLanguage(languageSelected);
 	
 	API.savetoken(startScene);
 	
@@ -761,6 +775,7 @@ var initSound = function()
 {
 	listener = new THREE.AudioListener();
 	camera.add( listener );
+	listener.setMasterVolume(0);
 	
 	cheerSadSound = new THREE.Audio( listener );
 	
@@ -989,13 +1004,21 @@ var initUI = function()
 	finalScore.push(scoreT[0].clone());
 	finalScore.push(scoreT[0].clone());
 	
+	yourScore = scoreT[0].clone();
+	yourScore.position.set(0,0.15, -0.99);
+	camBox.add( yourScore );
+	
+	yourScore.scale.x = 0.8;
+	yourScore.scale.y = 0.4;
+	yourScore.visible = false;
+	
 	camBox.add( finalScore[0] );
 	camBox.add( finalScore[1] );
 	camBox.add( finalScore[2] );
 	
-	finalScore[0].position.set(0.12,0, -0.98);
-	finalScore[1].position.set(0,0, -0.98);
-	finalScore[2].position.set(-0.12,0, -0.98);
+	finalScore[0].position.set(0.12,-0.15, -0.98);
+	finalScore[1].position.set(0,-0.15, -0.98);
+	finalScore[2].position.set(-0.12,-0.15, -0.98);
 	
 	finalScore[0].scale.x = 0.1;
 	finalScore[1].scale.x = 0.1;
@@ -1247,12 +1270,14 @@ var initPlayer = function(x, z, index)
 	{
 		var pX = player.interactPoint.x;
 		var pZ = player.interactPoint.z;
-		
+		var timeT = moverTime;
 		if(player.index != catcherIndex){
 			pX = player.interactPoint.x * 0.5 + player.initialPoint.x;
 			pZ = player.interactPoint.z * 0.5 + player.initialPoint.z;
+			timeT = 2;
 		}
-		TweenMax.to(player.position,moverTime,{x:pX,z:pZ,
+		
+		TweenMax.to(player.position,timeT,{x:pX,z:pZ,
 			onUpdate:function(){
 				player.lookAt(camera.position.x,player.position.y,camera.position.z);
 				camera.updateProjectionMatrix();
@@ -1578,7 +1603,7 @@ var submitScoreCall = function()
 	for(var i = 0; i < finalScore.length; i++){
 		finalScore[i].position.y = 2;
 		finalScore[i].visible = true;
-		TweenMax.to(finalScore[i].position,0.8,{ease: Bounce.easeOut,y:0,
+		TweenMax.to(finalScore[i].position,0.8,{ease: Bounce.easeOut,y:-0.1,
 			onUpdate:function(){
 				camera.updateProjectionMatrix();
 			},
@@ -1586,6 +1611,16 @@ var submitScoreCall = function()
 			}
 		});
 	}
+	
+	yourScore.position.y = 2 + 0.15;
+	yourScore.visible = true;
+	TweenMax.to(yourScore.position,0.8,{ease: Bounce.easeOut,y:0.15,
+		onUpdate:function(){
+			camera.updateProjectionMatrix();
+		},
+		onComplete: function() {
+		}
+	});
 };
 
 var initSprites = function(pos)
