@@ -44,7 +44,6 @@ var scoreForBall;
 var numberArray;
 var wicketsLeft;
 var bounce;
-var runs;
 var boundry;
 var ballT;
 var middleScore;
@@ -399,7 +398,7 @@ var restartGame = function()
 	scoreForBall = 0;
 	wicketsLeft = 3;
 	bounce = false;
-	runs = 0;
+	API.setruns(0);
 	boundry = false;
 	firstT = true;
 	firstTime = true;
@@ -614,13 +613,13 @@ var setUISizes = function()
 	var width = window.innerWidth;
 	var height = window.innerHeight;
 	
-	backgroundSprite.scale.x = (width/100) * 1.7;
-	backgroundSprite.scale.y = (height/100) * 1.7;
+	backgroundSprite.scale.set(19.20 * 1.6,10.80 * 1.6,1);
 	
-	playButton.scale.x = width/800;
-	playButton.scale.y = height/450;
-	soundBuuton.scale.x = width/800;
-	soundBuuton.scale.y = height/450;
+	playButton.scale.set(2,2,1);
+	soundBuuton.scale.set(2,2,1);
+	sinhalaBuuton.scale.set(2,2,1);
+	englishBuuton.scale.set(2,2,1);
+	tamilBuuton.scale.set(2,2,1);
 	
 	playButton.position.x = width/-192;
 	soundBuuton.position.x = width/-256;
@@ -651,25 +650,19 @@ var setUISizes = function()
 	scoreT[1].scale.y = height/1350;
 	scoreT[2].scale.y = height/1350;
 	
-	sinhalaBuuton.scale.x = width/800;
-	sinhalaBuuton.scale.y = height/450;
 	sinhalaBuuton.position.x = width/-170;
 	sinhalaBuuton.position.y = height/-150;
 	
-	englishBuuton.scale.x = width/800;
-	englishBuuton.scale.y = height/450;
 	englishBuuton.position.x = width/-220;
 	englishBuuton.position.y = height/-150;
 	
-	tamilBuuton.scale.x = width/800;
-	tamilBuuton.scale.y = height/450;
 	tamilBuuton.position.x = width/-310;
 	tamilBuuton.position.y = height/-150;
 	
-	gameName.scale.x = width/170;
-	gameName.scale.y = height/225;
+	gameName.scale.x = 12;
+	gameName.scale.y = 6;
 	gameName.position.x = width/-220;
-	gameName.position.y = height/-1820;
+	gameName.position.y = height/-3420;
 };
 
 var init = function()
@@ -722,7 +715,7 @@ var init = function()
 	camera.position.set(0,0,100);
 	wicketsLeft = 3;
 	bounce = false;
-	runs = 0;
+	API.setruns();
 	boundry = false;
 	ballT = [];
 	firstT = true;
@@ -753,6 +746,7 @@ var init = function()
 			finalScore[1].rotation.set(0,0,0);
 			finalScore[2].rotation.set(0,0,0);
 			yourScore.rotation.set(0,0,0);
+			middleScore.rotation.set(0,0,0);
 		}
 	};
 	
@@ -775,7 +769,6 @@ var initSound = function()
 {
 	listener = new THREE.AudioListener();
 	camera.add( listener );
-	listener.setMasterVolume(0);
 	
 	cheerSadSound = new THREE.Audio( listener );
 	
@@ -849,7 +842,7 @@ var initUI = function()
 {
 	uiGroup = new THREE.Group();
 	
-	var spriteMap = new THREE.TextureLoader().load( "UI/menu2.jpg" );
+	var spriteMap = new THREE.TextureLoader().load( "UI/menu.jpg" );
 	spriteMap.minFilter = THREE.minFilter;
 	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	backgroundSprite = new THREE.Sprite( spriteMaterial );
@@ -1148,13 +1141,17 @@ var createMaterial = function( texture ) {
 
 var showScore = function()
 {
-	if(scoreForBall >= runs)
+	var scaleX = 1.6;
+	var scaleY = 1.6;
+	if(scoreForBall >= API.getruns())
 	{
 		API.appendscore(scoreForBall);
 		score += scoreForBall;
-		if(runs == 0)
+		if(API.getruns() == 0)
 		{
 			middleScore.material = outMaterial;
+			scaleX = 8;
+			scaleY = 4;
 		}
 		else
 		{
@@ -1163,9 +1160,8 @@ var showScore = function()
 	}
 	else
 	{
-		API.appendscore(runs);
-		score += runs;
-		middleScore.material = numberArray[runs];
+		API.appendscore(API.getruns());
+		middleScore.material = numberArray[API.getruns()];
 	}
 	
 	middleScore.scale.x = 0;
@@ -1174,7 +1170,7 @@ var showScore = function()
 	
 	scoreSound.play();
 	
-	TweenMax.to(middleScore.scale,0.8,{ease: Elastic.easeOut,x:1.6,y:1.6,
+	TweenMax.to(middleScore.scale,0.8,{ease: Elastic.easeOut,x:scaleX,y:scaleY,
 		onUpdate:function(){
 			camera.updateProjectionMatrix();
 		},
@@ -1208,7 +1204,7 @@ var showScore = function()
 	});
 	
 	scoreForBall = 0;
-	runs = 0;
+	API.setruns(0);
 	boundry = false;
 	updateScore();
 };
@@ -1927,8 +1923,8 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	};
 	this.runFromWicket = function()
 	{
-		if(runs < 4){
-			runs += 1;
+		if(API.getruns() < 4){
+			API.appendruns(1);
 		}
 		
 		this.tileDisplayDuration = 120;
@@ -2046,8 +2042,8 @@ function TextureAnimator2(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 	
 	this.runFromWicket = function()
 	{
-		if(runs < 4){
-			runs += 1;
+		if(API.getruns() < 4){
+			API.appendruns(1);
 		}
 		this.tileDisplayDuration = 120;
 		

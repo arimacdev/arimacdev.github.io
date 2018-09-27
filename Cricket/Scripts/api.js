@@ -8,6 +8,7 @@ leaderboardID = "25e88691-df58-4212-a01d-406e1907bc4a";
 authtoken = "";
 sessiontoken = "";
 submitscore = 0;
+runs = 0;
 displayscore = 0;
 highscore = 0;
 lockkey = 4568907;
@@ -26,6 +27,7 @@ class API {
             callback(k);
         });
     }
+	
 
     //static getbalance() {
     //    url = wallet;
@@ -115,6 +117,23 @@ class API {
         return submitscore ^ lockkey;
     }
 
+	static setruns(runCount)
+    {
+        runs = runCount ^ lockkey;
+    }
+
+    static appendruns(addon) {
+        
+        runs = runs ^ lockkey;
+        runs = runs + addon;
+        runs = runs ^ lockkey;
+    }
+
+    static getruns()
+    {
+        return runs ^ lockkey;
+    }
+	
     static submitscore(callback)
     {
         var num1 = ((((submitscore ^ lockkey) * 679) - 674) * 739) ^ 217645177;
