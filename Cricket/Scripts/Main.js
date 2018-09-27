@@ -147,7 +147,7 @@ window.addEventListener( 'mousedown', function(event)
 			if(intersects[0].object.buttonType == "Return")
 			{
 				buttonSound.play();
-				restartGame();
+				API.spendcoins(restartGame);
 			}
 		}
 	}
@@ -613,18 +613,19 @@ var setUISizes = function()
 	var width = window.innerWidth;
 	var height = window.innerHeight;
 	
+	console.log(width);
 	backgroundSprite.scale.set(19.20 * 1.6,10.80 * 1.6,1);
 	
-	playButton.scale.set(2,2,1);
-	soundBuuton.scale.set(2,2,1);
-	sinhalaBuuton.scale.set(2,2,1);
-	englishBuuton.scale.set(2,2,1);
-	tamilBuuton.scale.set(2,2,1);
+	playButton.scale.set(2.5,2.5,1);
+	soundBuuton.scale.set(2.5,2.5,1);
+	sinhalaBuuton.scale.set(2.5,2.5,1);
+	englishBuuton.scale.set(2.5,2.5,1);
+	tamilBuuton.scale.set(2.5,2.5,1);
 	
-	playButton.position.x = width/-192;
-	soundBuuton.position.x = width/-256;
-	playButton.position.y = height/-240;
-	soundBuuton.position.y = height/-240;
+	playButton.position.x = -16800/(width);
+	soundBuuton.position.x = -6;
+	playButton.position.y = -3;
+	soundBuuton.position.y = -3;
 	
 	ballT[0].position.x = camBox.position.x - width/148;
 	ballT[1].position.x = camBox.position.x - width/160;
@@ -650,19 +651,19 @@ var setUISizes = function()
 	scoreT[1].scale.y = height/1350;
 	scoreT[2].scale.y = height/1350;
 	
-	sinhalaBuuton.position.x = width/-170;
-	sinhalaBuuton.position.y = height/-150;
+	sinhalaBuuton.position.x = -9.7;
+	sinhalaBuuton.position.y = -5.5;
 	
-	englishBuuton.position.x = width/-220;
-	englishBuuton.position.y = height/-150;
+	englishBuuton.position.x = -7.3;
+	englishBuuton.position.y = -5.5;
 	
-	tamilBuuton.position.x = width/-310;
-	tamilBuuton.position.y = height/-150;
+	tamilBuuton.position.x = -5;
+	tamilBuuton.position.y = -5.5;
 	
-	gameName.scale.x = 12;
-	gameName.scale.y = 6;
-	gameName.position.x = width/-220;
-	gameName.position.y = height/-3420;
+	gameName.scale.x = 8.79 * 1.4;
+	gameName.scale.y = 4.92 * 1.4;
+	gameName.position.x = -7.5;
+	gameName.position.y = 1;
 };
 
 var init = function()
@@ -769,7 +770,7 @@ var initSound = function()
 {
 	listener = new THREE.AudioListener();
 	camera.add( listener );
-	
+	listener.setMasterVolume(0) ;
 	cheerSadSound = new THREE.Audio( listener );
 	
 	var audioLoader = new THREE.AudioLoader();
@@ -842,7 +843,7 @@ var initUI = function()
 {
 	uiGroup = new THREE.Group();
 	
-	var spriteMap = new THREE.TextureLoader().load( "UI/menu.jpg" );
+	var spriteMap = new THREE.TextureLoader().load( "UI/menu2.jpg" );
 	spriteMap.minFilter = THREE.minFilter;
 	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	backgroundSprite = new THREE.Sprite( spriteMaterial );
