@@ -606,6 +606,8 @@ window.addEventListener( 'resize', function()
 	camera.updateProjectionMatrix();
 	renderer.setSize(width,height);
 	
+	console.log(width + " " + height);
+	
 });
 
 var setUISizes = function()
@@ -613,19 +615,36 @@ var setUISizes = function()
 	var width = window.innerWidth;
 	var height = window.innerHeight;
 	
-	console.log(width);
-	backgroundSprite.scale.set(19.20 * 1.6,10.80 * 1.6,1);
+	backgroundSprite.scale.set(19.20 * 1.65,10.80 * 1.65,1);
 	
-	playButton.scale.set(2.5,2.5,1);
-	soundBuuton.scale.set(2.5,2.5,1);
-	sinhalaBuuton.scale.set(2.5,2.5,1);
-	englishBuuton.scale.set(2.5,2.5,1);
-	tamilBuuton.scale.set(2.5,2.5,1);
+	playButton.scale.set(2.1,2.1,1);
+	soundBuuton.scale.set(2.1,2.1,1);
+	sinhalaBuuton.scale.set(2.1,2.1,1);
+	englishBuuton.scale.set(2.1,2.1,1);
+	tamilBuuton.scale.set(2.1,2.1,1);
 	
-	playButton.position.x = -(width/height) * 4;
-	soundBuuton.position.x = -(width/height) * 2.8;
-	playButton.position.y = -3;
-	soundBuuton.position.y = -3;
+	// var a = 1920/1080;
+	// if(a > width/height)
+	// {
+		// sinhalaBuuton.position.x = -(width/height) * 3.65;
+		// englishBuuton.position.x = sinhalaBuuton.position.x + sinhalaBuuton.scale.x/2 + 1;
+		// tamilBuuton.position.x = englishBuuton.position.x + englishBuuton.scale.x/2 + 1;
+		// playButton.position.x = -(width/height) * 3.1;
+		// soundBuuton.position.x = playButton.position.x + playButton.scale.x/2 + 0.9;
+	// }
+	// else
+	// {
+		playButton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 9.2;
+		soundBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 19.6;
+		sinhalaBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 8.85;
+		englishBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 8.3;
+		tamilBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 10.75;
+	// }
+	
+	//playButton.position.x = -(width/height) * 4;
+	//soundBuuton.position.x = -(width/height) * 2.8;
+	playButton.position.y = -2.5;
+	soundBuuton.position.y = -2.5;
 	
 	ballT[0].position.x = camBox.position.x - width/148;
 	ballT[1].position.x = camBox.position.x - width/160;
@@ -651,19 +670,14 @@ var setUISizes = function()
 	scoreT[1].scale.y = height/1350;
 	scoreT[2].scale.y = height/1350;
 	
-	sinhalaBuuton.position.x = -(width/height) * 4.6;
-	sinhalaBuuton.position.y = -5.5;
+	sinhalaBuuton.position.y = -4.5;
+	englishBuuton.position.y = -4.5;
+	tamilBuuton.position.y = -4.5;
 	
-	englishBuuton.position.x = -(width/height) * 3.4;
-	englishBuuton.position.y = -5.5;
-	
-	tamilBuuton.position.x = -(width/height) * 2.2;
-	tamilBuuton.position.y = -5.5;
-	
-	gameName.scale.x = 8.79 * 1.4;
-	gameName.scale.y = 4.92 * 1.4;
-	gameName.position.x = -7.5;
-	gameName.position.y = 1;
+	gameName.scale.x = 8.79 * 1.2;
+	gameName.scale.y = 4.92 * 1.2;
+	gameName.position.x = -5.7;
+	gameName.position.y = 1.35;
 };
 
 var init = function()
@@ -843,7 +857,7 @@ var initUI = function()
 {
 	uiGroup = new THREE.Group();
 	
-	var spriteMap = new THREE.TextureLoader().load( "UI/menu2.jpg" );
+	var spriteMap = new THREE.TextureLoader().load( "UI/menu.jpg" );
 	spriteMap.minFilter = THREE.minFilter;
 	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	backgroundSprite = new THREE.Sprite( spriteMaterial );
