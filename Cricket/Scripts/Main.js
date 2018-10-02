@@ -622,8 +622,8 @@ var setUISizes = function()
 	englishBuuton.scale.set(2.5,2.5,1);
 	tamilBuuton.scale.set(2.5,2.5,1);
 	
-	playButton.position.x = -16800/(width);
-	soundBuuton.position.x = -6;
+	playButton.position.x = -(width/height) * 4;
+	soundBuuton.position.x = -(width/height) * 2.8;
 	playButton.position.y = -3;
 	soundBuuton.position.y = -3;
 	
@@ -651,13 +651,13 @@ var setUISizes = function()
 	scoreT[1].scale.y = height/1350;
 	scoreT[2].scale.y = height/1350;
 	
-	sinhalaBuuton.position.x = -9.7;
+	sinhalaBuuton.position.x = -(width/height) * 4.6;
 	sinhalaBuuton.position.y = -5.5;
 	
-	englishBuuton.position.x = -7.3;
+	englishBuuton.position.x = -(width/height) * 3.4;
 	englishBuuton.position.y = -5.5;
 	
-	tamilBuuton.position.x = -5;
+	tamilBuuton.position.x = -(width/height) * 2.2;
 	tamilBuuton.position.y = -5.5;
 	
 	gameName.scale.x = 8.79 * 1.4;
