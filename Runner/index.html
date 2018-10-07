@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Infinity Runner </title>
+		<style>
+			.para {
+				position: absolute;
+				display: block;
+				z-index: 99;
+				color: white;
+				text-align: right;
+				font-size: 55px;
+				left: 85%;
+				top: 0%;
+				display: inline-block;
+			}
+			.buttona {
+				cursor: pointer;
+				position: absolute;
+				display: block;
+				z-index: 99;
+				left: 45%;
+				top: 45%;
+				border: none;
+				color: black;
+				display: inline-block;
+				outline : 0;
+			}
+			.buttona:active {
+				<!-- background-color: #3e8e41; -->
+				box-shadow: 0 5px #666;
+				transform: translateY(4px);
+			}
+			.buttonRound {border-radius: 70%;}
+		</style>
+	</head>
+	<body>
+		<p class = "para" id="time">Time : 60</p>
+		<button id = "Restart" class="buttona buttonRound"><img src="images/restart.png"></button>
+		<script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script>
+		<script src="js/three.min.js"></script>
+		<script src="js/FBXLoader.js"></script>
+		<script src="js/inflate.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/TweenMax.min.js"></script>
+		<script src="js/main.js"></script>
+	</body>
+</html>
