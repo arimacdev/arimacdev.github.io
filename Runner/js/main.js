@@ -15,8 +15,9 @@ var modelReady;
 var mixers;
 var clock;
 var timeClock;
-var timeText;
+var timeText, scoreText;
 var remainingTime;
+var runAction, jumpAction;
 
 document.getElementById("Restart").onclick = function() 
 {
@@ -44,9 +45,10 @@ var init = function()
 	restartButton.style.display = "none";
 	
 	timeText = document.getElementById("time");
+	scoreText = document.getElementById("score");
 	gameStarted = false;
 	
-	initFb();
+	startGame();
 };
 
 var initFb = function()
@@ -318,6 +320,7 @@ var initPlayer = function()
 				player.dy = 0;
 				jumping = false;
 				player.position.y = 0;
+				runAction.time = 0;
 			}
 			else
 			{
@@ -337,8 +340,8 @@ var initPlayerModel = function()
 		var model = object;
 		object.mixer = new THREE.AnimationMixer( object );
 		mixers.push( object.mixer );
-		var action = object.mixer.clipAction( object.animations[ 0 ] );
-		action.play();
+		runAction = object.mixer.clipAction( object.animations[ 0 ] );
+		runAction.play();
 		object.traverse( function ( child ) {
 			if ( child.isMesh ) {
 				child.castShadow = true;
@@ -349,6 +352,7 @@ var initPlayerModel = function()
 		model.scale.y = 0.008;
 		model.scale.z = 0.008;
 		model.position.y = 20;
+		model.rotation.x = Math.PI/2;
 		model.rotation.y = Math.PI;
 		
 		scene.add( object );
@@ -356,24 +360,29 @@ var initPlayerModel = function()
 		player.add(object);
 		modelReady = true;
 	} );
+	
+	
 
 };
 
 var onDocumentKeyDown = function(event) {
-    var keyCode = event.which;
-    if (keyCode == 37) //left
-	{
-		moveLeft();
-    } 
-	else if (keyCode == 39) //right
-	{
-		moveRight();
-    }
-	else if (keyCode == 40 && !jumping) //down
-	{
-		player.dy = 0.2;
-		jumping = true;
-    }
+	if(gameStarted){
+		var keyCode = event.which;
+		if (keyCode == 37) //left
+		{
+			moveLeft();
+		} 
+		else if (keyCode == 39) //right
+		{
+			moveRight();
+		}
+		else if (keyCode == 40 && !jumping) //down
+		{
+			player.dy = 0.2;
+			jumping = true;
+			runAction.time = 0.68;
+		}
+	}
 };
 
 var moveLeft = function()
@@ -430,6 +439,7 @@ var gameOver = function()
 	gameStarted = false;
 	intersects[0].object.visible = false;
 	restartButton.style.display = "block";
+	jumping = false;
 	timeClock.stop();
 }
 
@@ -450,7 +460,7 @@ var restartGame = function()
 	}
 	
 	player.rotation.z = 0;
-	
+	player.position.y = 0;
 	gameStarted = true;
 	restartButton.style.display = "none";
 	remainingTime = 60;
@@ -466,20 +476,25 @@ var update = function()
 		collitionDetection();
 		player.update();
 		remainingTime = 60 - Math.floor(timeClock.getElapsedTime () );
+		
 		if(remainingTime == 0)
 		{
 			gameOver();
 		}
 		timeText.innerHTML = "Time : " + remainingTime;
+		scoreText.innerHTML = "Score : " + Math.floor(timeClock.getElapsedTime () );
 	}
 	
 	if(modelReady)
 	{
-		if ( mixers.length > 0 ) {
-			for ( var i = 0; i < mixers.length; i ++ ) {
-				mixers[ i ].update( clock.getDelta() );
+		if(!jumping)
+		{
+			if(runAction.time >= 0.68)
+			{
+				runAction.time = 0;
 			}
 		}
+		mixers[0].update( clock.getDelta() );
 	}
 	
 	//controls.update();
@@ -524,22 +539,24 @@ function handleTouchMove(evt) {
     var xDiff = xDown - xUp;
     var yDiff = yDown - yUp;
 
-    if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
-        if ( xDiff > 0 ) {
-            moveLeft();
-        } else {
-            moveRight();
-        }                       
-    }
-	else
-	{
-		if ( yDiff > 0 ) {
-            player.dy = 0.2;
-			jumping = true;
-        }
-	}
-    xDown = null;
-    yDown = null;                                             
+	if(gameStarted){
+		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+			if ( xDiff > 0 ) {
+				moveLeft();
+			} else {
+				moveRight();
+			}                       
+		}
+		else
+		{
+			if ( yDiff > 0 ) {
+				player.dy = 0.2;
+				jumping = true;
+			}
+		} 
+	}	
+	xDown = null;
+	yDown = null;   
 };
 
 init();

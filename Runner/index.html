@@ -3,7 +3,7 @@
 	<head>
 		<title> Infinity Runner </title>
 		<style>
-			.para {
+			.paraR {
 				position: absolute;
 				display: block;
 				z-index: 99;
@@ -11,6 +11,17 @@
 				text-align: right;
 				font-size: 55px;
 				left: 85%;
+				top: 0%;
+				display: inline-block;
+			}
+			.paraL {
+				position: absolute;
+				display: block;
+				z-index: 99;
+				color: white;
+				text-align: left;
+				font-size: 55px;
+				left: 5%;
 				top: 0%;
 				display: inline-block;
 			}
@@ -35,7 +46,8 @@
 		</style>
 	</head>
 	<body>
-		<p class = "para" id="time">Time : 60</p>
+		<p class = "paraR" id="time">Time : 60</p>
+		<p class = "paraL" id="score">Score : 0</p>
 		<button id = "Restart" class="buttona buttonRound"><img src="images/restart.png"></button>
 		<script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script>
 		<script src="js/three.min.js"></script>
