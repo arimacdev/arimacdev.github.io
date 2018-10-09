@@ -3,6 +3,7 @@ var gameStarted;
 var sphere;
 var obstacleHalfOne, obstacleHalfTwo;
 var dandrufHalfOne, dandrufHalfTwo;
+var fallenHalfOne, fallenHalfTwo;
 var shuffled;
 var player;
 var playerMoving;
@@ -19,23 +20,47 @@ var timeText, scoreText;
 var remainingTime;
 var runAction, jumpAction;
 
+var aspectRatio;
+
+var currentLevel;
+var restarting;
+var collitionStarted;
+var playerScore;
+
 document.getElementById("Restart").onclick = function() 
 {
-	restartGame();
+	if(!gameStarted && !restarting){
+		restartGame();
+	}
 };
+
+window.addEventListener('resize', setSize, true);
+
+//Set renderer size
+function setSize(){
+    if(window.innerWidth/window.innerHeight > aspectRatio){
+        renderer.setSize(window.innerHeight * aspectRatio, window.innerHeight);
+    }else{
+        renderer.setSize(window.innerWidth, window.innerWidth/aspectRatio);
+    }
+}
 
 var init = function()
 {
+	aspectRatio = 9/16;
 	scene = new THREE.Scene();
-	scene.background = new THREE.Color( 0x6E8CC1 );
+	//scene.background = new THREE.Color( 0x6E8CC1 );
 	
-	camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1, 1000);
+	camera = new THREE.PerspectiveCamera(75, 9/16, 0.1, 1000);
+	
+	var container = document.getElementById('game');
+	document.body.appendChild(container);
 	
 	renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFShadowMap;
 	renderer.setSize(window.innerWidth, window.innerHeight);
-	document.body.appendChild(renderer.domElement);
+	container.appendChild(renderer.domElement);
 	
 	//controls = new THREE.OrbitControls( camera );
 	
@@ -47,6 +72,8 @@ var init = function()
 	timeText = document.getElementById("time");
 	scoreText = document.getElementById("score");
 	gameStarted = false;
+	
+	setSize();
 	
 	startGame();
 };
@@ -73,6 +100,9 @@ var startGame = function()
 	obstacleHalfTwo = [];
 	dandrufHalfOne = [];
 	dandrufHalfTwo = [];
+	fallenHalfOne = [];
+	fallenHalfTwo = [];
+	
 	shuffled = false;
 	playerMoving = false;
 	raycaster = new THREE.Raycaster();
@@ -83,6 +113,10 @@ var startGame = function()
 	timeClock = new THREE.Clock();
 	mixers = [];
 	remainingTime = 60;
+	currentLevel = 0;
+	restarting = false;
+	collitionStarted = false;
+	playerScore = 0;
 	
 	initGame();
 };
@@ -92,19 +126,8 @@ var initGame = function()
 	initSphere();
 	
 	initHair();
-	for(var i = 20; i <  40; i++)
-	{
-		obstacleHalfTwo[i].visible = false;
-	}
-	
 	initDandruff();
-	for(var i = 20; i <  40; i++)
-	{
-		dandrufHalfTwo[i].visible = false;
-	}
-	
-	shuffleCones(obstacleHalfOne, dandrufHalfOne);
-	shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+	initFallenHair();
 	
 	initPlayer();
 	
@@ -125,8 +148,72 @@ var initGame = function()
 	
 	gameStarted = true;
 	
+	setLevel();
+	
 	timeClock.start();
 	sceneLoop();
+};
+
+var setLevel = function()
+{	
+	
+	for(var i = 0; i <  dandrufHalfOne.length; i++)
+	{
+		dandrufHalfOne[i].visible = false;
+	}
+	for(var i = 0; i <  dandrufHalfTwo.length; i++)
+	{
+		dandrufHalfTwo[i].visible = false;
+	}
+	
+	for(var i = 0; i <  fallenHalfOne.length; i++)
+	{
+		fallenHalfOne[i].visible = false;
+	}
+	for(var i = 0; i <  fallenHalfTwo.length; i++)
+	{
+		fallenHalfTwo[i].visible = false;
+	}
+	
+	shuffleCones(obstacleHalfOne, fallenHalfOne);
+	shuffleCones(obstacleHalfTwo, fallenHalfTwo);
+	
+	for(var i = 0; i <  fallenHalfOne.length; i++)
+	{
+		fallenHalfOne[i].visible = true;
+	}
+	for(var i = 0; i <  fallenHalfTwo.length; i++)
+	{
+		fallenHalfTwo[i].visible = true;
+	}
+	
+	for(var i = 0; i <  40; i++)
+	{
+		obstacleHalfTwo[i].visible = false;
+	}
+	for(var i = 28; i <  40; i++)
+	{
+		fallenHalfTwo[i].visible = false;
+	}
+
+	if(currentLevel == 0)
+	{
+		fogColor = new THREE.Color(0xE5FFCC);
+		scene.background = fogColor;
+		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
+	}
+	else if(currentLevel == 1)
+	{
+		fogColor = new THREE.Color(0xCCFFFF);
+		scene.background = fogColor;
+		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
+	}
+	else if(currentLevel == 2)
+	{
+		fogColor = new THREE.Color(0xFFFFCC);
+		scene.background = fogColor;
+		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
+	}
 };
 
 var initSphere = function()
@@ -141,10 +228,10 @@ var initSphere = function()
 	sphere = new THREE.Mesh( geometry, material );
 	scene.add( sphere );
 	sphere.receiveShadow = true;
-	
+	sphere.material.visible = false;
 	sphere.update = function()
 	{
-		sphere.rotation.x += Math.PI/360 + timeClock.getElapsedTime() * 0.0001;
+		//sphere.rotation.x += Math.PI/360 + timeClock.getElapsedTime() * 0.0001;
 		if(sphere.rotation.x >= 2 * Math.PI)
 		{
 			shuffled = false;
@@ -165,7 +252,7 @@ var initHair = function()
 	var geometry = new THREE.ConeGeometry( 1, 20, 32 );
 	var material = new THREE.MeshBasicMaterial( {color: new THREE.Color(0x000000)} );
 	var cone = new THREE.Mesh( geometry, material );
-	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20 + cone.scale.y/2, 0 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
 	cone.isCone = true;
 	
 	for(var i = 0; i < 16; i++)
@@ -180,6 +267,53 @@ var initHair = function()
 	}
 };
 
+var initFallenHair = function()
+{
+	var geometry = new THREE.ConeGeometry( 0.5, 20, 32 );
+	var material = new THREE.MeshBasicMaterial( {color: new THREE.Color(0x000000)} );
+	var cone = new THREE.Mesh( geometry, material );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 30, 0 ) );
+	cone.isCone = true;
+	
+	for(var i = 0; i < 16; i++)
+	{
+		initObstacleModel((Math.PI/16) * (i + 8), 0, fallenHalfOne, cone);
+		initObstacleModel((Math.PI/16) * (i + 8), Math.PI/32, fallenHalfOne, cone);
+		initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/32, fallenHalfOne, cone);
+		
+		initObstacleModel((Math.PI/16) * (i - 8), 0, fallenHalfTwo, cone);
+		initObstacleModel((Math.PI/16) * (i - 8), Math.PI/32, fallenHalfTwo, cone);
+		initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/32, fallenHalfTwo, cone);
+	}
+	
+	// for(var i = 0; i <  fallenHalfOne.length; i++)
+	// {
+		// fallenHalfOne[i].material.visible = false;
+	// }
+	// for(var i = 0; i <  fallenHalfTwo.length; i++)
+	// {
+		// fallenHalfTwo[i].material.visible = false;
+	// }
+	
+	for(var i = 0; i <  fallenHalfOne.length; i++)
+	{
+		fallenHalfOne[i].material.visible = false;
+		var c = cone.clone();
+		c.position.set(0,0, 0);
+		//c.rotation.z += Math.PI/4;
+		fallenHalfOne[i].add(c);
+	}
+	for(var i = 0; i <  fallenHalfTwo.length; i++)
+	{
+		fallenHalfTwo[i].material.visible = false;
+		var c = cone.clone();
+		c.position.set(0,0, 0);
+		//c.rotation.z += Math.PI/4;
+		fallenHalfTwo[i].add(c);
+	}
+	
+};
+
 var initDandruff = function()
 {
 	var geometry = new THREE.BoxGeometry( 0.9, 0.5, 0.3 );
@@ -187,7 +321,6 @@ var initDandruff = function()
 	var cube = new THREE.Mesh( geometry, material );
 	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
 	cube.isCone = true;
-	
 	
 	for(var i = 0; i < 16; i++)
 	{
@@ -417,55 +550,72 @@ var moveRight = function()
 
 var collitionDetection = function()
 {
-	player.geometry.computeBoundingBox();  
-	player.updateMatrixWorld();
-	var vector = new THREE.Vector3();
-	vector.setFromMatrixPosition( camera.matrixWorld );
-	var yVal = 19 + player.position.y;
-	raycaster.set(new THREE.Vector3(vector.x, yVal , 7), new THREE.Vector3( 0, 0,  -1));
-	raycaster.far = 10;
-	intersects = raycaster.intersectObjects(sphere.children);
-	
-	if(intersects.length > 0)
-	{
-		if(intersects[0].distance < 1){
-			gameOver();
+	if(collitionStarted){
+		player.geometry.computeBoundingBox();  
+		player.updateMatrixWorld();
+		var vector = new THREE.Vector3();
+		vector.setFromMatrixPosition( camera.matrixWorld );
+		var yVal = 19 + player.position.y;
+		raycaster.set(new THREE.Vector3(vector.x, yVal , 7), new THREE.Vector3( 0, 0,  -1));
+		raycaster.far = 10;
+		intersects = raycaster.intersectObjects(sphere.children);
+		
+		if(intersects.length > 0)
+		{
+			if(intersects[0].distance < 1){
+				if(currentLevel == 2)
+				{
+					playerScore = 0;
+				}
+				else
+				{
+					playerScore += Math.floor(timeClock.getElapsedTime ());
+				}
+				timeClock.stop();
+				timeClock.startTime = 0;
+				timeClock.oldTime = 0;
+				timeClock.elapsedTime = 0;
+				gameOver();
+			}
 		}
 	}
+	
 };
 
 var gameOver = function()
 {
-	gameStarted = false;
-	intersects[0].object.visible = false;
-	restartButton.style.display = "block";
-	jumping = false;
-	timeClock.stop();
+	if(gameStarted){
+		gameStarted = false;
+		restartButton.style.display = "block";
+		jumping = false;
+		timeClock.stop();
+	}
 }
 
 var restartGame = function()
 {
+	restarting = true;
+	collitionStarted = false;
+	restartButton.style.display = "none";
 	sphere.rotation.x = 0;
-	
-	shuffleCones(obstacleHalfOne, dandrufHalfOne);
-	shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
-	
-	for(var i = 20; i <  40; i++)
-	{
-		obstacleHalfTwo[i].visible = false;
-	}
-	for(var i = 20; i <  40; i++)
-	{
-		dandrufHalfTwo[i].visible = false;
-	}
 	
 	player.rotation.z = 0;
 	player.position.y = 0;
-	gameStarted = true;
-	restartButton.style.display = "none";
 	remainingTime = 60;
 	timeText.innerHTML = "Time : " + remainingTime;
 	timeClock.start();
+	if(currentLevel == 2)
+	{
+		currentLevel = 0;
+	}
+	else
+	{
+		currentLevel++;
+	}
+	setLevel();
+	
+	restarting = false;
+	gameStarted = true;
 };
 
 var update = function()
@@ -481,8 +631,15 @@ var update = function()
 		{
 			gameOver();
 		}
-		timeText.innerHTML = "Time : " + remainingTime;
-		scoreText.innerHTML = "Score : " + Math.floor(timeClock.getElapsedTime () );
+		timeText.innerHTML = " Time : " + remainingTime;
+		scoreText.innerHTML = " Score : " + (playerScore + Math.floor(timeClock.getElapsedTime ()) );
+		
+		var a = Math.floor(timeClock.getElapsedTime () );
+		
+		if(!collitionStarted && a >= 0.5)
+		{
+			collitionStarted = false;
+		}
 	}
 	
 	if(modelReady)

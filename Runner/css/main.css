@@ -1,0 +1,63 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+#game {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: fixed;
+    min-width: 100%;
+    min-height: 100%;
+}
+
+#game-ui {
+   display: block;
+   text-align: center;
+   position: absolute;
+   width: 25%;
+   height: 100%;
+}
+
+#time {
+	display: inline;
+	text-align: left;
+    color: black;
+	font-size: 40px;
+}
+
+#score {
+	display: inline;
+	text-align: right;
+    color: black;
+	font-size: 40px;
+}
+
+#Restart
+{
+	cursor: pointer;
+	position: absolute;
+	border: none;
+	color: black;
+	outline : 0;
+	left: 25%;
+	top: 70%;
+	border-radius: 70%;
+}
+
+#Restart:active {
+	<!-- background-color: #3e8e41; -->
+	box-shadow: 0 5px #666;
+	transform: translateY(4px);
+}
+
+html, body {
+    background: #fff;
+    color: #999;
+    overflow: hidden;
+    touch-action: none;
+    -ms-touch-action: none;
+}

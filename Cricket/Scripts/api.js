@@ -20,8 +20,8 @@ class API {
     static savetoken(callback)
     { 
         url = new URL(window.location.href);
-        //authtoken = "Bearer " + url.searchParams.get("user");
-        authtoken = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJTYWhhbiBSYW5kdWxhIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIl0sImlhdCI6MTUzNzUyODkxNywiZXhwIjoxNTY5MDY0OTE3LCJ1ZCI6IjVjYWJhNzhkLTRhNjUtNDM1MS04ZDUyLTE3OTIyYzNjMTU4NyIsInR5cGUiOiJBQ0NFU1MifQ.dm_IDV7jpnzz7wrf1bFNstpuXS-l3yf7DJaAf7TDsXY';
+        authtoken = "Bearer " + url.searchParams.get("user");
+        //authtoken = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJTYWhhbiBSYW5kdWxhIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIl0sImlhdCI6MTUzNzUyODkxNywiZXhwIjoxNTY5MDY0OTE3LCJ1ZCI6IjVjYWJhNzhkLTRhNjUtNDM1MS04ZDUyLTE3OTIyYzNjMTU4NyIsInR5cGUiOiJBQ0NFU1MifQ.dm_IDV7jpnzz7wrf1bFNstpuXS-l3yf7DJaAf7TDsXY';
         //API.gethighscore(callback);
         API.gethighscore(function (k) {
             callback(k);
