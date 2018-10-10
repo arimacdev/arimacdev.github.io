@@ -120,28 +120,21 @@ window.addEventListener( 'mousedown', function(event)
 				buttonSound.play();
 				handleAudio();
 			}
-			// else if(intersects[0].object.buttonType == "Sinhala")
-			// {
-				// buttonSound.play();
-				// changeLanguage(0);
-			// }
+			else if(intersects[0].object.buttonType == "Sinhala")
+			{
+				buttonSound.play();
+				changeLanguage(0);
+			}
 			else if(intersects[0].object.buttonType == "English")
 			{
 				buttonSound.play();
-				if(languageSelected != 2)
-				{
-					changeLanguage(languageSelected + 1);
-				}
-				else
-				{
-					changeLanguage(0);
-				}
+				changeLanguage(1);
 			}
-			// else if(intersects[0].object.buttonType == "Tamil")
-			// {
-				// buttonSound.play();
-				// changeLanguage(2);
-			// }
+			else if(intersects[0].object.buttonType == "Tamil")
+			{
+				buttonSound.play();
+				changeLanguage(2);
+			}
 		}
 	}
 	else if(gameOver){
@@ -170,9 +163,9 @@ window.addEventListener( 'mousedown', function(event)
 					firstTime = false;
 					recursiveBalling();
 				}
+				batting = true;
 				if(batman1.inStrike){
 					batmanAnimator1.startBattingAnimation();
-					batting = true;
 				}
 				else if(batman2.inStrike){
 					batmanAnimator2.startBattingAnimation();
@@ -261,7 +254,7 @@ var changeLanguage = function(lang)
 		}
 		
 		yourScore.material = createMaterial(loader.load( 'UI/scoreS.png' ));
-		animateButton(englishBuuton, sOff, sOn, sName);
+		animateButton(sinhalaBuuton, sOff, sOn, sName);
 	}
 	else if(lang == 1){
 		if(eOff == null)
@@ -287,8 +280,9 @@ var changeLanguage = function(lang)
 		}
 		
 		yourScore.material = createMaterial(loader.load( 'UI/scoreT.png' ));
-		animateButton(englishBuuton, tOff, tOn, tName);
+		animateButton(tamilBuuton, tOff, tOn, tName);
 	}
+	console.log("set m");
 };
 
 var animateButton = function(button, map1, map2, map3)
@@ -443,19 +437,18 @@ var calculateHit = function()
 		hitted = true;
 		shotInDisplay = true;
 		
-		
 		if(ball.position.z >= 3  && ball.position.z < 3.5)
 		{
 			var x = -0.15;
 			var z = -0.5;
-			catcherIndex = 1;
-			throwMultiplier = 0.5;
-			throwY = 0.26;
+			catcherIndex = 3;
+			throwMultiplier = 0.25;
+			throwY = 0.22;
 			moverTime = 0.2;
 			if(ball.position.x > xBarrier)
 			{
-				x = -x;
-				z = z;
+				x = -x/2;
+				z = z/2;
 				catcherIndex = 2;
 				throwMultiplier = 0.5;
 				throwY = 0.26;
@@ -488,8 +481,8 @@ var calculateHit = function()
 		}
 		else if(ball.position.z >= 4  && ball.position.z < 4.5)
 		{
-			var x = -0.4/1.2;
-			var z = -0.15/1.2;
+			var x = -0.4;
+			var z = -0.15;
 			catcherIndex = 5;
 			throwMultiplier = 0.5;
 			throwY = 0.27;
@@ -613,6 +606,8 @@ window.addEventListener( 'resize', function()
 	camera.updateProjectionMatrix();
 	renderer.setSize(width,height);
 	
+	console.log(width + " " + height);
+	
 });
 
 var setUISizes = function()
@@ -620,38 +615,43 @@ var setUISizes = function()
 	var width = window.innerWidth;
 	var height = window.innerHeight;
 	
-	backgroundSprite.scale.set(19.20 * 1.5,10.80 * 1.5,1);
+	backgroundSprite.scale.set(19.20 * 1.65,10.80 * 1.65,1);
 	
-	playButton.scale.set(2.3,2.3,1);
-	soundBuuton.scale.set(2.3,2.3,1);
-	englishBuuton.scale.set(2.3,2.3,1);
-	// sinhalaBuuton.scale.set(2.1,2.1,1);
-	// tamilBuuton.scale.set(2.1,2.1,1);
+	playButton.scale.set(2.1,2.1,1);
+	soundBuuton.scale.set(2.1,2.1,1);
+	sinhalaBuuton.scale.set(2.1,2.1,1);
+	englishBuuton.scale.set(2.1,2.1,1);
+	tamilBuuton.scale.set(2.1,2.1,1);
 	
 	var a = 1920/1080;
 	if(a > width/height)
 	{
-		playButton.position.x = -(width/height) * 3.8;
-		soundBuuton.position.x = playButton.position.x + playButton.scale.x/2 + 1.05;
-		englishBuuton.position.x = soundBuuton.position.x + soundBuuton.scale.x/2 + 1.05;
+		sinhalaBuuton.position.x = -(width/height) * 3.65;
+		englishBuuton.position.x = sinhalaBuuton.position.x + sinhalaBuuton.scale.x/2 + 1;
+		tamilBuuton.position.x = englishBuuton.position.x + englishBuuton.scale.x/2 + 1;
+		playButton.position.x = -(width/height) * 3.1;
+		soundBuuton.position.x = playButton.position.x + playButton.scale.x/2 + 0.9;
 	}
 	else
 	{
-		playButton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 6.2;
-		soundBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 8.4;
-		englishBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 10.6;
+		playButton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 9.2;
+		soundBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 11;
+		sinhalaBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 7.9;
+		englishBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 10;
+		tamilBuuton.position.x = backgroundSprite.position.x - backgroundSprite.scale.x/2 + 12.1;
 	}
 	
-	playButton.position.y = -5.7;
-	soundBuuton.position.y = -5.7;
-	englishBuuton.position.y = -5.7;
-	// sinhalaBuuton.position.y = -4.5;
-	// tamilBuuton.position.y = -4.5;
+	playButton.position.y = -2.5;
+	soundBuuton.position.y = -2.5;
 	
-	gameName.scale.x = 8.79 * 1.3;
-	gameName.scale.y = 4.92 * 1.3;
-	gameName.position.x = -4.4;
-	gameName.position.y = 4.5;
+	sinhalaBuuton.position.y = -4.5;
+	englishBuuton.position.y = -4.5;
+	tamilBuuton.position.y = -4.5;
+	
+	gameName.scale.x = 8.79 * 1.2;
+	gameName.scale.y = 4.92 * 1.2;
+	gameName.position.x = -5.3;
+	gameName.position.y = 1.35;
 	
 	ballT[2].position.x = (width/height) * -6.4;
 	ballT[1].position.x = ballT[2].position.x + 1.2;
@@ -676,7 +676,6 @@ var setUISizes = function()
 	ballT[0].scale.y = 1;
 	ballT[1].scale.y = 1;
 	ballT[2].scale.y = 1;
-	
 };
 
 var init = function()
@@ -720,7 +719,7 @@ var init = function()
 	ballIsThrwoing = false;
 	initRotaton = camera.rotation;
 	out = false;
-	xBarrier = -0.1;
+	xBarrier = 0.05;
 	score = 0;
 	scoreForBall = 0;
 	numberArray = [];
@@ -743,13 +742,7 @@ var init = function()
 	{
 		if(shotInDisplay || ballIsThrwoing)
 		{
-			if(ballInHold){
-				camera.lookAt(0, 0, ball.position.z);
-			}
-			else
-			{
-				camera.lookAt(ball.position.x, 0, ball.position.z);
-			}
+			camera.lookAt(ball.position.x, 0, ball.position.z);
 		}
 		if(!gameOver){
 			camBox.position.set(camera.position.x, camera.position.y, camera.position.z);
@@ -770,8 +763,9 @@ var init = function()
 		}
 	};
 	
-	initSound();
 	initMeshes();
+	
+	initSound();
 	
 	changeLanguage(languageSelected);
 	
@@ -788,7 +782,7 @@ var initSound = function()
 {
 	listener = new THREE.AudioListener();
 	camera.add( listener );
-	listener.setMasterVolume(0) ;
+	// listener.setMasterVolume(0) ;
 	cheerSadSound = new THREE.Audio( listener );
 	
 	var audioLoader = new THREE.AudioLoader();
@@ -861,7 +855,7 @@ var initUI = function()
 {
 	uiGroup = new THREE.Group();
 	
-	var spriteMap = new THREE.TextureLoader().load( "UI/sana2.jpg" );
+	var spriteMap = new THREE.TextureLoader().load( "UI/menu3.jpg" );
 	spriteMap.minFilter = THREE.minFilter;
 	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
 	backgroundSprite = new THREE.Sprite( spriteMaterial );
@@ -895,7 +889,6 @@ var initUI = function()
 	sinhalaBuuton.position.z = 91;
 	sinhalaBuuton.lookAt(camera.position);
 	sinhalaBuuton.buttonType = "Sinhala";
-	sinhalaBuuton.visible = false;
 	
 	eOn = new THREE.TextureLoader().load( "UI/eN.png" );
 	eOn.minFilter = THREE.minFilter;
@@ -914,7 +907,6 @@ var initUI = function()
 	tamilBuuton.position.z = 91;
 	tamilBuuton.lookAt(camera.position);
 	tamilBuuton.buttonType = "Tamil";
-	tamilBuuton.visible = false;
 	
 	eName = new THREE.TextureLoader().load( "UI/nameE.png" );
 	eName.minFilter = THREE.minFilter;
@@ -1096,10 +1088,10 @@ var initMeshes = function()
 	var bowlerGeo = new THREE.PlaneGeometry(3.95/3, 6.25/3);
 	bowler = new THREE.Mesh(bowlerGeo, bowlerMat);
 	scene.add( bowler );
-	bowler.position.x = -1;
+	bowler.position.x = 1;
 	bowler.position.z = -7;
 	bowler.position.y = 1;
-	bowler.scale.x = bowler.scale.x;
+	bowler.scale.x = -bowler.scale.x;
 	
 	initCylinder(0xffffff,50, 0.3);
 	//initCylinder(0xffffff,60, 3);
@@ -1123,10 +1115,9 @@ var initMeshes = function()
 	
 	scene.add(batman1);
 	scene.add(batman2);
-	batman2.visible = false;
-	batman1.scale.x = -batman1.scale.x;
+	
 	batmanAnimator2.setNonStrikeBatman();
-	batmanAnimator1.setStrikeBatman();
+	
 	//recursiveBalling();
 };
 
@@ -1349,9 +1340,9 @@ var initBall = function()
 	material.transparent = true;
 	ball = new THREE.Mesh( geometry, material );
 	scene.add(ball);
-	ball.position.x = -0.6;
+	ball.position.x = 0.5;
 	ball.position.z = -1;
-	ball.position.y = 0.4;
+	ball.position.y = 1;
 	
 	ball.radius = 0.1;
 	ball.dy = 0;
@@ -1368,28 +1359,28 @@ var initBall = function()
 				if(!shotInDisplay && !ballIsThrwoing){
 					switch(ballType) {
 						case 0:
-							ball.dx = 0.01;
+							ball.dx = -0.01;
 							break;
 						case 1:
-							ball.dx = 0.05;
+							ball.dx = -0.05;
 							break;
 						case 2:
-							ball.dx = 0.08;
+							ball.dx = 0.05;
 							break;
 						case 3:
-							ball.dx = 0.01;
+							ball.dx = -0.01;
 							break;
 						case 4:
-							ball.dx = 0.01;
+							ball.dx = -0.03;
 							break;
 						case 5:
-							ball.dx = -0.005;
+							ball.dx = -0.01;
 							break;
 						case 6:
 							ball.dx = 0.035;
 							break;
 						case 7:
-							ball.dx = -0.015;
+							ball.dx = -0.035;
 							break;
 						default:
 					}
@@ -1410,9 +1401,9 @@ var initBall = function()
 		}
 		else if(ballInHold)
 		{
-			ball.position.x = -0.6;
+			ball.position.x = 0.5;
 			ball.position.z = bowler.position.z - 0.01;
-			ball.position.y = 0.4;
+			ball.position.y = 0.6;
 		}
 		
 		if(shotInDisplay)
@@ -1513,7 +1504,6 @@ var calculateDirection = function(v1, v2)
 var recursiveBalling = function()
 {
 	if(!bowling){
-		
 		if(wicketsLeft == 0)
 		{
 			gameOver = true;
@@ -1539,27 +1529,17 @@ var initB = function()
 	bowlerSpeed = -0.1;
 	bowling = true;
 	ballInHold = true;
-	ball.position.x = -0.6;
+	ball.position.x = 0.5;
 	ball.position.z = -7.1;
-	ball.position.y = 1.5;
-	
-	
-	if(!batman1.inStrike)
-	{
-		batman1.position.set(0.5,0.9,6);
-		batman1.inStrike = true;
-		batman2.position.set(0.5,0.9,-6);
-		batman2.inStrike = false;
-		batmanAnimator1.startBattingAnimation();
-	}
+	ball.position.y = 1;
 };
 
 var startBowling = function()
-{	
+{
 	ballType = Math.floor(Math.random() * (7 - 0 + 1)) + 0;
 	switch(ballType) {
 		case 0:
-			ball.dx = 0.01;
+			ball.dx = -0.01;
 			ball.dy = 0.1;
 			ball.dz = 0.4;
 			break;
@@ -1569,32 +1549,32 @@ var startBowling = function()
 			ball.dz = 0.4;
 			break;
 		case 2:
-			ball.dx = -0.02;
+			ball.dx = -0.04;
 			ball.dy = 0.1;
 			ball.dz = 0.4;
 			break;
 		case 3:
-			ball.dx = 0.005;
+			ball.dx = -0.01;
 			ball.dy = 0.1;
 			ball.dz = 0.5;
 			break;
 		case 4:
-			ball.dx = 0.005;
+			ball.dx = -0.01;
 			ball.dy = 0.03;
 			ball.dz = 0.55;
 			break;
 		case 5:
-			ball.dx = 0.005;
+			ball.dx = -0.01;
 			ball.dy = 0.15;
 			ball.dz = 0.25;
 			break;
 		case 6:
-			ball.dx = -0.01;
+			ball.dx = -0.03;
 			ball.dy = 0.15;
-			ball.dz = 0.27;
+			ball.dz = 0.25;
 			break;
 		case 7:
-			ball.dx = 0.01;
+			ball.dx = 0;
 			ball.dy = 0.15;
 			ball.dz = 0.25;
 			break;
@@ -1655,17 +1635,17 @@ var submitScoreCall = function()
 var initSprites = function(pos)
 {
 	var loader = new THREE.TextureLoader();
-	var texture = loader.load( 'Textures/batman.png' );
+	var texture = loader.load( 'Textures/batmanNN.png' );
 	texture.anisotropy  = 16;
 	texture.minFilter = THREE.minFilter;
 	if(pos == 0){
-		batmanAnimator1 = new TextureAnimator1( texture, 15, 1, 15, 20);
+		batmanAnimator1 = new TextureAnimator1( texture, 14, 1, 14, 20);
 	}	
 	else if(pos == 1){
-		batmanAnimator2 = new TextureAnimator2( texture, 15, 1, 15, 20);
+		batmanAnimator2 = new TextureAnimator2( texture, 14, 1, 14, 20);
 	}
 	var batmanMat = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide , alphaTest: 0.5} );
-	var batmanGeo = new THREE.PlaneGeometry(1.237 * 3, 1.118 * 3);
+	var batmanGeo = new THREE.PlaneGeometry(5.55/3, 8.82/3);
 	var batter = new THREE.Mesh(batmanGeo, batmanMat);
 	
 	batter.dx = 0;
@@ -1679,13 +1659,13 @@ var initSprites = function(pos)
 	
 	if(pos == 0)
 	{
-		batter.position.set(0.5,0.9,6);
+		batter.position.set(-0.6,0.75,6);
 		batter.inStrike = true;
 		batter.animator = batmanAnimator1;
 	}
 	else if(pos == 1)
 	{
-		batter.position.set(0.5,0.9,-6);
+		batter.position.set(-0.6,0.75,-6);
 		batter.inStrike = false;
 		batter.animator = batmanAnimator2;
 	}
@@ -1702,9 +1682,12 @@ var initSprites = function(pos)
 			{
 				batter.dy -= gravity;
 			}
-			
+			if(!this.inStrike){
+				batter.dx -= 0.003;
+			}
 			batter.position.y += batter.dy;
 			batter.position.z += batter.dz;
+			batter.position.x += batter.dx;
 			
 			//batter.position.x += batter.dx;
 			var travelD = calculateDistance(new THREE.Vector3(0,0,0), ball.position);
@@ -1715,6 +1698,7 @@ var initSprites = function(pos)
 					this.inStrike = false;
 					if(shotInDisplay && travelD < 65){
 						this.dz = -this.dz;
+						this.dx = 0.1;
 						this.animator.runFromWicket();
 					}
 					else
@@ -1724,9 +1708,9 @@ var initSprites = function(pos)
 						this.dz = 0;
 						this.dy = 0;
 						this.dx = 0;
-						batter.position.set(0.5,0.9,-6);
+						batter.position.set(-0.6,0.75,-6);
+						this.animator.startBattingAnimation();
 						this.animator.setNonStrikeBatman();
-						camera.lookAt(0, 0, ball.position.z);
 					}
 				}
 			}
@@ -1737,6 +1721,7 @@ var initSprites = function(pos)
 					this.inStrike = true;
 					if(shotInDisplay && travelD < 65){
 						this.dz = -this.dz;
+						this.dx = 0;
 						this.animator.runToWicket();
 					}
 					else
@@ -1745,9 +1730,8 @@ var initSprites = function(pos)
 						this.dz = 0;
 						this.dy = 0;
 						this.dx = 0;
-						batter.position.set(0.5,0.9,6);
+						batter.position.set(-0.6,0.75,6);
 						this.animator.startBattingAnimation();
-						camera.lookAt(0, 0, ball.position.z);
 					}
 				}
 			}
@@ -1884,9 +1868,9 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 			{
 				this.currentDisplayTime -= this.tileDisplayDuration;
 				this.currentTile++;
-				if (this.currentTile == this.numberOfTiles - 5){
-					batting = false;
+				if (this.currentTile == this.numberOfTiles - 4){
 					this.currentTile = 0;
+					batting = false;
 				}
 				var currentColumn = this.currentTile % this.tilesHorizontal;
 				texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -1901,8 +1885,8 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 			{
 				this.currentDisplayTime -= this.tileDisplayDuration;
 				this.currentTile++;
-				if (this.currentTile == this.numberOfTiles - 3){
-					this.currentTile = this.numberOfTiles - 5;
+				if (this.currentTile == this.numberOfTiles - 2){
+					this.currentTile = this.numberOfTiles - 4;
 				}
 				var currentColumn = this.currentTile % this.tilesHorizontal;
 				texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -1917,8 +1901,8 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 			{
 				this.currentDisplayTime -= this.tileDisplayDuration;
 				this.currentTile++;
-				if (this.currentTile == this.numberOfTiles - 1){
-					this.currentTile = this.numberOfTiles - 3;
+				if (this.currentTile == this.numberOfTiles){
+					this.currentTile = this.numberOfTiles - 2;
 				}
 				var currentColumn = this.currentTile % this.tilesHorizontal;
 				texture.offset.x = currentColumn / this.tilesHorizontal;
@@ -1933,19 +1917,7 @@ function TextureAnimator1(texture, tilesHoriz, tilesVert, numTiles, tileDispDura
 		batSwingSound.play();
 		this.tileDisplayDuration = 20;
 		
-		this.currentTile =  0;
-		var currentColumn = this.currentTile % this.tilesHorizontal;
-		texture.offset.x = currentColumn / this.tilesHorizontal;
-		var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
-		texture.offset.y = currentRow / this.tilesVertical;
-	};
-	
-	this.setStrikeBatman = function()
-	{
-		batSwingSound.play();
-		this.tileDisplayDuration = 20;
-		
-		this.currentTile =  0;
+		this.currentTile = 0;
 		var currentColumn = this.currentTile % this.tilesHorizontal;
 		texture.offset.x = currentColumn / this.tilesHorizontal;
 		var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
@@ -2123,7 +2095,7 @@ var update = function()
 		ballInHold = false;
 		startBowling();
 		bowlerAnim.inBall();
-		ball.position.x = -0.4;
+		ball.position.x = 0.4;
 		ball.position.y = 1.4;
 	}
 	
