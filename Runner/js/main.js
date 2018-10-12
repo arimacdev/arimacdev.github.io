@@ -14,12 +14,12 @@ var restartButton;
 var gravity;
 var jumping;
 var modelReady;
-var mixers;
+var mixers, mixersG;
 var clock;
 var timeClock;
 var timeText, scoreText;
 var remainingTime;
-var runAction, jumpAction;
+var boyAction, girlAction;
 
 var aspectRatio;
 
@@ -29,6 +29,11 @@ var collitionStarted;
 var playerScore;
 
 var dead;
+var uiGroup;
+
+var uiChecking;
+var mouse;
+var gender;
 
 document.getElementById("Restart").onclick = function() 
 {
@@ -38,6 +43,39 @@ document.getElementById("Restart").onclick = function()
 };
 
 window.addEventListener('resize', setSize, true);
+
+window.addEventListener( 'mousedown', function(event)
+{
+	if(uiChecking)
+	{
+		event.preventDefault();
+		mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+		raycaster.setFromCamera( mouse, camera );
+		var intersects = raycaster.intersectObjects( uiGroup.children );
+		
+		if ( intersects.length > 0 ) {
+			if(intersects[0].object.tag == "Play")
+			{
+				playMenuDisapearAnimation();
+			}
+			else if(intersects[0].object.tag == "Male")
+			{
+				gender = 0;
+				player.children[1].visible = true;
+				player.children[2].visible = false;
+				playGenderDisapearAnimation();
+			}
+			else if(intersects[0].object.tag == "Female")
+			{
+				gender = 1;
+				player.children[1].visible = false;
+				player.children[2].visible = true;
+				playGenderDisapearAnimation();
+			}
+		}
+	}
+});
 
 //Set renderer size
 function setSize(){
@@ -72,8 +110,8 @@ var init = function()
 	restartButton = document.getElementById("Restart");
 	restartButton.style.display = "none";
 	
-	timeText = document.getElementById("time");
-	scoreText = document.getElementById("score");
+	// timeText = document.getElementById("time");
+	// scoreText = document.getElementById("score");
 	gameStarted = false;
 	
 	setSize();
@@ -117,15 +155,319 @@ var startGame = function()
 	clock = new THREE.Clock();
 	timeClock = new THREE.Clock();
 	mixers = [];
+	mixersG = [];
 	remainingTime = 60;
 	currentLevel = 0;
 	restarting = false;
 	collitionStarted = false;
 	playerScore = 0;
 	dead = false;
+	uiChecking = false;
+	mouse = new THREE.Vector2();
+	gender = 0;
+	
+	initUI();
+};
+
+var initUI = function()
+{
+	uiGroup = new THREE.Group();
+	
+	addSprite("images/mainBG.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");
+	
+	addSprite("images/name.png", -0.99, 0.43, 0, 0.451 * 1.3, 0.3 * 1.3, "");
+	addSprite("images/girl.png", -0.99, -0.07, -0.34, 1.91 * 0.225, 3.8 * 0.225, "");	
+	addSprite("images/boy.png", -0.99, -0.035, 0.35, 1.71 * 0.25, 3.71 * 0.25, "");	
+	addSprite("images/play.png", -0.99, -0.07, 0, 3.7 * 0.11, 1.78 * 0.11, "Play");
+	
+	addSprite("images/genderText.png", -0.99, 0.56, 0, 0.898 * 0.8, 0.08 * 0.8, "");
+	addSprite("images/girl.png", -0.99, -0.07, -0.15, 1.91 * 0.225, 3.8 * 0.225, "");	
+	addSprite("images/boy.png", -0.99, -0.035, 0.15, 1.71 * 0.25, 3.71 * 0.25, "");
+	addSprite("images/female.png", -0.99, -0.58, -0.17, 3.75 * 0.08, 1.8 * 0.08, "Female");
+	addSprite("images/male.png", -0.99, -0.58, 0.185, 3.75 * 0.08, 1.8 * 0.08, "Male");
+	
+	addSprite("images/3.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");
+	addSprite("images/2.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");
+	addSprite("images/1.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");
+	
+	camera.add(uiGroup);
+	
+	uiGroup.children[0].visible = false;
+	uiGroup.children[1].visible = false;
+	uiGroup.children[2].visible = false;
+	uiGroup.children[3].visible = false;
+	
+	uiGroup.children[4].visible = false;
+	uiGroup.children[5].visible = false;
+	uiGroup.children[6].visible = false;
+	uiGroup.children[7].visible = false;
+	uiGroup.children[8].visible = false;
+	uiGroup.children[9].visible = false;
+	
+	uiGroup.children[10].visible = false;
+	uiGroup.children[11].visible = false;
+	uiGroup.children[12].visible = false;
+	
+	playMenuApearAnimation();
 	
 	initGame();
 };
+
+var playMenuApearAnimation = function()
+{
+	uiGroup.children[0].visible = true;
+	uiGroup.children[1].visible = true;
+	uiGroup.children[2].visible = true;
+	uiGroup.children[3].visible = true;
+	uiGroup.children[4].visible = true;
+	
+	var yOne = uiGroup.children[1].position.y;
+	uiGroup.children[1].position.y = 2;
+	
+	var xOne = uiGroup.children[2].position.x;
+	uiGroup.children[2].position.x = -2;
+	
+	var xTwo = uiGroup.children[3].position.x;
+	uiGroup.children[3].position.x = 2;
+	
+	var yTwo = uiGroup.children[4].position.y;
+	uiGroup.children[4].position.y = -2;
+	
+	TweenMax.to(uiGroup.children[1].position,0.5,{ease: Power4.easeOut, delay: 1,y:yOne,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[2].position,0.5,{ease: Power4.easeOut,x:xOne,
+				onComplete: function() {
+					
+				}
+			});
+			TweenMax.to(uiGroup.children[3].position,0.5,{ease: Power4.easeOut,x:xTwo,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[4].position,0.5,{ease: Power4.easeOut, y:yTwo,
+						onComplete: function() {
+							uiChecking = true;
+						}
+					});
+				}
+			});
+		}
+	});
+};
+
+var playMenuDisapearAnimation = function()
+{
+	uiChecking = false;
+	
+	var yOne = uiGroup.children[1].position.y;
+	var xOne = uiGroup.children[2].position.x;
+	var xTwo = uiGroup.children[3].position.x;
+	var yTwo = uiGroup.children[4].position.y;
+	
+	TweenMax.to(uiGroup.children[4].position,0.5,{ease: Power4.easeIn, y:-2,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[2].position,0.5,{ease: Power4.easeIn,x:-2,
+				onComplete: function() {
+					
+				}
+			});
+			TweenMax.to(uiGroup.children[3].position,0.5,{ease: Power4.easeIn,x:2,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[1].position,0.5,{ease: Power4.easeIn, y:2,
+						onComplete: function() {
+							uiGroup.children[1].visible = false;
+							uiGroup.children[2].visible = false;
+							uiGroup.children[3].visible = false;
+							uiGroup.children[4].visible = false;
+							
+							uiGroup.children[0].material.opacity = 1;
+							uiGroup.children[1].position.y = yOne;
+							uiGroup.children[2].position.x = xOne;
+							uiGroup.children[3].position.x = xTwo;
+							uiGroup.children[4].position.y = yTwo;
+							
+							playGenderApearAnimation();
+						}
+					});
+				}
+			});
+		}
+	});
+};
+
+var playGenderApearAnimation = function()
+{
+	uiGroup.children[0].visible = true;
+	uiGroup.children[5].visible = true;
+	uiGroup.children[6].visible = true;
+	uiGroup.children[7].visible = true;
+	uiGroup.children[8].visible = true;
+	uiGroup.children[9].visible = true;
+	
+	var yOne = uiGroup.children[5].position.y;
+	uiGroup.children[5].position.y = 2;
+	
+	var xOne = uiGroup.children[6].position.x;
+	uiGroup.children[6].position.x = -2;
+	
+	var xTwo = uiGroup.children[7].position.x;
+	uiGroup.children[7].position.x = 2;
+	
+	var yTwo = uiGroup.children[8].position.y;
+	uiGroup.children[8].position.y = -2;
+	uiGroup.children[9].position.y = -2;
+	
+	TweenMax.to(uiGroup.children[5].position,0.5,{ease: Power4.easeOut,y:yOne,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[6].position,0.5,{ease: Power4.easeOut,x:xOne,
+				onComplete: function() {
+					
+				}
+			});
+			TweenMax.to(uiGroup.children[7].position,0.5,{ease: Power4.easeOut,x:xTwo,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[8].position,0.5,{ease: Power4.easeOut, y:yTwo,
+						onComplete: function() {
+							uiChecking = true;
+						}
+					});
+					TweenMax.to(uiGroup.children[9].position,0.5,{ease: Power4.easeOut, y:yTwo,
+						onComplete: function() {
+							uiChecking = true;
+						}
+					});
+				}
+			});
+		}
+	});
+};
+
+var playGenderDisapearAnimation = function()
+{
+	uiChecking = false;
+	
+	var yOne = uiGroup.children[5].position.y;
+	var xOne = uiGroup.children[6].position.x;
+	var xTwo = uiGroup.children[7].position.x;
+	var yTwo = uiGroup.children[8].position.y;
+	
+	TweenMax.to(uiGroup.children[8].position,0.5,{ease: Power4.easeIn, y:-2,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[6].position,0.5,{ease: Power4.easeIn,x:-2,
+				onComplete: function() {
+					
+				}
+			});
+			TweenMax.to(uiGroup.children[7].position,0.5,{ease: Power4.easeIn,x:2,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[5].position,0.5,{ease: Power4.easeIn, y:2,
+						onComplete: function() {
+							TweenMax.to(uiGroup.children[0].material,0.5,{ease: Power4.easeIn, opacity:0,
+								onComplete: function() {
+									uiGroup.children[0].visible = false;
+									uiGroup.children[5].visible = false;
+									uiGroup.children[6].visible = false;
+									uiGroup.children[7].visible = false;
+									uiGroup.children[8].visible = false;
+									uiGroup.children[9].visible = false;
+									
+									uiGroup.children[0].material.opacity = 1;
+									uiGroup.children[5].position.y = yOne;
+									uiGroup.children[6].position.x = xOne;
+									uiGroup.children[7].position.x = xTwo;
+									uiGroup.children[8].position.y = yTwo;
+									uiGroup.children[9].position.y = yTwo;
+									
+									showCountDown();
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+	
+	TweenMax.to(uiGroup.children[9].position,0.5,{ease: Power4.easeIn, y:-2,
+		
+	});
+};
+
+var showCountDown = function()
+{
+	var scaleX = uiGroup.children[10].scale.x;
+	var scaleY = uiGroup.children[10].scale.y;
+	
+	uiGroup.children[10].scale.x = 0;
+	uiGroup.children[10].scale.y = 0;
+	
+	uiGroup.children[11].scale.x = 0;
+	uiGroup.children[11].scale.y = 0;
+	
+	uiGroup.children[12].scale.x = 0;
+	uiGroup.children[12].scale.y = 0;
+	
+	uiGroup.children[10].visible = true;
+	uiGroup.children[11].visible = true;
+	uiGroup.children[12].visible = true;
+	
+	TweenMax.to(uiGroup.children[10].scale,0.5,{ease: Power4.easeIn, x: scaleX, y: scaleY,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[10].material,0.5,{ease: Power4.easeIn, opacity: 0,
+				onComplete: function() {
+					uiGroup.children[10].visible = false;
+					uiGroup.children[10].material.opacity = 1;
+					
+					TweenMax.to(uiGroup.children[11].scale,0.5,{ease: Power4.easeIn, x: scaleX, y: scaleY,
+						onComplete: function() {
+							TweenMax.to(uiGroup.children[11].material,0.5,{ease: Power4.easeIn, opacity: 0,
+								onComplete: function() {
+									uiGroup.children[11].visible = false;
+									uiGroup.children[11].material.opacity = 1;
+									
+									TweenMax.to(uiGroup.children[12].scale,0.5,{ease: Power4.easeIn, x: scaleX, y: scaleY,
+										onComplete: function() {
+											TweenMax.to(uiGroup.children[12].material,0.5,{ease: Power4.easeIn, opacity: 0,
+												onComplete: function() {
+													uiGroup.children[12].visible = false;
+													uiGroup.children[12].material.opacity = 1;
+													
+													startRunning();													
+												}
+											});
+										}
+									});
+									
+								}
+							});
+						}
+					});
+					
+				}
+			});
+		}
+	});
+};
+
+var startRunning = function()
+{
+	gameStarted = true;
+	timeClock.start();
+	boyAction.time = 3.2916666;
+	girlAction.time = 7.04166;
+};
+
+var addSprite = function(location, zVal, yVal, xVal, scaleX, scaleY, tag)
+{
+	var spriteMap = new THREE.TextureLoader().load( location );
+	// spriteMap.minFilter = THREE.minFilter;
+	var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
+	var item = new THREE.Sprite( spriteMaterial );
+	item.position.set(xVal, yVal, zVal);
+	item.scale.x = scaleX;
+	item.scale.y = scaleY;
+	item.tag = tag;
+	item.lookAt(camera.position);
+	uiGroup.add(item);
+}
 
 var initGame = function()
 {
@@ -153,9 +495,6 @@ var initGame = function()
 	camera.position.set(0, 24, 4);
 	camera.lookAt(0,20,0);
 	
-	gameStarted = true;
-	
-	timeClock.start();
 	sceneLoop();
 };
 
@@ -251,7 +590,6 @@ var initSphere = function()
 				// child.receiveShadow = true;
 			// }
 		// } );
-		console.log(object.children[1]);
 		
 		object.children[1].material[0].transparent = false;
 		object.children[1].material[0].alphaTest = 0.5;
@@ -317,7 +655,6 @@ var initHair = function()
 		} );
 		//model.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
 		model.isCone = true;
-		console.log(object);
 		object.scale.set(0.1, 0.1, 0.1);
 		object.position.y = 20;
 		cone.add(object);
@@ -363,7 +700,6 @@ var initFallenHair = function()
 		} );
 		//model.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
 		model.isCone = true;
-		console.log(object);
 		object.scale.set(0.1, 0.1, 0.1);
 		object.position.y = 20;
 		cone.add(object);
@@ -454,7 +790,6 @@ var initDandruff = function()
 			}
 		} );
 		model.isCone = true;
-		console.log(object);
 		object.scale.set(0.1, 0.1, 0.1);
 		object.position.y = 20;
 		cube.add(object);
@@ -500,7 +835,6 @@ var initCracks = function()
 			}
 		} );
 		model.isCone = true;
-		console.log(object);
 		object.scale.set(0.1, 0.1, 0.1);
 		object.position.y = 20;
 		cube.add(object);
@@ -524,7 +858,6 @@ var initCracks = function()
 	} );
 	
 };
-
 
 var initObstacleModel = function(xRot, zRot, obstacle, origin)
 {
@@ -637,6 +970,7 @@ var initPlayer = function()
 	player.rotation.x = Math.PI/9;
 	player.rotation.z = 0;
 	player.add(camera);
+	
 	player.castShadow = true; 
 	player.receiveShadow = false;
 
@@ -651,7 +985,8 @@ var initPlayer = function()
 				player.dy = 0;
 				jumping = false;
 				player.position.y = 0;
-				runAction.time = 3.2916666;
+				boyAction.time = 3.2916666;
+				girlAction.time = 7.04166;
 			}
 			else
 			{
@@ -667,19 +1002,44 @@ var initPlayer = function()
 var initPlayerModel = function()
 {
 	var loader = new THREE.FBXLoader();
-	loader.load( 'models/player.fbx', function ( object ) {
+	loader.load( 'models/playerBoy.fbx', function ( object ) {
 		var model = object;
 		object.mixer = new THREE.AnimationMixer( object );
 		mixers.push( object.mixer );
-		runAction = object.mixer.clipAction( object.animations[ 0 ] );
-		runAction.play();
+		boyAction = object.mixer.clipAction( object.animations[ 0 ] );
+		boyAction.play();
 		object.traverse( function ( child ) {
 			if ( child.isMesh ) {
 				child.castShadow = true;
 				child.receiveShadow = true;
 			}
 		} );
-		runAction.time = 3.29;
+		// boyAction.time = 3.29;
+		model.scale.x = 0.1;
+		model.scale.y = 0.1;
+		model.scale.z = 0.1;
+		model.position.y = 20;
+		// model.rotation.x = Math.PI/2;
+		model.rotation.y = Math.PI;
+		
+		scene.add( object );
+		
+		player.add(object);
+	} );
+	
+	loader.load( 'models/playerGirl.fbx', function ( object ) {
+		var model = object;
+		object.mixer = new THREE.AnimationMixer( object );
+		mixersG.push( object.mixer );
+		girlAction = object.mixer.clipAction( object.animations[ 0 ] );
+		girlAction.play();
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		// boyAction.time = 3.29;
 		model.scale.x = 0.1;
 		model.scale.y = 0.1;
 		model.scale.z = 0.1;
@@ -692,8 +1052,8 @@ var initPlayerModel = function()
 		player.add(object);
 		modelReady = true;
 		
-		
 		setLevel();
+		
 	} );
 };
 
@@ -712,7 +1072,8 @@ var onDocumentKeyDown = function(event) {
 		{
 			player.dy = 0.2;
 			jumping = true;
-			runAction.time = 3.916666;
+			boyAction.time = 3.916666;
+			girlAction.time = 7.66666;
 		}
 	}
 };
@@ -777,7 +1138,8 @@ var collitionDetection = function()
 					timeClock.oldTime = 0;
 					timeClock.elapsedTime = 0;
 					dead = true;
-					runAction.time = 4.91666;
+					boyAction.time = 4.91666;
+					girlAction.time = 8.6666;
 				}
 			}
 		}
@@ -840,10 +1202,11 @@ var restartGame = function()
 	player.rotation.z = 0;
 	player.position.y = 0;
 	remainingTime = 60;
-	timeText.innerHTML = "Time : " + remainingTime;
+	// timeText.innerHTML = "Time : " + remainingTime;
 	timeClock.start();
 	dead = false;
-	runAction.time = 3.29;
+	boyAction.time = 0;
+	girlAction.time = 0;
 	
 	if(currentLevel == 2)
 	{
@@ -856,7 +1219,14 @@ var restartGame = function()
 	setLevel();
 	
 	restarting = false;
-	gameStarted = true;
+	
+	if(currentLevel != 0){
+		showCountDown();
+	}
+	else
+	{
+		playMenuApearAnimation();
+	}
 };
 
 var update = function()
@@ -872,8 +1242,8 @@ var update = function()
 		{
 			gameOver();
 		}
-		timeText.innerHTML = " Time : " + remainingTime;
-		scoreText.innerHTML = " Score : " + (playerScore + Math.floor(timeClock.getElapsedTime ()) );
+		// timeText.innerHTML = " Time : " + remainingTime;
+		// scoreText.innerHTML = " Score : " + (playerScore + Math.floor(timeClock.getElapsedTime ()) );
 		
 		var a = Math.floor(timeClock.getElapsedTime () );
 		
@@ -883,29 +1253,71 @@ var update = function()
 		}		
 	}
 	
-	
 	if(modelReady && gameStarted)
 	{
 		if(!jumping && !dead)
 		{
-			if(runAction.time >= 3.875)
+			if(boyAction.time >= 3.875)
 			{
-				runAction.time = 3.2916666;
+				boyAction.time = 3.2916666;
+			}
+			if(girlAction.time >= 7.625)
+			{
+				girlAction.time = 7.04166;
 			}
 		}
 		else if(dead)
 		{
-			if(runAction.time >= 7.9)
+			if(gender == 0){
+				if(boyAction.time >= 7.9)
+				{
+					boyAction.time = 7.9;
+					player.position.y = 0;
+					gameOver();
+				}	
+			}
+			else
 			{
-				runAction.time = 7.9;
-				player.position.y = 0;
-				gameOver();
-			}		
+				if(girlAction.time >= 11.60)
+				{
+					girlAction.time = 11.60;
+					player.position.y = 0;
+					gameOver();
+				}	
+			}			
 		}
-		mixers[0].update( clock.getDelta() );
-	}
 		
+		if(gender == 1)
+		{
+			mixersG[0].update( clock.getDelta() );
+		}
+		else
+		{
+			mixers[0].update( clock.getDelta() );
+		}
+	}
+	else if(modelReady && !gameStarted && !dead)
+	{
+		if(boyAction.time >= 3.25)
+		{
+			boyAction.time = 0;
+		}
+		if(girlAction.time >= 7)
+		{
+			girlAction.time = 0;
+		}
+		if(gender == 1)
+		{
+			mixersG[0].update( clock.getDelta() );
+		}
+		else
+		{
+			mixers[0].update( clock.getDelta() );
+		}
+	}
+	
 	//controls.update();
+
 };
 
 var render = function()
