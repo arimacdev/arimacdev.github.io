@@ -4,6 +4,7 @@ var sphere;
 var obstacleHalfOne, obstacleHalfTwo;
 var dandrufHalfOne, dandrufHalfTwo;
 var fallenHalfOne, fallenHalfTwo;
+var cracksHalfOne, cracksHalfTwo;
 var shuffled;
 var player;
 var playerMoving;
@@ -26,6 +27,8 @@ var currentLevel;
 var restarting;
 var collitionStarted;
 var playerScore;
+
+var dead;
 
 document.getElementById("Restart").onclick = function() 
 {
@@ -102,6 +105,8 @@ var startGame = function()
 	dandrufHalfTwo = [];
 	fallenHalfOne = [];
 	fallenHalfTwo = [];
+	cracksHalfOne = [];
+	cracksHalfTwo = [];
 	
 	shuffled = false;
 	playerMoving = false;
@@ -117,6 +122,7 @@ var startGame = function()
 	restarting = false;
 	collitionStarted = false;
 	playerScore = 0;
+	dead = false;
 	
 	initGame();
 };
@@ -128,6 +134,7 @@ var initGame = function()
 	initHair();
 	initDandruff();
 	initFallenHair();
+	initCracks();
 	
 	initPlayer();
 	
@@ -143,7 +150,7 @@ var initGame = function()
 	directionalLight.shadow.camera.near = 0.5;
 	directionalLight.shadow.camera.far = 500
 	
-	camera.position.set(0, 23, 3);
+	camera.position.set(0, 24, 4);
 	camera.lookAt(0,20,0);
 	
 	gameStarted = true;
@@ -172,6 +179,14 @@ var setLevel = function()
 		fallenHalfTwo[i].visible = false;
 	}
 	
+	for(var i = 0; i <  cracksHalfOne.length; i++)
+	{
+		cracksHalfOne[i].visible = false;
+	}
+	for(var i = 0; i <  cracksHalfTwo.length; i++)
+	{
+		cracksHalfTwo[i].visible = false;
+	}
 	
 	if(currentLevel == 0){
 		shuffleCones(obstacleHalfOne, dandrufHalfOne);
@@ -182,8 +197,8 @@ var setLevel = function()
 		shuffleCones(obstacleHalfTwo, fallenHalfTwo);
 	}
 	else if(currentLevel == 2){
-		shuffleCones(obstacleHalfOne, dandrufHalfOne);
-		shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+		shuffleCones(obstacleHalfOne, cracksHalfOne);
+		shuffleCones(obstacleHalfTwo, cracksHalfTwo);
 	}
 	
 	for(var i = 20; i <  40; i++)
@@ -225,37 +240,59 @@ var initSphere = function()
 	sphere = new THREE.Mesh( geometry, material );
 	scene.add( sphere );
 	sphere.receiveShadow = true;
-	// sphere.material.visible = false;
+	sphere.material.visible = false;
+	
+	var loader = new THREE.FBXLoader();
+	loader.load( 'models/head.fbx', function ( object ) {
+		var model = object;
+		// object.traverse( function ( child ) {
+			// if ( child.isMesh ) {
+				// child.castShadow = true;
+				// child.receiveShadow = true;
+			// }
+		// } );
+		console.log(object.children[1]);
+		
+		object.children[1].material[0].transparent = false;
+		object.children[1].material[0].alphaTest = 0.5;
+		object.children[1].material[0].alphaMap = null;
+		sphere.add(object);
+		object.rotation.y = Math.PI;
+		object.scale.set(0.1035,0.1035,0.1035);
+	} );	
+	
 	sphere.update = function()
 	{
-		sphere.rotation.x += Math.PI/360 + timeClock.getElapsedTime() * 0.0001;
-		if(sphere.rotation.x >= 2 * Math.PI)
-		{
-			shuffled = false;
-			sphere.rotation.x = 0;
+		if(!dead){
+			sphere.rotation.x += Math.PI/360 + timeClock.getElapsedTime() * 0.0001;
+			if(sphere.rotation.x >= 2 * Math.PI)
+			{
+				shuffled = false;
+				sphere.rotation.x = 0;
+				
+				if(currentLevel == 0){
+					shuffleCones(obstacleHalfOne, dandrufHalfOne);
+				}
+				else if(currentLevel == 1){
+					shuffleCones(obstacleHalfOne, fallenHalfOne);
+				}
+				else if(currentLevel == 2){
+					shuffleCones(obstacleHalfOne, cracksHalfOne);
+				}
+			}
 			
-			if(currentLevel == 0){
-				shuffleCones(obstacleHalfOne, dandrufHalfOne);
-			}
-			else if(currentLevel == 1){
-				shuffleCones(obstacleHalfOne, fallenHalfOne);
-			}
-			else if(currentLevel == 2){
-				shuffleCones(obstacleHalfOne, dandrufHalfOne);
-			}
-		}
-		
-		if(sphere.rotation.x >=  Math.PI && !shuffled)
-		{
-			shuffled = true;
-			if(currentLevel == 0){
-				shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
-			}
-			else if(currentLevel == 1){
-				shuffleCones(obstacleHalfTwo, fallenHalfTwo);
-			}
-			else if(currentLevel == 2){
-				shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+			if(sphere.rotation.x >=  Math.PI && !shuffled)
+			{
+				shuffled = true;
+				if(currentLevel == 0){
+					shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+				}
+				else if(currentLevel == 1){
+					shuffleCones(obstacleHalfTwo, fallenHalfTwo);
+				}
+				else if(currentLevel == 2){
+					shuffleCones(obstacleHalfTwo, cracksHalfTwo);
+				}
 			}
 		}
 	};
@@ -295,6 +332,13 @@ var initHair = function()
 			initObstacleModel((Math.PI/16) * (i - 8), 0, obstacleHalfTwo, cone);
 			initObstacleModel((Math.PI/16) * (i - 8), Math.PI/30, obstacleHalfTwo, cone);
 			initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/30, obstacleHalfTwo, cone);
+		}
+		
+		for(var i = 0; i <  obstacleHalfTwo.length; i++)
+		{
+			obstacleHalfOne[i].children[0].children[0].isCone = true;
+			
+			obstacleHalfTwo[i].children[0].children[0].isCone = true;
 		}
 	} );
 	
@@ -351,8 +395,6 @@ var initFallenHair = function()
 			fallenHalfTwo[i].children[0].children[0].hairNumber = i;
 			fallenHalfTwo[i].children[0].children[0].isCone = true;
 		}
-		
-		setLevel();
 	} );	
 };
 
@@ -399,20 +441,90 @@ var initDandruff = function()
 	var geometry = new THREE.BoxGeometry( 0.9, 0.5, 0.3 );
 	var material = new THREE.MeshBasicMaterial( {color: new THREE.Color(0xffffff)} );
 	var cube = new THREE.Mesh( geometry, material );
-	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20.2, 0 ) );
 	cube.isCone = true;
 	
-	for(var i = 0; i < 16; i++)
-	{
-		initObstacleModel((Math.PI/16) * (i + 8), 0, dandrufHalfOne, cube);
-		initObstacleModel((Math.PI/16) * (i + 8), Math.PI/30, dandrufHalfOne, cube);
-		initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/30, dandrufHalfOne, cube);
+	var loader = new THREE.FBXLoader();
+	loader.load( 'models/dandruff.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		console.log(object);
+		object.scale.set(0.1, 0.1, 0.1);
+		object.position.y = 20;
+		cube.add(object);
+		cube.material.visible = false;
+		object.isCone = true;
 		
-		initObstacleModel((Math.PI/16) * (i - 8), 0, dandrufHalfTwo, cube);
-		initObstacleModel((Math.PI/16) * (i - 8), Math.PI/30, dandrufHalfTwo, cube);
-		initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/30, dandrufHalfTwo, cube);
-	}
+		for(var i = 0; i < 16; i++)
+		{
+			initObstacleModel((Math.PI/16) * (i + 8), 0, dandrufHalfOne, cube);
+			initObstacleModel((Math.PI/16) * (i + 8), Math.PI/30, dandrufHalfOne, cube);
+			initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/30, dandrufHalfOne, cube);
+			
+			initObstacleModel((Math.PI/16) * (i - 8), 0, dandrufHalfTwo, cube);
+			initObstacleModel((Math.PI/16) * (i - 8), Math.PI/30, dandrufHalfTwo, cube);
+			initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/30, dandrufHalfTwo, cube);
+		}
+		
+		for(var i = 0; i <  obstacleHalfTwo.length; i++)
+		{
+			dandrufHalfOne[i].isCone = true;
+			
+			dandrufHalfTwo[i].isCone = true;
+		}
+	} );
+	
 };
+
+var initCracks = function()
+{
+	var geometry = new THREE.BoxGeometry( 0.9, 0.5, 0.3 );
+	var material = new THREE.MeshBasicMaterial( {color: new THREE.Color(0xffffff)} );
+	var cube = new THREE.Mesh( geometry, material );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20.2, 0 ) );
+	cube.isCone = true;
+	
+	var loader = new THREE.FBXLoader();
+	loader.load( 'models/crack.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		console.log(object);
+		object.scale.set(0.1, 0.1, 0.1);
+		object.position.y = 20;
+		cube.add(object);
+		cube.material.visible = false;
+		object.isCone = true;
+		
+		for(var i = 0; i < 16; i++)
+		{
+			initObstacleModel((Math.PI/16) * (i + 8), 0, cracksHalfOne, cube);
+			
+			initObstacleModel((Math.PI/16) * (i - 8), 0, cracksHalfTwo, cube);
+		}
+		
+		for(var i = 0; i <  obstacleHalfTwo.length; i++)
+		{
+			cracksHalfTwo[i].isCone = true;
+			
+			cracksHalfTwo[i].isCone = true;
+		}
+				
+	} );
+	
+};
+
 
 var initObstacleModel = function(xRot, zRot, obstacle, origin)
 {
@@ -425,6 +537,7 @@ var initObstacleModel = function(xRot, zRot, obstacle, origin)
 	obj.rotation.z = zRot;
 	sphere.add(obj);
 	obj.castShadow = true;
+	obj.isCone = true;
 	obstacle.push(obj);
 };
 
@@ -434,8 +547,8 @@ var shuffleCones = function(obstacle1, obstacle2)
 	{
 		for(var i = 0; i <  obstacle2.length; i++)
 		{
-			obstacle2[i].children[0].rotation.z = 0;
-			obstacle2[i].children[0].fallen = false;
+			obstacle2[i].children[0].children[0].rotation.z = 0;
+			obstacle2[i].children[0].children[0].fallen = false;
 		}
 	}
 	
@@ -444,36 +557,18 @@ var shuffleCones = function(obstacle1, obstacle2)
 		obstacle1[i * 3 + 0].visible = true;
 		obstacle1[i * 3 + 1].visible = true;
 		obstacle1[i * 3 + 2].visible = true;
-		obstacle2[i * 3 + 0].visible = true;
-		obstacle2[i * 3 + 1].visible = true;
-		obstacle2[i * 3 + 2].visible = true;
-		
+		if(currentLevel != 2){
+			obstacle2[i * 3 + 0].visible = true;
+			obstacle2[i * 3 + 1].visible = true;
+			obstacle2[i * 3 + 2].visible = true;
+		}
+		else
+		{
+			obstacle2[i].visible = true;
+		}
 		var randA = Math.floor(Math.random() * 3) + 1;
 		
-		if(randA == 1)
-		{
-			var randX = Math.floor(Math.random() * 3);
-			
-			obstacle1[i * 3 + randX].visible = false;
-			obstacle2[i * 3 + randX].visible = false;
-			
-			for(var j = 0; j < 3; j++)
-			{
-				if(j != randX)
-				{
-					var randY = Math.floor(Math.random() * 2);
-					if(randY == 0){
-						obstacle1[i * 3 + j].visible = false;
-					}
-					else
-					{
-						obstacle2[i * 3 + j].visible = false;
-					}
-				}
-			}
-			
-		}
-		else if(randA == 2)
+		if(randA == 2 || randA == 1)
 		{
 			var randX = Math.floor(Math.random() * 3);
 			var randY = 100;
@@ -485,20 +580,28 @@ var shuffleCones = function(obstacle1, obstacle2)
 			
 			obstacle1[i * 3 + randX].visible = false;
 			obstacle1[i * 3 + randY].visible = false;
-			obstacle2[i * 3 + randX].visible = false;
-			obstacle2[i * 3 + randY].visible = false;
+			if(currentLevel != 2){
+				obstacle2[i * 3 + randX].visible = false;
+				obstacle2[i * 3 + randY].visible = false;
+			}
 			
 			for(var j = 0; j < 3; j++)
 			{
 				if(j != randX && j != randY)
 				{
-					var randZ = Math.floor(Math.random() * 2);
-					if(randZ == 0){
+					var randZ = Math.floor(Math.random() * 4);
+					if(randZ == 0 ){
 						obstacle1[i * 3 + j].visible = false;
 					}
 					else
 					{
-						obstacle2[i * 3 + j].visible = false;
+						if(currentLevel != 2){
+							obstacle2[i * 3 + j].visible = false;
+						}
+						else
+						{
+							obstacle2[i].visible = false;
+						}
 					}
 				}
 			}
@@ -508,9 +611,16 @@ var shuffleCones = function(obstacle1, obstacle2)
 			obstacle1[i * 3 + 0].visible = false;
 			obstacle1[i * 3 + 1].visible = false;
 			obstacle1[i * 3 + 2].visible = false;
-			obstacle2[i * 3 + 0].visible = false;
-			obstacle2[i * 3 + 1].visible = false;
-			obstacle2[i * 3 + 2].visible = false;
+			
+			if(currentLevel != 2){
+				obstacle2[i * 3 + 0].visible = false;
+				obstacle2[i * 3 + 1].visible = false;
+				obstacle2[i * 3 + 2].visible = false;
+			}
+			else
+			{
+				obstacle2[i].visible = false;
+			}
 		}
 	}
 };
@@ -535,13 +645,13 @@ var initPlayer = function()
 	
 	player.update = function()
 	{
-		if(jumping){
+		if(jumping && !dead){
 			if(player.position.y < 0)
 			{
 				player.dy = 0;
 				jumping = false;
 				player.position.y = 0;
-				runAction.time = 0;
+				runAction.time = 3.2916666;
 			}
 			else
 			{
@@ -569,22 +679,26 @@ var initPlayerModel = function()
 				child.receiveShadow = true;
 			}
 		} );
-		model.scale.x = 0.008;
-		model.scale.y = 0.008;
-		model.scale.z = 0.008;
+		runAction.time = 3.29;
+		model.scale.x = 0.1;
+		model.scale.y = 0.1;
+		model.scale.z = 0.1;
 		model.position.y = 20;
-		model.rotation.x = Math.PI/2;
+		// model.rotation.x = Math.PI/2;
 		model.rotation.y = Math.PI;
 		
 		scene.add( object );
 		
 		player.add(object);
 		modelReady = true;
+		
+		
+		setLevel();
 	} );
 };
 
 var onDocumentKeyDown = function(event) {
-	if(gameStarted){
+	if(gameStarted && !dead){
 		var keyCode = event.which;
 		if (keyCode == 37) //left
 		{
@@ -598,7 +712,7 @@ var onDocumentKeyDown = function(event) {
 		{
 			player.dy = 0.2;
 			jumping = true;
-			runAction.time = 0.68;
+			runAction.time = 3.916666;
 		}
 	}
 };
@@ -635,7 +749,7 @@ var moveRight = function()
 
 var collitionDetection = function()
 {
-	if(collitionStarted){
+	if(collitionStarted && !dead){
 		player.geometry.computeBoundingBox();  
 		player.updateMatrixWorld();
 		var vector = new THREE.Vector3();
@@ -646,20 +760,25 @@ var collitionDetection = function()
 		intersects = raycaster.intersectObjects(sphere.children, true);
 		if(intersects.length > 0)
 		{
-			if(intersects[0].distance < 1){
-				if(currentLevel == 2)
+			for(var i =  0; i <  intersects.length; i++)
+			{
+				if(intersects[i].distance < 1 && intersects[i].object.isCone)
 				{
-					playerScore = 0;
+					if(currentLevel == 2)
+					{
+						playerScore = 0;
+					}
+					else
+					{
+						playerScore += Math.floor(timeClock.getElapsedTime ());
+					}
+					timeClock.stop();
+					timeClock.startTime = 0;
+					timeClock.oldTime = 0;
+					timeClock.elapsedTime = 0;
+					dead = true;
+					runAction.time = 4.91666;
 				}
-				else
-				{
-					playerScore += Math.floor(timeClock.getElapsedTime ());
-				}
-				timeClock.stop();
-				timeClock.startTime = 0;
-				timeClock.oldTime = 0;
-				timeClock.elapsedTime = 0;
-				gameOver();
 			}
 		}
 	
@@ -723,6 +842,9 @@ var restartGame = function()
 	remainingTime = 60;
 	timeText.innerHTML = "Time : " + remainingTime;
 	timeClock.start();
+	dead = false;
+	runAction.time = 3.29;
+	
 	if(currentLevel == 2)
 	{
 		currentLevel = 0;
@@ -761,18 +883,28 @@ var update = function()
 		}		
 	}
 	
-	if(modelReady)
+	
+	if(modelReady && gameStarted)
 	{
-		if(!jumping)
+		if(!jumping && !dead)
 		{
-			if(runAction.time >= 0.68)
+			if(runAction.time >= 3.875)
 			{
-				runAction.time = 0;
+				runAction.time = 3.2916666;
 			}
+		}
+		else if(dead)
+		{
+			if(runAction.time >= 7.9)
+			{
+				runAction.time = 7.9;
+				player.position.y = 0;
+				gameOver();
+			}		
 		}
 		mixers[0].update( clock.getDelta() );
 	}
-	
+		
 	//controls.update();
 };
 
