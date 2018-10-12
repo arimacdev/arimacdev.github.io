@@ -62,7 +62,7 @@ var init = function()
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	container.appendChild(renderer.domElement);
 	
-	//controls = new THREE.OrbitControls( camera );
+	// controls = new THREE.OrbitControls( camera );
 	
 	document.addEventListener("keydown", onDocumentKeyDown, false);
 	
@@ -148,15 +148,12 @@ var initGame = function()
 	
 	gameStarted = true;
 	
-	setLevel();
-	
 	timeClock.start();
 	sceneLoop();
 };
 
 var setLevel = function()
-{	
-	
+{		
 	for(var i = 0; i <  dandrufHalfOne.length; i++)
 	{
 		dandrufHalfOne[i].visible = false;
@@ -175,32 +172,32 @@ var setLevel = function()
 		fallenHalfTwo[i].visible = false;
 	}
 	
-	shuffleCones(obstacleHalfOne, fallenHalfOne);
-	shuffleCones(obstacleHalfTwo, fallenHalfTwo);
 	
-	for(var i = 0; i <  fallenHalfOne.length; i++)
-	{
-		fallenHalfOne[i].visible = true;
+	if(currentLevel == 0){
+		shuffleCones(obstacleHalfOne, dandrufHalfOne);
+		shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
 	}
-	for(var i = 0; i <  fallenHalfTwo.length; i++)
-	{
-		fallenHalfTwo[i].visible = true;
+	else if(currentLevel == 1){
+		shuffleCones(obstacleHalfOne, fallenHalfOne);
+		shuffleCones(obstacleHalfTwo, fallenHalfTwo);
+	}
+	else if(currentLevel == 2){
+		shuffleCones(obstacleHalfOne, dandrufHalfOne);
+		shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
 	}
 	
-	for(var i = 0; i <  40; i++)
+	for(var i = 20; i <  40; i++)
 	{
 		obstacleHalfTwo[i].visible = false;
-	}
-	for(var i = 28; i <  40; i++)
-	{
 		fallenHalfTwo[i].visible = false;
+		dandrufHalfTwo[i].visible = false;
 	}
 
 	if(currentLevel == 0)
 	{
 		fogColor = new THREE.Color(0xE5FFCC);
 		scene.background = fogColor;
-		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
+		scene.fog = new THREE.Fog(fogColor, 0.0025, 100);
 	}
 	else if(currentLevel == 1)
 	{
@@ -228,21 +225,38 @@ var initSphere = function()
 	sphere = new THREE.Mesh( geometry, material );
 	scene.add( sphere );
 	sphere.receiveShadow = true;
-	sphere.material.visible = false;
+	// sphere.material.visible = false;
 	sphere.update = function()
 	{
-		//sphere.rotation.x += Math.PI/360 + timeClock.getElapsedTime() * 0.0001;
+		sphere.rotation.x += Math.PI/360 + timeClock.getElapsedTime() * 0.0001;
 		if(sphere.rotation.x >= 2 * Math.PI)
 		{
 			shuffled = false;
 			sphere.rotation.x = 0;
-			shuffleCones(obstacleHalfOne, dandrufHalfOne);
+			
+			if(currentLevel == 0){
+				shuffleCones(obstacleHalfOne, dandrufHalfOne);
+			}
+			else if(currentLevel == 1){
+				shuffleCones(obstacleHalfOne, fallenHalfOne);
+			}
+			else if(currentLevel == 2){
+				shuffleCones(obstacleHalfOne, dandrufHalfOne);
+			}
 		}
 		
 		if(sphere.rotation.x >=  Math.PI && !shuffled)
 		{
 			shuffled = true;
-			shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+			if(currentLevel == 0){
+				shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+			}
+			else if(currentLevel == 1){
+				shuffleCones(obstacleHalfTwo, fallenHalfTwo);
+			}
+			else if(currentLevel == 2){
+				shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+			}
 		}
 	};
 };
@@ -255,16 +269,35 @@ var initHair = function()
 	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
 	cone.isCone = true;
 	
-	for(var i = 0; i < 16; i++)
-	{
-		initObstacleModel((Math.PI/16) * (i + 8), 0, obstacleHalfOne, cone);
-		initObstacleModel((Math.PI/16) * (i + 8), Math.PI/32, obstacleHalfOne, cone);
-		initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/32, obstacleHalfOne, cone);
-		
-		initObstacleModel((Math.PI/16) * (i - 8), 0, obstacleHalfTwo, cone);
-		initObstacleModel((Math.PI/16) * (i - 8), Math.PI/32, obstacleHalfTwo, cone);
-		initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/32, obstacleHalfTwo, cone);
-	}
+	var loader = new THREE.FBXLoader();
+	loader.load( 'models/hair.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		//model.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
+		model.isCone = true;
+		console.log(object);
+		object.scale.set(0.1, 0.1, 0.1);
+		object.position.y = 20;
+		cone.add(object);
+		cone.material.visible = false;
+		object.isCone = true;
+		for(var i = 0; i < 16; i++)
+		{
+			initObstacleModel((Math.PI/16) * (i + 8), 0, obstacleHalfOne, cone);
+			initObstacleModel((Math.PI/16) * (i + 8), Math.PI/30, obstacleHalfOne, cone);
+			initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/30, obstacleHalfOne, cone);
+			
+			initObstacleModel((Math.PI/16) * (i - 8), 0, obstacleHalfTwo, cone);
+			initObstacleModel((Math.PI/16) * (i - 8), Math.PI/30, obstacleHalfTwo, cone);
+			initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/30, obstacleHalfTwo, cone);
+		}
+	} );
+	
 };
 
 var initFallenHair = function()
@@ -275,43 +308,90 @@ var initFallenHair = function()
 	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 30, 0 ) );
 	cone.isCone = true;
 	
-	for(var i = 0; i < 16; i++)
-	{
-		initObstacleModel((Math.PI/16) * (i + 8), 0, fallenHalfOne, cone);
-		initObstacleModel((Math.PI/16) * (i + 8), Math.PI/32, fallenHalfOne, cone);
-		initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/32, fallenHalfOne, cone);
+	var loader = new THREE.FBXLoader();
+	loader.load( 'models/hair.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		//model.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
+		model.isCone = true;
+		console.log(object);
+		object.scale.set(0.1, 0.1, 0.1);
+		object.position.y = 20;
+		cone.add(object);
+		cone.material.visible = false;
+		model.isCone = true;
 		
-		initObstacleModel((Math.PI/16) * (i - 8), 0, fallenHalfTwo, cone);
-		initObstacleModel((Math.PI/16) * (i - 8), Math.PI/32, fallenHalfTwo, cone);
-		initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/32, fallenHalfTwo, cone);
-	}
+		for(var i = 0; i < 16; i++)
+		{
+			initObstacleModel((Math.PI/16) * (i + 8), 0, fallenHalfOne, cone);
+			initObstacleModel((Math.PI/16) * (i + 8), Math.PI/30, fallenHalfOne, cone);
+			initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/30, fallenHalfOne, cone);
+			
+			initObstacleModel((Math.PI/16) * (i - 8), 0, fallenHalfTwo, cone);
+			initObstacleModel((Math.PI/16) * (i - 8), Math.PI/30, fallenHalfTwo, cone);
+			initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/30, fallenHalfTwo, cone);
+		}
+		
+		for(var i = 0; i <  fallenHalfOne.length; i++)
+		{
+			fallenHalfOne[i].children[0].children[0].fallen = false;
+			fallenHalfOne[i].children[0].children[0].canFall = true;
+			fallenHalfOne[i].children[0].children[0].arrayNumber = 1;
+			fallenHalfOne[i].children[0].children[0].hairNumber = i;
+			fallenHalfOne[i].children[0].children[0].isCone = true;
+			
+			fallenHalfTwo[i].children[0].children[0].fallen = false;
+			fallenHalfTwo[i].children[0].children[0].canFall = true;
+			fallenHalfTwo[i].children[0].children[0].arrayNumber = 2;
+			fallenHalfTwo[i].children[0].children[0].hairNumber = i;
+			fallenHalfTwo[i].children[0].children[0].isCone = true;
+		}
+		
+		setLevel();
+	} );	
+};
+
+var fallHair = function(arrayNumber, hairNumber)
+{
+	var obj;
 	
-	// for(var i = 0; i <  fallenHalfOne.length; i++)
-	// {
-		// fallenHalfOne[i].material.visible = false;
-	// }
-	// for(var i = 0; i <  fallenHalfTwo.length; i++)
-	// {
-		// fallenHalfTwo[i].material.visible = false;
-	// }
-	
-	for(var i = 0; i <  fallenHalfOne.length; i++)
+	if(arrayNumber == 1)
 	{
-		fallenHalfOne[i].material.visible = false;
-		var c = cone.clone();
-		c.position.set(0,0, 0);
-		//c.rotation.z += Math.PI/4;
-		fallenHalfOne[i].add(c);
+		obj = fallenHalfOne[hairNumber].children[0].children[0];
 	}
-	for(var i = 0; i <  fallenHalfTwo.length; i++)
+	else if(arrayNumber == 2)
 	{
-		fallenHalfTwo[i].material.visible = false;
-		var c = cone.clone();
-		c.position.set(0,0, 0);
-		//c.rotation.z += Math.PI/4;
-		fallenHalfTwo[i].add(c);
+		obj = fallenHalfTwo[hairNumber].children[0].children[0];
 	}
 	
+	obj.fallen = true;
+	var rot = 0;
+	var pRot = 0;
+	
+	if(arrayNumber == 1)
+	{
+		pRot = fallenHalfOne[hairNumber].rotation;
+	}
+	else if(arrayNumber == 2)
+	{
+		pRot = fallenHalfTwo[hairNumber].rotation;
+	}
+	console.log(pRot.z + Math.PI/30);
+	
+	if(pRot.z == Math.PI/30)
+	{
+		rot = -Math.PI/1.8;
+	}
+	else if(pRot.z == -Math.PI/30)
+	{
+		rot = Math.PI/1.8;
+	}
+	TweenMax.to(obj.rotation,1,{ ease: Bounce.easeOut, z:rot});
 };
 
 var initDandruff = function()
@@ -325,12 +405,12 @@ var initDandruff = function()
 	for(var i = 0; i < 16; i++)
 	{
 		initObstacleModel((Math.PI/16) * (i + 8), 0, dandrufHalfOne, cube);
-		initObstacleModel((Math.PI/16) * (i + 8), Math.PI/32, dandrufHalfOne, cube);
-		initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/32, dandrufHalfOne, cube);
+		initObstacleModel((Math.PI/16) * (i + 8), Math.PI/30, dandrufHalfOne, cube);
+		initObstacleModel((Math.PI/16) * (i + 8), -Math.PI/30, dandrufHalfOne, cube);
 		
 		initObstacleModel((Math.PI/16) * (i - 8), 0, dandrufHalfTwo, cube);
-		initObstacleModel((Math.PI/16) * (i - 8), Math.PI/32, dandrufHalfTwo, cube);
-		initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/32, dandrufHalfTwo, cube);
+		initObstacleModel((Math.PI/16) * (i - 8), Math.PI/30, dandrufHalfTwo, cube);
+		initObstacleModel((Math.PI/16) * (i - 8), -Math.PI/30, dandrufHalfTwo, cube);
 	}
 };
 
@@ -345,12 +425,20 @@ var initObstacleModel = function(xRot, zRot, obstacle, origin)
 	obj.rotation.z = zRot;
 	sphere.add(obj);
 	obj.castShadow = true;
-	
 	obstacle.push(obj);
 };
 
 var shuffleCones = function(obstacle1, obstacle2)
 {
+	if(currentLevel == 1)
+	{
+		for(var i = 0; i <  obstacle2.length; i++)
+		{
+			obstacle2[i].children[0].rotation.z = 0;
+			obstacle2[i].children[0].fallen = false;
+		}
+	}
+	
 	for(var i = 0; i <  obstacle1.length/3; i++)
 	{
 		obstacle1[i * 3 + 0].visible = true;
@@ -493,9 +581,6 @@ var initPlayerModel = function()
 		player.add(object);
 		modelReady = true;
 	} );
-	
-	
-
 };
 
 var onDocumentKeyDown = function(event) {
@@ -558,8 +643,7 @@ var collitionDetection = function()
 		var yVal = 19 + player.position.y;
 		raycaster.set(new THREE.Vector3(vector.x, yVal , 7), new THREE.Vector3( 0, 0,  -1));
 		raycaster.far = 10;
-		intersects = raycaster.intersectObjects(sphere.children);
-		
+		intersects = raycaster.intersectObjects(sphere.children, true);
 		if(intersects.length > 0)
 		{
 			if(intersects[0].distance < 1){
@@ -578,8 +662,43 @@ var collitionDetection = function()
 				gameOver();
 			}
 		}
-	}
 	
+		if(currentLevel == 1){
+			raycaster.set(new THREE.Vector3(-2.254, 20 , 7), new THREE.Vector3( 0, 0,  -1));
+			raycaster.far = 50;
+			intersects = raycaster.intersectObjects(sphere.children, true);
+			if(intersects.length > 0)
+			{
+				for(var i =  0; i <  intersects.length; i++)
+				{
+					if(intersects[i].object.canFall && intersects[i].distance > 2)
+					{
+						if(!intersects[i].object.fallen)
+						{
+							fallHair(intersects[i].object.arrayNumber, intersects[i].object.hairNumber);
+						}
+					}
+				}
+			}
+			
+			raycaster.set(new THREE.Vector3(2.254, 20 , 7), new THREE.Vector3( 0, 0,  -1));
+			raycaster.far = 50;
+			intersects = raycaster.intersectObjects(sphere.children, true);
+			if(intersects.length > 0)
+			{
+				for(var i =  0; i <  intersects.length; i++)
+				{
+					if(intersects[i].object.canFall && intersects[i].distance > 2)
+					{
+						if(!intersects[i].object.fallen)
+						{
+							fallHair(intersects[i].object.arrayNumber, intersects[i].object.hairNumber);
+						}
+					}
+				}
+			}
+		}
+	}
 };
 
 var gameOver = function()
@@ -638,8 +757,8 @@ var update = function()
 		
 		if(!collitionStarted && a >= 0.5)
 		{
-			collitionStarted = false;
-		}
+			collitionStarted = true;
+		}		
 	}
 	
 	if(modelReady)
