@@ -26,7 +26,6 @@ var aspectRatio;
 var currentLevel;
 var restarting;
 var collitionStarted;
-var playerScore;
 
 var dead;
 var uiGroup;
@@ -34,13 +33,9 @@ var uiGroup;
 var uiChecking;
 var mouse;
 var gender;
+var whiteNumbers;
 
-document.getElementById("Restart").onclick = function() 
-{
-	if(!gameStarted && !restarting){
-		restartGame();
-	}
-};
+var playerScore, playerTime;
 
 window.addEventListener('resize', setSize, true);
 
@@ -72,6 +67,10 @@ window.addEventListener( 'mousedown', function(event)
 				player.children[1].visible = false;
 				player.children[2].visible = true;
 				playGenderDisapearAnimation();
+			}
+			else if(intersects[0].object.tag == "Tap")
+			{
+				showHideLevel(false, currentLevel+1);
 			}
 		}
 	}
@@ -107,11 +106,6 @@ var init = function()
 	
 	document.addEventListener("keydown", onDocumentKeyDown, false);
 	
-	restartButton = document.getElementById("Restart");
-	restartButton.style.display = "none";
-	
-	// timeText = document.getElementById("time");
-	// scoreText = document.getElementById("score");
 	gameStarted = false;
 	
 	setSize();
@@ -160,11 +154,13 @@ var startGame = function()
 	currentLevel = 0;
 	restarting = false;
 	collitionStarted = false;
-	playerScore = 0;
 	dead = false;
 	uiChecking = false;
 	mouse = new THREE.Vector2();
 	gender = 0;
+	
+	playerScore = 0;
+	playerTime = 60;
 	
 	initUI();
 };
@@ -173,45 +169,119 @@ var initUI = function()
 {
 	uiGroup = new THREE.Group();
 	
-	addSprite("images/mainBG.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");
+	addSprite("images/mainBG.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//0
 	
-	addSprite("images/name.png", -0.99, 0.43, 0, 0.451 * 1.3, 0.3 * 1.3, "");
-	addSprite("images/girl.png", -0.99, -0.07, -0.34, 1.91 * 0.225, 3.8 * 0.225, "");	
-	addSprite("images/boy.png", -0.99, -0.035, 0.35, 1.71 * 0.25, 3.71 * 0.25, "");	
-	addSprite("images/play.png", -0.99, -0.07, 0, 3.7 * 0.11, 1.78 * 0.11, "Play");
+	addSprite("images/name.png", -0.99, 0.43, 0, 0.451 * 1.3, 0.3 * 1.3, "");//1
+	addSprite("images/girl.png", -0.99, -0.07, -0.34, 1.91 * 0.225, 3.8 * 0.225, "");//2
+	addSprite("images/boy.png", -0.99, -0.035, 0.35, 1.71 * 0.25, 3.71 * 0.25, "");	//3
+	addSprite("images/play.png", -0.99, -0.07, 0, 3.7 * 0.11, 1.78 * 0.11, "Play");//4
 	
-	addSprite("images/genderText.png", -0.99, 0.56, 0, 0.898 * 0.8, 0.08 * 0.8, "");
-	addSprite("images/girl.png", -0.99, -0.07, -0.15, 1.91 * 0.225, 3.8 * 0.225, "");	
-	addSprite("images/boy.png", -0.99, -0.035, 0.15, 1.71 * 0.25, 3.71 * 0.25, "");
-	addSprite("images/female.png", -0.99, -0.58, -0.17, 3.75 * 0.08, 1.8 * 0.08, "Female");
-	addSprite("images/male.png", -0.99, -0.58, 0.185, 3.75 * 0.08, 1.8 * 0.08, "Male");
+	addSprite("images/genderText.png", -0.99, 0.56, 0, 0.898 * 0.8, 0.08 * 0.8, "");//5
+	addSprite("images/girl.png", -0.99, -0.07, -0.15, 1.91 * 0.225, 3.8 * 0.225, "");//6
+	addSprite("images/boy.png", -0.99, -0.035, 0.15, 1.71 * 0.25, 3.71 * 0.25, "");//7
+	addSprite("images/female.png", -0.99, -0.58, -0.17, 3.75 * 0.08, 1.8 * 0.08, "Female");//8
+	addSprite("images/male.png", -0.99, -0.58, 0.185, 3.75 * 0.08, 1.8 * 0.08, "Male");//9
 	
-	addSprite("images/3.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");
-	addSprite("images/2.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");
-	addSprite("images/1.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");
+	addSprite("images/3.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");//10
+	addSprite("images/2.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");//11
+	addSprite("images/1.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");//12
+	
+	addSprite("images/bg1.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//13
+	addSprite("images/bg2.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//14
+	addSprite("images/bg3.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//15
+	
+	addSprite("images/tap.png", -0.99, -0.53, 0, 5.84* 0.08, 1.8 * 0.08, "Tap");//16
+	
+	addSprite("images/level1.png", -0.99, 0.64, 0, 0.746 * 0.8, 0.547 * 0.8, "");//17
+	addSprite("images/level2.png", -0.99, 0.64, 0, 0.746 * 0.8, 0.547 * 0.8, "");//18
+	addSprite("images/level3.png", -0.99, 0.64, 0, 0.746 * 0.8, 0.547 * 0.8, "");//19
+	
+	addSprite("images/cBot.png", -0.99, -0.23, 0, 6.67* 0.08, 0.69 * 0.08, "");//20
+	addSprite("images/dandruff.png", -0.99, -0.33, 0, 5.34* 0.08, 0.7 * 0.08, "");//21
+	addSprite("images/hair.png", -0.99, -0.33, 0, 7.71* 0.08, 0.87 * 0.08, "");//22
+	addSprite("images/cracks.png", -0.99, -0.33, 0, 7.45* 0.08, 0.86 * 0.08, "");//23
+	
+	addSprite("images/scoreBG.png", -0.99, 0.625, 0.23, 4.42* 0.13, 1.45 * 0.13, "");//24
+	
+	addSprite("images/0W.png", -0.98, 0.63, 0.32, 1.5 * 0.045, 2 * 0.045, "");//25
+	addSprite("images/0W.png", -0.98, 0.63, 0.26, 1.5 * 0.045, 2 * 0.045, "");//26
+	addSprite("images/0W.png", -0.98, 0.63, 0.2, 1.5 * 0.045, 2 * 0.045, "");//27
+	
+	addSprite("images/timeBg.png", -0.99, 0.62, -0.325, 1.45 * 0.13, 1.45 * 0.13, "");//28
+	addSprite("images/0W.png", -0.98, 0.63, -0.3, 1.5 * 0.04, 2 * 0.04, "");//29
+	addSprite("images/0W.png", -0.98, 0.63, -0.35, 1.5 * 0.04, 2 * 0.04, "");//30
+	
+	whiteNumbers = [];
+	
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/0W.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/1w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/2w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/3w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/4w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/5w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/6w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/7w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/8w.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/9w.png" ));
 	
 	camera.add(uiGroup);
 	
-	uiGroup.children[0].visible = false;
-	uiGroup.children[1].visible = false;
-	uiGroup.children[2].visible = false;
-	uiGroup.children[3].visible = false;
+	setScore(playerScore, playerTime);
 	
-	uiGroup.children[4].visible = false;
-	uiGroup.children[5].visible = false;
-	uiGroup.children[6].visible = false;
-	uiGroup.children[7].visible = false;
-	uiGroup.children[8].visible = false;
-	uiGroup.children[9].visible = false;
-	
-	uiGroup.children[10].visible = false;
-	uiGroup.children[11].visible = false;
-	uiGroup.children[12].visible = false;
-	
-	playMenuApearAnimation();
+	// playMenuApearAnimation();
 	
 	initGame();
 };
+
+var setScore = function(score, time)
+{
+	var s = score.pad(3);
+	
+	uiGroup.children[25].material.map = whiteNumbers[parseInt(s[2])];
+	uiGroup.children[26].material.map = whiteNumbers[parseInt(s[1])];
+	uiGroup.children[27].material.map = whiteNumbers[parseInt(s[0])];
+	
+	var t = time.pad(2);
+	
+	uiGroup.children[29].material.map = whiteNumbers[parseInt(t[1])];
+	uiGroup.children[30].material.map = whiteNumbers[parseInt(t[0])];
+};
+
+var showHideGameMenu = function(show)
+{
+	var arr = [24,25,26,27,28,29,30];
+	if(show){
+		for(var i = 0; i < arr.length; i++)
+		{
+			uiGroup.children[arr[i]].material.opacity = 0;
+			uiGroup.children[arr[i]].visible = true;
+			
+			TweenMax.to(uiGroup.children[arr[i]].material,0.5,{ease: Power4.easeOut, opacity:1});
+		}
+	}
+	else {
+		for(var i = 0; i < arr.length; i++)
+		{
+			TweenMax.to(uiGroup.children[arr[i]].material,0.5,{ease: Power4.easeIn, opacity:0,
+				onComplete: function() {
+					uiGroup.children[24].visible = false;
+					uiGroup.children[25].visible = false;
+					uiGroup.children[26].visible = false;
+					uiGroup.children[27].visible = false;
+					uiGroup.children[28].visible = false;
+					uiGroup.children[29].visible = false;
+					uiGroup.children[30].visible = false;
+				}
+			});
+		}
+	}
+}
+
+Number.prototype.pad = function(size) {
+  var s = String(this);
+  while (s.length < (size || 2)) {s = "0" + s;}
+  return s;
+}
 
 var playMenuApearAnimation = function()
 {
@@ -375,10 +445,9 @@ var playGenderDisapearAnimation = function()
 									uiGroup.children[7].position.x = xTwo;
 									uiGroup.children[8].position.y = yTwo;
 									uiGroup.children[9].position.y = yTwo;
-									
-									showCountDown();
 								}
 							});
+							showHideLevel(true, currentLevel+1);
 						}
 					});
 				}
@@ -467,7 +536,148 @@ var addSprite = function(location, zVal, yVal, xVal, scaleX, scaleY, tag)
 	item.tag = tag;
 	item.lookAt(camera.position);
 	uiGroup.add(item);
-}
+	item.visible = false;
+};
+
+var showHideLevel = function(show, index)
+{
+	if(show)
+	{
+		if(index == 1)
+		{
+			levelApear(13, 17, 20, 21, 16);
+		}
+		else if(index == 2)
+		{
+			levelApear(14, 18, 20, 22, 16);
+		}
+		else if(index == 3)
+		{
+			levelApear(15, 19, 20, 23, 16);
+		}
+	}
+	else
+	{
+		if(index == 1)
+		{
+			levelDisapear(13, 17, 20, 21, 16);
+		}
+		else if(index == 2)
+		{
+			levelDisapear(14, 18, 20, 22, 16);
+		}
+		else if(index == 3)
+		{
+			levelDisapear(15, 19, 20, 23, 16);
+		}
+	}
+};
+
+var levelApear = function(bg, name, text1, text2, tap)
+{	
+	uiGroup.children[bg].material.opacity = 0;
+	
+	var yOne = uiGroup.children[name].position.y;
+	uiGroup.children[name].position.y = 2;
+	
+	var yTwo = uiGroup.children[text1].position.y;
+	uiGroup.children[text1].position.y = -2;
+	
+	var yThree= uiGroup.children[text2].position.y;
+	uiGroup.children[text2].position.y = -2;
+	
+	var yFour = uiGroup.children[tap].position.y;
+	uiGroup.children[tap].position.y = -2;
+	
+	uiGroup.children[bg].visible = true;
+	uiGroup.children[name].visible = true;
+	uiGroup.children[text1].visible = true;
+	uiGroup.children[text2].visible = true;
+	uiGroup.children[tap].visible = true;
+	
+	TweenMax.to(uiGroup.children[bg].material,0.5,{ease: Power4.easeOut, opacity:1,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[name].position,0.5,{ease: Power4.easeOut, y: yOne,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[text1].position,0.5,{ease: Power4.easeOut, y: yTwo,
+						onComplete: function() {
+							TweenMax.to(uiGroup.children[text2].position,0.5,{ease: Power4.easeOut, y: yThree,
+								onComplete: function() {
+									TweenMax.to(uiGroup.children[tap].position,0.5,{ease: Power4.easeOut, y: yFour,
+										onComplete: function() {
+											uiChecking = true;
+											
+											collitionStarted = false;
+											sphere.rotation.x = 0;
+											
+											player.rotation.z = 0;
+											player.position.y = 0;
+											remainingTime = 60;
+											dead = false;
+											boyAction.time = 0;
+											girlAction.time = 0;
+											
+											setLevel();
+										}
+									});
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+};
+
+var levelDisapear = function(bg, name, text1, text2, tap)
+{
+	uiChecking = false;
+	
+	var yOne = uiGroup.children[name].position.y;
+	var yTwo = uiGroup.children[text1].position.y;
+	var yThree= uiGroup.children[text2].position.y;
+	var yFour = uiGroup.children[tap].position.y;
+	
+	TweenMax.to(uiGroup.children[tap].position,0.5,{ease: Power4.easeIn, y:-2,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[text2].position,0.5,{ease: Power4.easeIn, y: -2,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[text1].position,0.5,{ease: Power4.easeIn, y: -2,
+						onComplete: function() {
+							TweenMax.to(uiGroup.children[name].position,0.5,{ease: Power4.easeIn, y: 2,
+								onComplete: function() {
+									TweenMax.to(uiGroup.children[bg].material,0.5,{ease: Power4.easeIn, opacity: 0,
+										onComplete: function() {
+											uiGroup.children[bg].visible = false;
+											uiGroup.children[name].visible = false;
+											uiGroup.children[text1].visible = false;
+											uiGroup.children[text2].visible = false;
+											uiGroup.children[tap].visible = false;
+											
+											uiGroup.children[bg].material.opacity = 1;
+											uiGroup.children[name].position.y = yOne;
+											uiGroup.children[text1].position.y = yTwo;
+											uiGroup.children[text2].position.y = yThree;
+											uiGroup.children[tap].position.y = yFour;
+											
+											showHideGameMenu(true);
+											
+											showCountDown();
+										}
+									});
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+	
+	
+	
+};
 
 var initGame = function()
 {
@@ -551,7 +761,7 @@ var setLevel = function()
 	{
 		fogColor = new THREE.Color(0xE5FFCC);
 		scene.background = fogColor;
-		scene.fog = new THREE.Fog(fogColor, 0.0025, 100);
+		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
 	}
 	else if(currentLevel == 1)
 	{
@@ -759,7 +969,6 @@ var fallHair = function(arrayNumber, hairNumber)
 	{
 		pRot = fallenHalfTwo[hairNumber].rotation;
 	}
-	console.log(pRot.z + Math.PI/30);
 	
 	if(pRot.z == Math.PI/30)
 	{
@@ -1052,8 +1261,6 @@ var initPlayerModel = function()
 		player.add(object);
 		modelReady = true;
 		
-		setLevel();
-		
 	} );
 };
 
@@ -1140,6 +1347,8 @@ var collitionDetection = function()
 					dead = true;
 					boyAction.time = 4.91666;
 					girlAction.time = 8.6666;
+					
+					showHideGameMenu(false);
 				}
 			}
 		}
@@ -1186,46 +1395,19 @@ var gameOver = function()
 {
 	if(gameStarted){
 		gameStarted = false;
-		restartButton.style.display = "block";
+		// restartButton.style.display = "block";
 		jumping = false;
 		timeClock.stop();
-	}
-}
-
-var restartGame = function()
-{
-	restarting = true;
-	collitionStarted = false;
-	restartButton.style.display = "none";
-	sphere.rotation.x = 0;
-	
-	player.rotation.z = 0;
-	player.position.y = 0;
-	remainingTime = 60;
-	// timeText.innerHTML = "Time : " + remainingTime;
-	timeClock.start();
-	dead = false;
-	boyAction.time = 0;
-	girlAction.time = 0;
-	
-	if(currentLevel == 2)
-	{
-		currentLevel = 0;
-	}
-	else
-	{
-		currentLevel++;
-	}
-	setLevel();
-	
-	restarting = false;
-	
-	if(currentLevel != 0){
-		showCountDown();
-	}
-	else
-	{
-		playMenuApearAnimation();
+		
+		if(currentLevel == 2)
+		{
+			currentLevel = 0;
+		}
+		else
+		{
+			currentLevel++;
+		}
+		showHideLevel(true, currentLevel + 1);
 	}
 };
 
@@ -1236,14 +1418,16 @@ var update = function()
 		sphere.update();
 		collitionDetection();
 		player.update();
-		remainingTime = 60 - Math.floor(timeClock.getElapsedTime () );
+		playerTime = 60 - Math.floor(timeClock.getElapsedTime () );
 		
-		if(remainingTime == 0)
+		if(playerTime == 0)
 		{
 			gameOver();
 		}
-		// timeText.innerHTML = " Time : " + remainingTime;
-		// scoreText.innerHTML = " Score : " + (playerScore + Math.floor(timeClock.getElapsedTime ()) );
+		
+		var tempScore = playerScore + Math.floor(timeClock.getElapsedTime ());
+		
+		setScore(tempScore, playerTime);
 		
 		var a = Math.floor(timeClock.getElapsedTime () );
 		
