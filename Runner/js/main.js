@@ -33,7 +33,7 @@ var uiGroup;
 var uiChecking;
 var mouse;
 var gender;
-var whiteNumbers;
+var whiteNumbers, greenNumber;
 
 var playerScore, playerTime;
 
@@ -71,6 +71,10 @@ window.addEventListener( 'mousedown', function(event)
 			else if(intersects[0].object.tag == "Tap")
 			{
 				showHideLevel(false, currentLevel+1);
+			}
+			else if(intersects[0].object.tag == "Submit")
+			{
+				hideGameOver();
 			}
 		}
 	}
@@ -203,17 +207,25 @@ var initUI = function()
 	
 	addSprite("images/scoreBG.png", -0.99, 0.625, 0.23, 4.42* 0.13, 1.45 * 0.13, "");//24
 	
-	addSprite("images/0W.png", -0.98, 0.63, 0.32, 1.5 * 0.045, 2 * 0.045, "");//25
-	addSprite("images/0W.png", -0.98, 0.63, 0.26, 1.5 * 0.045, 2 * 0.045, "");//26
-	addSprite("images/0W.png", -0.98, 0.63, 0.2, 1.5 * 0.045, 2 * 0.045, "");//27
+	addSprite("images/w.png", -0.98, 0.63, 0.32, 1.5 * 0.045, 2 * 0.045, "");//25
+	addSprite("images/w.png", -0.98, 0.63, 0.26, 1.5 * 0.045, 2 * 0.045, "");//26
+	addSprite("images/w.png", -0.98, 0.63, 0.2, 1.5 * 0.045, 2 * 0.045, "");//27
 	
 	addSprite("images/timeBg.png", -0.99, 0.62, -0.325, 1.45 * 0.13, 1.45 * 0.13, "");//28
 	addSprite("images/0W.png", -0.98, 0.63, -0.3, 1.5 * 0.04, 2 * 0.04, "");//29
 	addSprite("images/0W.png", -0.98, 0.63, -0.35, 1.5 * 0.04, 2 * 0.04, "");//30
 	
+	addSprite("images/gOver.png", -0.99, 0.28, 0, 0.495 * 0.8, 0.299 * 0.8, "");//31
+	addSprite("images/yScore.png", -0.99, 0.02, 0, 0.4 * 0.8, 0.063 * 0.8, "");//32
+	addSprite("images/submit.png", -0.99, -0.365, 0, 0.584 * 0.8, 0.180 * 0.8, "Submit");//33
+	
+	addSprite("images/0.png", -0.99, -0.09, 0.095, 0.121 * 0.8, 0.142 * 0.8, "");//34
+	addSprite("images/0.png", -0.99, -0.09, 0, 0.121 * 0.8, 0.142 * 0.8, "");//35
+	addSprite("images/0.png", -0.99, -0.09, -0.095, 0.121 * 0.8, 0.142 * 0.8, "");//36
+		
 	whiteNumbers = [];
 	
-	whiteNumbers.push(new THREE.TextureLoader().load( "images/0W.png" ));
+	whiteNumbers.push(new THREE.TextureLoader().load( "images/w.png" ));
 	whiteNumbers.push(new THREE.TextureLoader().load( "images/1w.png" ));
 	whiteNumbers.push(new THREE.TextureLoader().load( "images/2w.png" ));
 	whiteNumbers.push(new THREE.TextureLoader().load( "images/3w.png" ));
@@ -224,13 +236,140 @@ var initUI = function()
 	whiteNumbers.push(new THREE.TextureLoader().load( "images/8w.png" ));
 	whiteNumbers.push(new THREE.TextureLoader().load( "images/9w.png" ));
 	
+	greenNumber = [];
+	
+	greenNumber.push(new THREE.TextureLoader().load( "images/0.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/1.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/2.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/3.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/4.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/5.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/6.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/7.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/8.png" ));
+	greenNumber.push(new THREE.TextureLoader().load( "images/9.png" ));
+	
 	camera.add(uiGroup);
 	
 	setScore(playerScore, playerTime);
 	
-	// playMenuApearAnimation();
+	playMenuApearAnimation();
 	
 	initGame();
+};
+
+var showGameOver = function()
+{
+	setFinalScore(playerScore);
+	
+	uiGroup.children[0].material.opacity = 0;
+	uiGroup.children[0].visible = true;
+	
+	var yOne = uiGroup.children[31].position.y;
+	uiGroup.children[31].position.y = 2;
+	
+	var yTwo = uiGroup.children[32].position.y;
+	uiGroup.children[32].position.y = -2;
+	
+	var yThree = uiGroup.children[33].position.y;
+	uiGroup.children[33].position.y = -2;
+	
+	var yFour = uiGroup.children[34].position.y;
+	uiGroup.children[34].position.y = -2;
+	uiGroup.children[35].position.y = -2;
+	uiGroup.children[36].position.y = -2;
+	
+	uiGroup.children[31].visible = true;
+	uiGroup.children[32].visible = true;
+	uiGroup.children[33].visible = true;
+	uiGroup.children[34].visible = true;
+	uiGroup.children[35].visible = true;
+	uiGroup.children[36].visible = true;
+	
+	TweenMax.to(uiGroup.children[0].material,0.5,{ease: Power4.easeOut, opacity:1,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[31].position,0.5,{ease: Power4.easeOut, y:yOne,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[32].position,0.5,{ease: Power4.easeOut, y:yTwo,
+						onComplete: function() {
+							TweenMax.to(uiGroup.children[36].position,0.5,{ease: Power4.easeOut, y:yFour,
+								onComplete: function() {
+								}
+							});
+							TweenMax.to(uiGroup.children[35].position,0.5,{ease: Power4.easeOut, delay: 0.1, y:yFour,
+								onComplete: function() {
+								}
+							});
+							TweenMax.to(uiGroup.children[34].position,0.5,{ease: Power4.easeOut, delay: 0.2, y:yFour,
+								onComplete: function() {
+									TweenMax.to(uiGroup.children[33].position,0.5,{ease: Power4.easeOut, y:yThree,
+										onComplete: function() {
+											uiChecking = true;
+										}
+									});
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+};
+
+var hideGameOver = function()
+{	
+	var yOne = uiGroup.children[31].position.y;
+	var yTwo = uiGroup.children[32].position.y;
+	var yThree = uiGroup.children[33].position.y;
+	var yFour = uiGroup.children[34].position.y;
+	
+	uiChecking = false;
+	
+	TweenMax.to(uiGroup.children[33].position,0.5,{ease: Power4.easeIn, y:-2,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[34].position,0.5,{ease: Power4.easeIn, y:-2,
+				onComplete: function() {
+				}
+			});
+			TweenMax.to(uiGroup.children[35].position,0.5,{ease: Power4.easeIn, delay: 0.1, y:-2,
+				onComplete: function() {
+				}
+			});
+			TweenMax.to(uiGroup.children[36].position,0.5,{ease: Power4.easeIn, delay: 0.2, y:-2,
+				onComplete: function() {
+					TweenMax.to(uiGroup.children[32].position,0.5,{ease: Power4.easeIn, y:-2,
+						onComplete: function() {
+							TweenMax.to(uiGroup.children[31].position,0.5,{ease: Power4.easeIn, y:2,
+								onComplete: function() {
+									TweenMax.to(uiGroup.children[0].material,0.5,{ease: Power4.easeIn, opacity:1,
+										onComplete: function() {
+											
+											uiGroup.children[31].position.y = yOne;
+											uiGroup.children[32].position.y = yTwo;
+											uiGroup.children[33].position.y = yThree;
+											uiGroup.children[34].position.y = yFour;
+											uiGroup.children[35].position.y = yFour;
+											uiGroup.children[36].position.y = yFour;
+											
+											uiGroup.children[31].visible = false;
+											uiGroup.children[32].visible = false;
+											uiGroup.children[33].visible = false;
+											uiGroup.children[34].visible = false;
+											uiGroup.children[35].visible = false;
+											uiGroup.children[36].visible = false;
+											
+											playMenuApearAnimation();
+										}
+									});
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+	});
 };
 
 var setScore = function(score, time)
@@ -245,6 +384,15 @@ var setScore = function(score, time)
 	
 	uiGroup.children[29].material.map = whiteNumbers[parseInt(t[1])];
 	uiGroup.children[30].material.map = whiteNumbers[parseInt(t[0])];
+};
+
+var setFinalScore = function(score)
+{
+	var s = score.pad(3);
+	
+	uiGroup.children[34].material.map = greenNumber[parseInt(s[2])];
+	uiGroup.children[35].material.map = greenNumber[parseInt(s[1])];
+	uiGroup.children[36].material.map = greenNumber[parseInt(s[0])];
 };
 
 var showHideGameMenu = function(show)
@@ -285,11 +433,8 @@ Number.prototype.pad = function(size) {
 
 var playMenuApearAnimation = function()
 {
-	uiGroup.children[0].visible = true;
-	uiGroup.children[1].visible = true;
-	uiGroup.children[2].visible = true;
-	uiGroup.children[3].visible = true;
-	uiGroup.children[4].visible = true;
+	playerScore = 0;
+	setScore(playerScore, playerTime);
 	
 	var yOne = uiGroup.children[1].position.y;
 	uiGroup.children[1].position.y = 2;
@@ -303,7 +448,13 @@ var playMenuApearAnimation = function()
 	var yTwo = uiGroup.children[4].position.y;
 	uiGroup.children[4].position.y = -2;
 	
-	TweenMax.to(uiGroup.children[1].position,0.5,{ease: Power4.easeOut, delay: 1,y:yOne,
+	uiGroup.children[0].visible = true;
+	uiGroup.children[1].visible = true;
+	uiGroup.children[2].visible = true;
+	uiGroup.children[3].visible = true;
+	uiGroup.children[4].visible = true;
+	
+	TweenMax.to(uiGroup.children[1].position,0.5,{ease: Power4.easeOut,y:yOne,
 		onComplete: function() {
 			TweenMax.to(uiGroup.children[2].position,0.5,{ease: Power4.easeOut,x:xOne,
 				onComplete: function() {
@@ -755,6 +906,10 @@ var setLevel = function()
 		obstacleHalfTwo[i].visible = false;
 		fallenHalfTwo[i].visible = false;
 		dandrufHalfTwo[i].visible = false;
+	}
+	for(var i = 7; i <  14; i++)
+	{
+		cracksHalfTwo[i].visible = false;
 	}
 
 	if(currentLevel == 0)
@@ -1332,14 +1487,7 @@ var collitionDetection = function()
 			{
 				if(intersects[i].distance < 1 && intersects[i].object.isCone)
 				{
-					if(currentLevel == 2)
-					{
-						playerScore = 0;
-					}
-					else
-					{
-						playerScore += Math.floor(timeClock.getElapsedTime ());
-					}
+					playerScore += Math.floor(timeClock.getElapsedTime ());
 					timeClock.stop();
 					timeClock.startTime = 0;
 					timeClock.oldTime = 0;
@@ -1402,12 +1550,13 @@ var gameOver = function()
 		if(currentLevel == 2)
 		{
 			currentLevel = 0;
+			showGameOver();
 		}
 		else
 		{
 			currentLevel++;
+			showHideLevel(true, currentLevel + 1);
 		}
-		showHideLevel(true, currentLevel + 1);
 	}
 };
 
