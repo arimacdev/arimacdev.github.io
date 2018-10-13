@@ -5,6 +5,7 @@ var obstacleHalfOne, obstacleHalfTwo;
 var dandrufHalfOne, dandrufHalfTwo;
 var fallenHalfOne, fallenHalfTwo;
 var cracksHalfOne, cracksHalfTwo;
+var topBottle, bottomBottle;
 var shuffled;
 var player;
 var playerMoving;
@@ -35,7 +36,9 @@ var mouse;
 var gender;
 var whiteNumbers, greenNumber;
 
-var playerScore, playerTime;
+var playerScore, playerTime, extraTime;
+
+var buttonSound, swipeSound, jumpSound, hitSound, collectSound, coundSound, apearSound;
 
 window.addEventListener('resize', setSize, true);
 
@@ -52,10 +55,12 @@ window.addEventListener( 'mousedown', function(event)
 		if ( intersects.length > 0 ) {
 			if(intersects[0].object.tag == "Play")
 			{
+				buttonSound.play();
 				playMenuDisapearAnimation();
 			}
 			else if(intersects[0].object.tag == "Male")
 			{
+				buttonSound.play();
 				gender = 0;
 				player.children[1].visible = true;
 				player.children[2].visible = false;
@@ -63,6 +68,7 @@ window.addEventListener( 'mousedown', function(event)
 			}
 			else if(intersects[0].object.tag == "Female")
 			{
+				buttonSound.play();
 				gender = 1;
 				player.children[1].visible = false;
 				player.children[2].visible = true;
@@ -70,10 +76,12 @@ window.addEventListener( 'mousedown', function(event)
 			}
 			else if(intersects[0].object.tag == "Tap")
 			{
+				buttonSound.play();
 				showHideLevel(false, currentLevel+1);
 			}
 			else if(intersects[0].object.tag == "Submit")
 			{
+				buttonSound.play();
 				hideGameOver();
 			}
 		}
@@ -165,8 +173,75 @@ var startGame = function()
 	
 	playerScore = 0;
 	playerTime = 60;
+	extraTime = 0;
 	
 	initUI();
+	initSound();
+};
+
+var initSound = function()
+{
+	var listener = new THREE.AudioListener();
+	camera.add( listener );
+	
+	var audioLoader = new THREE.AudioLoader();
+	
+	var bgSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/bg1.mp3', function( buffer ) {
+		bgSound.setBuffer( buffer );
+		bgSound.setLoop( true );
+		bgSound.setVolume( 1 );
+		bgSound.play();
+	});
+	
+	buttonSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/button1.mp3', function( buffer ) {
+		buttonSound.setBuffer( buffer );
+		buttonSound.setLoop( false );
+		buttonSound.setVolume( 1 );
+	});
+	
+	swipeSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/swipe1.mp3', function( buffer ) {
+		swipeSound.setBuffer( buffer );
+		swipeSound.setLoop( false );
+		swipeSound.setVolume( 1 );
+	});
+	
+	jumpSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/jump1.mp3', function( buffer ) {
+		jumpSound.setBuffer( buffer );
+		jumpSound.setLoop( false );
+		jumpSound.setVolume( 1 );
+	});
+	
+	hitSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/hit1.mp3', function( buffer ) {
+		hitSound.setBuffer( buffer );
+		hitSound.setLoop( false );
+		hitSound.setVolume( 1 );
+	});
+	
+	collectSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/collect1.wav', function( buffer ) {
+		collectSound.setBuffer( buffer );
+		collectSound.setLoop( false );
+		collectSound.setVolume( 1 );
+	});
+	
+	coundSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/count1.wav', function( buffer ) {
+		coundSound.setBuffer( buffer );
+		coundSound.setLoop( false );
+		coundSound.setVolume( 1 );
+	});
+	
+	apearSound = new THREE.Audio( listener );
+	audioLoader.load( 'audio/apear1.mp3', function( buffer ) {
+		apearSound.setBuffer( buffer );
+		apearSound.setLoop( false );
+		apearSound.setVolume( 1 );
+	});
 };
 
 var initUI = function()
@@ -212,8 +287,8 @@ var initUI = function()
 	addSprite("images/w.png", -0.98, 0.63, 0.2, 1.5 * 0.045, 2 * 0.045, "");//27
 	
 	addSprite("images/timeBg.png", -0.99, 0.62, -0.325, 1.45 * 0.13, 1.45 * 0.13, "");//28
-	addSprite("images/0W.png", -0.98, 0.63, -0.3, 1.5 * 0.04, 2 * 0.04, "");//29
-	addSprite("images/0W.png", -0.98, 0.63, -0.35, 1.5 * 0.04, 2 * 0.04, "");//30
+	addSprite("images/0.png", -0.98, 0.63, -0.3, 1.5 * 0.04, 2 * 0.04, "");//29
+	addSprite("images/0.png", -0.98, 0.63, -0.35, 1.5 * 0.04, 2 * 0.04, "");//30
 	
 	addSprite("images/gOver.png", -0.99, 0.28, 0, 0.495 * 0.8, 0.299 * 0.8, "");//31
 	addSprite("images/yScore.png", -0.99, 0.02, 0, 0.4 * 0.8, 0.063 * 0.8, "");//32
@@ -222,6 +297,8 @@ var initUI = function()
 	addSprite("images/0.png", -0.99, -0.09, 0.095, 0.121 * 0.8, 0.142 * 0.8, "");//34
 	addSprite("images/0.png", -0.99, -0.09, 0, 0.121 * 0.8, 0.142 * 0.8, "");//35
 	addSprite("images/0.png", -0.99, -0.09, -0.095, 0.121 * 0.8, 0.142 * 0.8, "");//36
+	
+	addSprite("images/marks.png", -0.99, 0.4, 0, 0.19 * 0.8, 0.19 * 0.8, "");//37
 		
 	whiteNumbers = [];
 	
@@ -248,7 +325,7 @@ var initUI = function()
 	greenNumber.push(new THREE.TextureLoader().load( "images/7.png" ));
 	greenNumber.push(new THREE.TextureLoader().load( "images/8.png" ));
 	greenNumber.push(new THREE.TextureLoader().load( "images/9.png" ));
-	
+		
 	camera.add(uiGroup);
 	
 	setScore(playerScore, playerTime);
@@ -629,6 +706,9 @@ var showCountDown = function()
 	uiGroup.children[11].visible = true;
 	uiGroup.children[12].visible = true;
 	
+	coundSound.isPlaying = false;
+	coundSound.play();
+	
 	TweenMax.to(uiGroup.children[10].scale,0.5,{ease: Power4.easeIn, x: scaleX, y: scaleY,
 		onComplete: function() {
 			TweenMax.to(uiGroup.children[10].material,0.5,{ease: Power4.easeIn, opacity: 0,
@@ -636,12 +716,18 @@ var showCountDown = function()
 					uiGroup.children[10].visible = false;
 					uiGroup.children[10].material.opacity = 1;
 					
+					coundSound.isPlaying = false;
+					coundSound.play();
+					
 					TweenMax.to(uiGroup.children[11].scale,0.5,{ease: Power4.easeIn, x: scaleX, y: scaleY,
 						onComplete: function() {
 							TweenMax.to(uiGroup.children[11].material,0.5,{ease: Power4.easeIn, opacity: 0,
 								onComplete: function() {
 									uiGroup.children[11].visible = false;
 									uiGroup.children[11].material.opacity = 1;
+									
+									coundSound.isPlaying = false;
+									coundSound.play();
 									
 									TweenMax.to(uiGroup.children[12].scale,0.5,{ease: Power4.easeIn, x: scaleX, y: scaleY,
 										onComplete: function() {
@@ -838,6 +924,8 @@ var initGame = function()
 	initDandruff();
 	initFallenHair();
 	initCracks();
+	initTopBottle();
+	initBottomBottle();
 	
 	initPlayer();
 	
@@ -889,16 +977,16 @@ var setLevel = function()
 	}
 	
 	if(currentLevel == 0){
-		shuffleCones(obstacleHalfOne, dandrufHalfOne);
-		shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+		shuffleCones(obstacleHalfOne, dandrufHalfOne, bottomBottle);
+		shuffleCones(obstacleHalfTwo, dandrufHalfTwo, topBottle);
 	}
 	else if(currentLevel == 1){
-		shuffleCones(obstacleHalfOne, fallenHalfOne);
-		shuffleCones(obstacleHalfTwo, fallenHalfTwo);
+		shuffleCones(obstacleHalfOne, fallenHalfOne, bottomBottle);
+		shuffleCones(obstacleHalfTwo, fallenHalfTwo, topBottle);
 	}
 	else if(currentLevel == 2){
-		shuffleCones(obstacleHalfOne, cracksHalfOne);
-		shuffleCones(obstacleHalfTwo, cracksHalfTwo);
+		shuffleCones(obstacleHalfOne, cracksHalfOne, bottomBottle);
+		shuffleCones(obstacleHalfTwo, cracksHalfTwo, topBottle);
 	}
 	
 	for(var i = 20; i <  40; i++)
@@ -914,22 +1002,54 @@ var setLevel = function()
 
 	if(currentLevel == 0)
 	{
-		fogColor = new THREE.Color(0xE5FFCC);
+		fogColor = new THREE.Color(0xE5CCFF);
 		scene.background = fogColor;
 		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
+		
+		topBottle.children[0].visible = true;
+		topBottle.children[1].visible = false;
+		topBottle.children[2].visible = false;
+		
+		bottomBottle.children[0].visible = true;
+		bottomBottle.children[1].visible = false;
+		bottomBottle.children[2].visible = false;
 	}
 	else if(currentLevel == 1)
-	{
-		fogColor = new THREE.Color(0xCCFFFF);
-		scene.background = fogColor;
-		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
-	}
-	else if(currentLevel == 2)
 	{
 		fogColor = new THREE.Color(0xFFFFCC);
 		scene.background = fogColor;
 		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
+		
+		topBottle.children[0].visible = false;
+		topBottle.children[1].visible = true;
+		topBottle.children[2].visible = false;
+		
+		bottomBottle.children[0].visible = false;
+		bottomBottle.children[1].visible = true;
+		bottomBottle.children[2].visible = false;
 	}
+	else if(currentLevel == 2)
+	{
+		fogColor = new THREE.Color(0xE5FFCC);
+		scene.background = fogColor;
+		scene.fog = new THREE.Fog(fogColor, 0.0025, 25);
+		
+		topBottle.children[0].visible = false;
+		topBottle.children[1].visible = false;
+		topBottle.children[2].visible = true;
+		
+		bottomBottle.children[0].visible = false;
+		bottomBottle.children[1].visible = false;
+		bottomBottle.children[2].visible = true;
+	}
+	
+	extraTime = 0;
+	
+	timeClock.startTime = 0;
+	timeClock.oldTime = 0;
+	timeClock.elapsedTime = 0;
+	
+	setScore(playerScore, 60);
 };
 
 var initSphere = function()
@@ -974,13 +1094,13 @@ var initSphere = function()
 				sphere.rotation.x = 0;
 				
 				if(currentLevel == 0){
-					shuffleCones(obstacleHalfOne, dandrufHalfOne);
+					shuffleCones(obstacleHalfOne, dandrufHalfOne, bottomBottle);
 				}
 				else if(currentLevel == 1){
-					shuffleCones(obstacleHalfOne, fallenHalfOne);
+					shuffleCones(obstacleHalfOne, fallenHalfOne, bottomBottle);
 				}
 				else if(currentLevel == 2){
-					shuffleCones(obstacleHalfOne, cracksHalfOne);
+					shuffleCones(obstacleHalfOne, cracksHalfOne, bottomBottle);
 				}
 			}
 			
@@ -988,13 +1108,13 @@ var initSphere = function()
 			{
 				shuffled = true;
 				if(currentLevel == 0){
-					shuffleCones(obstacleHalfTwo, dandrufHalfTwo);
+					shuffleCones(obstacleHalfTwo, dandrufHalfTwo, topBottle);
 				}
 				else if(currentLevel == 1){
-					shuffleCones(obstacleHalfTwo, fallenHalfTwo);
+					shuffleCones(obstacleHalfTwo, fallenHalfTwo, topBottle);
 				}
 				else if(currentLevel == 2){
-					shuffleCones(obstacleHalfTwo, cracksHalfTwo);
+					shuffleCones(obstacleHalfTwo, cracksHalfTwo, topBottle);
 				}
 			}
 		}
@@ -1218,9 +1338,136 @@ var initCracks = function()
 			
 			cracksHalfTwo[i].isCone = true;
 		}
-				
 	} );
 	
+};
+
+var initTopBottle = function()
+{
+	var geometry = new THREE.BoxGeometry( 0.8, 0.8, 0.8 );
+	var material = new THREE.MeshBasicMaterial( {color: new THREE.Color(0xffffff)} );
+	var cube = new THREE.Mesh( geometry, material );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
+	
+	var obj = cube;
+	scene.add(obj);
+	sphere.add(obj);
+	obj.castShadow = true;
+	cube.material.visible = false;
+	cube.isBottle = true
+	var loader = new THREE.FBXLoader();
+	loader.load( 'models/bottle1.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		object.scale.set(0.07, 0.07, 0.07);
+		object.position.y = 20.1;
+		cube.add(object);
+		object.isBottle = true;
+	} );
+	
+	var loader1 = new THREE.FBXLoader();
+	loader1.load( 'models/bottle2.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		object.scale.set(0.07, 0.07, 0.07);
+		object.position.y = 20.1;
+		cube.add(object);
+		object.isBottle = true;
+	} );
+	
+	var loader2 = new THREE.FBXLoader();
+	loader2.load( 'models/bottle3.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		object.scale.set(0.07, 0.07, 0.07);
+		object.position.y = 20.1;
+		cube.add(object);
+		object.isBottle = true;
+	} );
+	
+	topBottle = obj;
+};
+
+var initBottomBottle = function()
+{
+	var geometry = new THREE.BoxGeometry( 0.8, 0.8, 0.8 );
+	var material = new THREE.MeshBasicMaterial( {color: new THREE.Color(0xffffff)} );
+	var cube = new THREE.Mesh( geometry, material );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20.4, 0 ) );
+	
+	var obj = cube;
+	scene.add(obj);
+	sphere.add(obj);
+	obj.castShadow = true;
+	cube.material.visible = false;
+	
+	var loader = new THREE.FBXLoader();
+	loader.load( 'models/bottle1.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		object.scale.set(0.07, 0.07, 0.07);
+		object.position.y = 20.1;
+		cube.add(object);
+		object.isBottle = true;
+	} );
+	
+	var loader1 = new THREE.FBXLoader();
+	loader1.load( 'models/bottle2.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		object.scale.set(0.07, 0.07, 0.07);
+		object.position.y = 20.1;
+		cube.add(object);
+		object.isBottle = true;
+	} );
+	
+	var loader2 = new THREE.FBXLoader();
+	loader2.load( 'models/bottle3.fbx', function ( object ) {
+		var model = object;
+		object.traverse( function ( child ) {
+			if ( child.isMesh ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		} );
+		model.isCone = true;
+		object.scale.set(0.07, 0.07, 0.07);
+		object.position.y = 20.1;
+		cube.add(object);
+		object.isBottle = true;
+	} );
+	
+	bottomBottle = obj;
 };
 
 var initObstacleModel = function(xRot, zRot, obstacle, origin)
@@ -1238,7 +1485,7 @@ var initObstacleModel = function(xRot, zRot, obstacle, origin)
 	obstacle.push(obj);
 };
 
-var shuffleCones = function(obstacle1, obstacle2)
+var shuffleCones = function(obstacle1, obstacle2, bottleNo)
 {
 	if(currentLevel == 1)
 	{
@@ -1288,10 +1535,6 @@ var shuffleCones = function(obstacle1, obstacle2)
 				{
 					var randZ = Math.floor(Math.random() * 4);
 					if(randZ == 0 ){
-						obstacle1[i * 3 + j].visible = false;
-					}
-					else
-					{
 						if(currentLevel != 2){
 							obstacle2[i * 3 + j].visible = false;
 						}
@@ -1299,6 +1542,10 @@ var shuffleCones = function(obstacle1, obstacle2)
 						{
 							obstacle2[i].visible = false;
 						}
+					}
+					else
+					{
+						obstacle1[i * 3 + j].visible = false;
 					}
 				}
 			}
@@ -1319,6 +1566,45 @@ var shuffleCones = function(obstacle1, obstacle2)
 				obstacle2[i].visible = false;
 			}
 		}
+	}
+	
+	bottleNo.visible = true;
+	var a,b,c;
+	if(currentLevel != 2){
+		do
+		{
+			a = Math.floor(Math.random() * 16);
+			b = Math.floor(Math.random() * 3);
+			c = a * 3 + b;
+		}while(obstacle1[c].visible != false || obstacle2[c].visible != false);
+	}
+	else
+	{
+		do
+		{
+			a = Math.floor(Math.random() * 16);
+			b = Math.floor(Math.random() * 3);
+			c = a * 3 + b;
+		}while(obstacle1[c].visible != false || obstacle2[a].visible != false);
+	}
+	
+	bottleNo.rotation.x = obstacle1[c].rotation.x;
+	bottleNo.rotation.z = obstacle1[c].rotation.z;
+	
+	
+	for(var  i = 0; i < bottleNo.children.length; i++)
+	{
+		bottleNo.children[i].isBottle = true;
+	}
+	
+	var k = Math.floor(Math.random() * 3);
+	if(k == 0)
+	{
+		bottleNo.visible = true;
+	}
+	else 
+	{
+		bottleNo.visible = false;
 	}
 };
 
@@ -1432,17 +1718,26 @@ var onDocumentKeyDown = function(event) {
 		}
 		else if (keyCode == 40 && !jumping) //down
 		{
-			player.dy = 0.2;
-			jumping = true;
-			boyAction.time = 3.916666;
-			girlAction.time = 7.66666;
+			jumpNow();
 		}
 	}
+};
+
+var jumpNow = function()
+{
+	jumpSound.isPlaying = false;
+	jumpSound.play();
+	player.dy = 0.2;
+	jumping = true;
+	boyAction.time = 3.916666;
+	girlAction.time = 7.66666;
 };
 
 var moveLeft = function()
 {
 	if(player.rotation.z != Math.PI/32 && !playerMoving){
+		swipeSound.isPlaying = false;
+		swipeSound.play();
 		playerMoving = true;
 		TweenMax.to(player.rotation,0.3,{z:player.rotation.z + Math.PI/32,
 			onUpdate:function(){
@@ -1458,6 +1753,8 @@ var moveLeft = function()
 var moveRight = function()
 {
 	if(player.rotation.z != -Math.PI/32 && !playerMoving){
+		swipeSound.isPlaying = false;
+		swipeSound.play();
 		playerMoving = true;
 		TweenMax.to(player.rotation,0.3,{z:player.rotation.z - Math.PI/32,
 			onUpdate:function(){
@@ -1487,11 +1784,11 @@ var collitionDetection = function()
 			{
 				if(intersects[i].distance < 1 && intersects[i].object.isCone)
 				{
+					hitSound.isPlaying = false;
+					hitSound.play();
+					
 					playerScore += Math.floor(timeClock.getElapsedTime ());
 					timeClock.stop();
-					timeClock.startTime = 0;
-					timeClock.oldTime = 0;
-					timeClock.elapsedTime = 0;
 					dead = true;
 					boyAction.time = 4.91666;
 					girlAction.time = 8.6666;
@@ -1500,7 +1797,36 @@ var collitionDetection = function()
 				}
 			}
 		}
-	
+		
+		if(topBottle.visible){
+			raycaster.set(new THREE.Vector3(vector.x - vector.x * 0.15, yVal , 7), new THREE.Vector3( 0, 0,  -1));
+			intersects = raycaster.intersectObjects(topBottle.children, true);
+			
+			if(intersects.length > 0)
+			{
+				if(intersects[0].distance < 1 && intersects[0].object.parent.isBottle)
+				{
+					intersects[0].object.parent.isBottle = false;
+					topBottle.visible = false;
+					addTime();
+				}
+			}
+		}
+		
+		if(bottomBottle.visible){
+			raycaster.set(new THREE.Vector3(vector.x - vector.x * 0.15, yVal , 7), new THREE.Vector3( 0, 0,  -1));
+			intersects = raycaster.intersectObjects(bottomBottle.children, true);
+			if(intersects.length > 0)
+			{
+				if(intersects[0].distance < 1 && intersects[0].object.parent.isBottle)
+				{
+					intersects[0].object.parent.isBottle = false;
+					bottomBottle.visible = false;
+					addTime();
+				}
+			}
+		}
+		
 		if(currentLevel == 1){
 			raycaster.set(new THREE.Vector3(-2.254, 20 , 7), new THREE.Vector3( 0, 0,  -1));
 			raycaster.far = 50;
@@ -1539,6 +1865,29 @@ var collitionDetection = function()
 	}
 };
 
+var addTime = function()
+{
+	extraTime += 5;
+	collectSound.isPlaying = false;
+	collectSound.play();
+	
+	uiGroup.children[37].material.opacity = 0;
+	var yOne = uiGroup.children[37].position.y;
+	uiGroup.children[37].position.y = yOne - 0.3;
+	uiGroup.children[37].visible = true;
+	
+	TweenMax.to(uiGroup.children[37].position,1,{ease: Back.easeOut, y:yOne,
+		onComplete: function() {
+			
+		}
+	});
+	TweenMax.to(uiGroup.children[37].material,1,{ease: Back.easeOut, opacity:1,
+		onComplete: function() {
+			uiGroup.children[37].visible = false;
+		}
+	});
+}
+
 var gameOver = function()
 {
 	if(gameStarted){
@@ -1567,7 +1916,7 @@ var update = function()
 		sphere.update();
 		collitionDetection();
 		player.update();
-		playerTime = 60 - Math.floor(timeClock.getElapsedTime () );
+		playerTime = extraTime + 60 - Math.floor(timeClock.getElapsedTime () );
 		
 		if(playerTime == 0)
 		{
@@ -1651,6 +2000,15 @@ var update = function()
 	
 	//controls.update();
 
+	for(var i = 0; i < topBottle.children.length; i++)
+	{
+		topBottle.children[i].rotation.y += 0.1;
+	}
+	for(var i = 0; i < bottomBottle.children.length; i++)
+	{
+		bottomBottle.children[i].rotation.y += 0.1;
+	}
+	
 };
 
 var render = function()
@@ -1703,8 +2061,7 @@ function handleTouchMove(evt) {
 		else
 		{
 			if ( yDiff > 0 ) {
-				player.dy = 0.2;
-				jumping = true;
+				jumpNow();
 			}
 		} 
 	}	
