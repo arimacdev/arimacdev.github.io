@@ -167,7 +167,7 @@ var startGame = function()
 	restarting = false;
 	collitionStarted = false;
 	dead = false;
-	uiChecking = false;
+	uiChecking = true;
 	mouse = new THREE.Vector2();
 	gender = 0;
 	
