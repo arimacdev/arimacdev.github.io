@@ -36,9 +36,12 @@ var mouse;
 var gender;
 var whiteNumbers, greenNumber;
 
-var playerScore, playerTime, extraTime;
+var playerScore, playerTime, extraTime, playerLives;
 
 var buttonSound, swipeSound, jumpSound, hitSound, collectSound, coundSound, apearSound;
+
+var elapsedT;
+var tempScore;
 
 window.addEventListener('resize', setSize, true);
 
@@ -167,13 +170,17 @@ var startGame = function()
 	restarting = false;
 	collitionStarted = false;
 	dead = false;
-	uiChecking = true;
+	uiChecking = false;
 	mouse = new THREE.Vector2();
 	gender = 0;
 	
 	playerScore = 0;
 	playerTime = 60;
 	extraTime = 0;
+	playerLives = 3;
+	
+	elapsedT = 60;
+	tempScore = 0;
 	
 	initUI();
 	initSound();
@@ -265,20 +272,20 @@ var initUI = function()
 	addSprite("images/2.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");//11
 	addSprite("images/1.png", -0.99, 0.4, 0, 1.01 * 0.08, 1.4 * 0.08, "");//12
 	
-	addSprite("images/bg1.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//13
-	addSprite("images/bg2.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//14
-	addSprite("images/bg3.png", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//15
+	addSprite("images/bg1.jpg", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//13
+	addSprite("images/bg2.jpg", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//14
+	addSprite("images/bg3.jpg", -1, 0, 0, 1.08 * 0.8, 1.92 * 0.8, "");//15
 	
-	addSprite("images/tap.png", -0.99, -0.53, 0, 5.84* 0.08, 1.8 * 0.08, "Tap");//16
+	addSprite("images/tap.png", -0.99, -0.58, 0, 5.84* 0.08, 1.8 * 0.08, "Tap");//16
 	
 	addSprite("images/level1.png", -0.99, 0.64, 0, 0.746 * 0.8, 0.547 * 0.8, "");//17
 	addSprite("images/level2.png", -0.99, 0.64, 0, 0.746 * 0.8, 0.547 * 0.8, "");//18
 	addSprite("images/level3.png", -0.99, 0.64, 0, 0.746 * 0.8, 0.547 * 0.8, "");//19
 	
 	addSprite("images/cBot.png", -0.99, -0.23, 0, 6.67* 0.08, 0.69 * 0.08, "");//20
-	addSprite("images/dandruff.png", -0.99, -0.33, 0, 5.34* 0.08, 0.7 * 0.08, "");//21
-	addSprite("images/hair.png", -0.99, -0.33, 0, 7.71* 0.08, 0.87 * 0.08, "");//22
-	addSprite("images/cracks.png", -0.99, -0.33, 0, 7.45* 0.08, 0.86 * 0.08, "");//23
+	addSprite("images/dandruff.png", -0.99, -0.4, 0, 5.65* 0.08, 0.77 * 0.08, "");//21
+	addSprite("images/hair.png", -0.99, -0.4, 0, 7.71* 0.08, 0.87 * 0.08, "");//22
+	addSprite("images/cracks.png", -0.99, -0.4, 0, 7.45* 0.08, 0.86 * 0.08, "");//23
 	
 	addSprite("images/scoreBG.png", -0.99, 0.625, 0.23, 4.42* 0.13, 1.45 * 0.13, "");//24
 	
@@ -299,7 +306,15 @@ var initUI = function()
 	addSprite("images/0.png", -0.99, -0.09, -0.095, 0.121 * 0.8, 0.142 * 0.8, "");//36
 	
 	addSprite("images/marks.png", -0.99, 0.4, 0, 0.19 * 0.8, 0.19 * 0.8, "");//37
-		
+	
+	addSprite("images/heart.png", -0.99, -0.67, -0.35, 0.19 * 0.5, 0.19 * 0.5, "");//38
+	addSprite("images/heart.png", -0.99, -0.67, -0.25, 0.19 * 0.5, 0.19 * 0.5, "");//39
+	addSprite("images/heart.png", -0.99, -0.67, -0.15, 0.19 * 0.5, 0.19 * 0.5, "");//40
+	
+	addSprite("images/b1.png", -0.99, 0.03, 0, 0.307 * 0.8, 0.859 * 0.8, "");//41
+	addSprite("images/b2.png", -0.99, 0.03, 0, 0.307 * 0.8, 0.859 * 0.8, "");//42
+	addSprite("images/b3.png", -0.99, 0.03, 0, 0.307 * 0.8, 0.859 * 0.8, "");//43
+			
 	whiteNumbers = [];
 	
 	whiteNumbers.push(new THREE.TextureLoader().load( "images/w.png" ));
@@ -334,6 +349,61 @@ var initUI = function()
 	
 	initGame();
 };
+
+var displayLives = function()
+{
+	uiGroup.children[38].material.opacity = 0;
+	uiGroup.children[39].material.opacity = 0;
+	uiGroup.children[40].material.opacity = 0;
+	
+	uiGroup.children[38].visible = true;
+	uiGroup.children[39].visible = true;
+	uiGroup.children[40].visible = true;
+		
+	TweenMax.to(uiGroup.children[38].material,0.5,{ease: Power4.easeOut, opacity:1,
+		onComplete: function() {
+			if(playerLives > 1)
+			{
+				TweenMax.to(uiGroup.children[39].material,0.5,{ease: Power4.easeOut, opacity:1,
+					onComplete: function() {
+						if(playerLives > 2)
+						{
+							TweenMax.to(uiGroup.children[40].material,0.5,{ease: Power4.easeOut, opacity:1	});
+						}
+					}
+				});
+			}
+		}
+	});
+}
+
+var hideLives = function()
+{
+	TweenMax.to(uiGroup.children[40].material,0.5,{ease: Power4.easeOut, opacity:0,
+		onComplete: function() {
+			TweenMax.to(uiGroup.children[39].material,0.5,{ease: Power4.easeOut, opacity:0,
+				onComplete: function() {
+						TweenMax.to(uiGroup.children[38].material,0.5,{ease: Power4.easeOut, opacity:0,
+							onComplete: function() {
+									uiGroup.children[38].visible = false;
+									uiGroup.children[39].visible = false;
+									uiGroup.children[40].visible = false;
+								}
+							});
+						}
+					});
+				}
+			});
+}
+
+var removeLives = function(index)
+{
+	TweenMax.to(uiGroup.children[38 + index].material,0.5,{ease: Power4.easeOut, opacity:0,
+		onComplete: function() {
+				uiGroup.children[38 + index].visible = false;
+			}
+	});
+}
 
 var showGameOver = function()
 {
@@ -483,6 +553,7 @@ var showHideGameMenu = function(show)
 			
 			TweenMax.to(uiGroup.children[arr[i]].material,0.5,{ease: Power4.easeOut, opacity:1});
 		}
+		displayLives();
 	}
 	else {
 		for(var i = 0; i < arr.length; i++)
@@ -499,6 +570,7 @@ var showHideGameMenu = function(show)
 				}
 			});
 		}
+		hideLives();
 	}
 }
 
@@ -759,6 +831,7 @@ var startRunning = function()
 	timeClock.start();
 	boyAction.time = 3.2916666;
 	girlAction.time = 7.04166;
+	playerScore = tempScore;
 };
 
 var addSprite = function(location, zVal, yVal, xVal, scaleX, scaleY, tag)
@@ -782,30 +855,30 @@ var showHideLevel = function(show, index)
 	{
 		if(index == 1)
 		{
-			levelApear(13, 17, 20, 21, 16);
+			levelApear(13, 17, 41, 21, 16);
 		}
 		else if(index == 2)
 		{
-			levelApear(14, 18, 20, 22, 16);
+			levelApear(14, 18, 42, 22, 16);
 		}
 		else if(index == 3)
 		{
-			levelApear(15, 19, 20, 23, 16);
+			levelApear(15, 19, 43, 23, 16);
 		}
 	}
 	else
 	{
 		if(index == 1)
 		{
-			levelDisapear(13, 17, 20, 21, 16);
+			levelDisapear(13, 17, 41, 21, 16);
 		}
 		else if(index == 2)
 		{
-			levelDisapear(14, 18, 20, 22, 16);
+			levelDisapear(14, 18, 42, 22, 16);
 		}
 		else if(index == 3)
 		{
-			levelDisapear(15, 19, 20, 23, 16);
+			levelDisapear(15, 19, 43, 23, 16);
 		}
 	}
 };
@@ -850,6 +923,9 @@ var levelApear = function(bg, name, text1, text2, tap)
 											player.rotation.z = 0;
 											player.position.y = 0;
 											remainingTime = 60;
+											elapsedTime = 60;
+											extraTime = 0;
+											
 											dead = false;
 											boyAction.time = 0;
 											girlAction.time = 0;
@@ -1172,7 +1248,6 @@ var initFallenHair = function()
 	var material = new THREE.MeshBasicMaterial( {color: new THREE.Color(0x000000)} );
 	var cone = new THREE.Mesh( geometry, material );
 	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 30, 0 ) );
-	cone.isCone = true;
 	
 	var loader = new THREE.FBXLoader();
 	loader.load( 'models/hair.fbx', function ( object ) {
@@ -1183,13 +1258,10 @@ var initFallenHair = function()
 				child.receiveShadow = true;
 			}
 		} );
-		//model.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 20, 0 ) );
-		model.isCone = true;
 		object.scale.set(0.1, 0.1, 0.1);
 		object.position.y = 20;
 		cone.add(object);
 		cone.material.visible = false;
-		model.isCone = true;
 		
 		for(var i = 0; i < 16; i++)
 		{
@@ -1215,6 +1287,8 @@ var initFallenHair = function()
 			fallenHalfTwo[i].children[0].children[0].arrayNumber = 2;
 			fallenHalfTwo[i].children[0].children[0].hairNumber = i;
 			fallenHalfTwo[i].children[0].children[0].isCone = true;
+			
+			fallenHalfOne[i].isCone = false;
 		}
 	} );	
 };
@@ -1247,13 +1321,17 @@ var fallHair = function(arrayNumber, hairNumber)
 	
 	if(pRot.z == Math.PI/30)
 	{
-		rot = -Math.PI/1.8;
+		rot = -Math.PI/2;
 	}
 	else if(pRot.z == -Math.PI/30)
 	{
-		rot = Math.PI/1.8;
+		rot = Math.PI/2;
 	}
-	TweenMax.to(obj.rotation,1,{ ease: Bounce.easeOut, z:rot});
+	TweenMax.to(obj.rotation,1,{ ease: Bounce.easeOut, z:rot,
+		onUpdate:function(){
+			obj.updateMatrixWorld();
+		}
+	});
 };
 
 var initDandruff = function()
@@ -1510,8 +1588,7 @@ var shuffleCones = function(obstacle1, obstacle2, bottleNo)
 		{
 			obstacle2[i].visible = true;
 		}
-		var randA = Math.floor(Math.random() * 3) + 1;
-		
+		var randA = Math.floor(Math.random() * 6) + 1;
 		if(randA == 2 || randA == 1)
 		{
 			var randX = Math.floor(Math.random() * 3);
@@ -1533,7 +1610,7 @@ var shuffleCones = function(obstacle1, obstacle2, bottleNo)
 			{
 				if(j != randX && j != randY)
 				{
-					var randZ = Math.floor(Math.random() * 4);
+					var randZ = Math.floor(Math.random() * 2);
 					if(randZ == 0 ){
 						if(currentLevel != 2){
 							obstacle2[i * 3 + j].visible = false;
@@ -1550,7 +1627,7 @@ var shuffleCones = function(obstacle1, obstacle2, bottleNo)
 				}
 			}
 		}
-		else if(randA == 3)
+		else
 		{
 			obstacle1[i * 3 + 0].visible = false;
 			obstacle1[i * 3 + 1].visible = false;
@@ -1784,16 +1861,18 @@ var collitionDetection = function()
 			{
 				if(intersects[i].distance < 1 && intersects[i].object.isCone)
 				{
+					
 					hitSound.isPlaying = false;
 					hitSound.play();
 					
-					playerScore += Math.floor(timeClock.getElapsedTime ());
+					elapsedT = playerTime;
+					// playerScore = Math.floor(timeClock.getElapsedTime ()) + (60 - elapsedT);
 					timeClock.stop();
 					dead = true;
 					boyAction.time = 4.91666;
 					girlAction.time = 8.6666;
 					
-					showHideGameMenu(false);
+					// showHideGameMenu(false);
 				}
 			}
 		}
@@ -1895,16 +1974,60 @@ var gameOver = function()
 		// restartButton.style.display = "block";
 		jumping = false;
 		timeClock.stop();
+		elapsedT = 60;
+		extraTime = 0;
 		
 		if(currentLevel == 2)
 		{
 			currentLevel = 0;
+			playerLives = 0;
 			showGameOver();
 		}
 		else
 		{
 			currentLevel++;
 			showHideLevel(true, currentLevel + 1);
+		}
+	}
+};
+
+var gameTempOver = function()
+{
+	if(gameStarted){
+		gameStarted = false;
+		jumping = false;
+		timeClock.stop();
+		extraTime = 0;
+		if(playerLives != 1)
+		{
+			playerLives--;
+			removeLives(playerLives);
+			collitionStarted = false;
+			sphere.rotation.x = 0;
+			
+			player.rotation.z = 0;
+			player.position.y = 0;
+			dead = false;
+			boyAction.time = 0;
+			girlAction.time = 0;
+			
+			for(var i = 20; i <  40; i++)
+			{
+				obstacleHalfTwo[i].visible = false;
+				fallenHalfTwo[i].visible = false;
+				dandrufHalfTwo[i].visible = false;
+			}
+			for(var i = 7; i <  14; i++)
+			{
+				cracksHalfTwo[i].visible = false;
+			}
+			
+			showCountDown();
+		}
+		else 
+		{
+			showHideGameMenu(false);
+			showGameOver();
 		}
 	}
 };
@@ -1916,16 +2039,18 @@ var update = function()
 		sphere.update();
 		collitionDetection();
 		player.update();
-		playerTime = extraTime + 60 - Math.floor(timeClock.getElapsedTime () );
-		
-		if(playerTime == 0)
-		{
-			gameOver();
+		if(!dead){
+			playerTime = extraTime + elapsedT - Math.floor(timeClock.getElapsedTime ());
+			if(playerTime <= 0)
+			{
+				showHideGameMenu(false);
+				gameOver();
+			}
+			
+			tempScore = playerScore + Math.floor(timeClock.getElapsedTime ());
+			
+			setScore(tempScore, playerTime);
 		}
-		
-		var tempScore = playerScore + Math.floor(timeClock.getElapsedTime ());
-		
-		setScore(tempScore, playerTime);
 		
 		var a = Math.floor(timeClock.getElapsedTime () );
 		
@@ -1955,7 +2080,7 @@ var update = function()
 				{
 					boyAction.time = 7.9;
 					player.position.y = 0;
-					gameOver();
+					gameTempOver();
 				}	
 			}
 			else
@@ -1964,7 +2089,7 @@ var update = function()
 				{
 					girlAction.time = 11.60;
 					player.position.y = 0;
-					gameOver();
+					gameTempOver();
 				}	
 			}			
 		}
