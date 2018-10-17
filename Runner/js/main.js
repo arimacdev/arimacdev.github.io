@@ -2201,6 +2201,7 @@ var update = function()
 				tempRun = true;
 				tadaSound.isPlaying = false;
 				tadaSound.play();
+				player.position.y = 0;
 				gameOver();
 			}
 			
