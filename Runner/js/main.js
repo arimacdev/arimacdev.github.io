@@ -53,15 +53,13 @@ window.addEventListener( 'mousedown', function(event)
 {
 	if(uiChecking)
 	{
-		camera.updateMatrixWorld();
 		event.preventDefault();
 		mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
 		mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+		
 		raycaster.setFromCamera( mouse, camera );
 		var intersects = raycaster.intersectObjects( uiGroup.children );
-		
 		if ( intersects.length > 0 ) {
-			console.log("dasdsa");
 			if(intersects[0].object.tag == "Play")
 			{
 				buttonSound.play();
@@ -96,7 +94,23 @@ window.addEventListener( 'mousedown', function(event)
 			else if(intersects[0].object.tag == "Submit")
 			{
 				buttonSound.play();
-				hideGameOver();
+				
+				var encodedScore = encodeScore(playerScore.toString());
+				var hashKey = makeid();
+				
+				//check location
+				var locationName = "default";
+				var field = 'loc';
+				var url = window.location.href;
+				if(url.indexOf('?' + field + '=') != -1)
+					locationName = window.location.location;
+				else if(url.indexOf('&' + field + '=') != -1)
+					locationName = window.location.location;
+				
+				
+				var redUrl = "https://score.dandexfreedomrun.arimac.games/submit/" + encodedScore + "/" + hashKey + "/" + locationName;
+				console.log(redUrl);
+				window.location.href = redUrl;
 			}
 			else if(intersects[0].object.tag == "Ready")
 			{
@@ -106,6 +120,70 @@ window.addEventListener( 'mousedown', function(event)
 		}
 	}
 });
+
+function makeid() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 5; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+};
+
+function encodeScore(x){
+
+    /*
+    1=a   2=s  3=d  4=f  5=1  6=2  7=3  8=4  9=z  0=x
+    */
+
+    var scorestr = [...x];
+
+    console.log(x);
+    console.log(scorestr + "  " + scorestr.length);
+
+    var _score = '';
+    for (var i in scorestr) {
+        var key=scorestr[i];
+        switch(key){
+            case '1':
+                _score = _score.concat('a');
+                break;
+            case '2':
+                _score = _score.concat('s');
+                break;
+            case '3':
+                _score = _score.concat('d');
+                break;
+            case '4':
+                _score = _score.concat('f');
+                break;
+            case '5':
+                _score = _score.concat('1');
+                break;
+            case '6':
+                _score = _score.concat('2');
+                break;
+            case '7':
+                _score = _score.concat('3');
+                break;
+            case '8':
+                _score = _score.concat('4');
+                break;
+            case '9':
+                _score = _score.concat('z');
+                break;
+            case '0':
+                _score = _score.concat('x');
+                break;
+            default:
+            break;    
+        }
+        console.log("Score : " + _score);
+    }
+    
+    return _score;
+}
 
 //Set renderer size
 function setSize(){
@@ -694,7 +772,7 @@ var playMenuApearAnimation = function()
 {
 	playerScore = 0;
 	setScore(playerScore, playerTime);
-	currentLevel = 2;
+	currentLevel = 0;
 	playerLives = 3;
 	elapsedT = 60;
 	playerScore = 0;
@@ -2224,7 +2302,7 @@ var gameOver = function()
 		// restartButton.style.display = "block";
 		jumping = false;
 		timeClock.stop();
-		elapsedT = 15;
+		elapsedT = 60;
 		extraTime = 0;
 		
 		if(currentLevel == 2)
