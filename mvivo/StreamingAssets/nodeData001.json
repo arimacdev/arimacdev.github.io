@@ -1,0 +1,95 @@
+{
+	"nodeData": 
+	[
+		{
+			"index" : 1,
+			"nodeType" : 0,
+			
+			"left" : 1000,
+			"right" : 5,
+			"top" : 3,
+			"bottom" : 1000,
+			
+			"x" : 0,
+			"y" : 0,
+			
+			"windowEnd" : false,
+			"windowType" : 0
+		},
+		{
+			"index" : 2,
+			"nodeType" : 0,
+			
+			"left" : 6,
+			"right" : 1000,
+			"top" : 4,
+			"bottom" : 1000,
+			
+			"x" : 10,
+			"y" : 0,
+			
+			"windowEnd" : false,
+			"windowType" : 0
+		},
+		{
+			"index" : 3,
+			"nodeType" : 0,
+			
+			"left" : 1000,
+			"right" : 4,
+			"top" : 1000,
+			"bottom" : 1,
+			
+			"x" : 0,
+			"y" : 10,
+			
+			"windowEnd" : false,
+			"windowType" : 0
+		},
+		{
+			"index" : 4,
+			"nodeType" : 0,
+			
+			"left" : 3,
+			"right" : 1000,
+			"top" : 1000,
+			"bottom" : 2,
+			
+			"x" : 10,
+			"y" : 10,
+			
+			"windowEnd" : false,
+			"windowType" : 0
+		},
+		{
+			"index" : 5,
+			"nodeType" : 2,
+			
+			"left" : 1,
+			"right" : 6,
+			"top" : 1000,
+			"bottom" : 1000,
+			
+			"x" : 4,
+			"y" : 0,
+			
+			"windowEnd" : false,
+			"windowType" : 1
+		},
+		{
+			"index" : 6,
+			"nodeType" : 2,
+			
+			"left" : 5,
+			"right" : 2,
+			"top" : 1000,
+			"bottom" : 1000,
+			
+			"x" : 6,
+			"y" : 0,
+			
+			"windowEnd" : true,
+			"windowType" : 1
+		}
+	]
+}
