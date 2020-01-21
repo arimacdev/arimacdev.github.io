@@ -1,0 +1,62 @@
+when flipping handles
+
+if top cell is empty => no hinge added
+
+if top cell has cupboard => add 1 mid hinge
+
+if top cell is drawer => no hinge added
+
+if top cell has shelf => no hinge added
+
+if bottom cell is empty => no hinge added
+
+if bottom cell has cupboard => add 1 mid hinge\
+
+if bottom cell has drawer => no hinge added
+
+if bottom cell has shelf => no hinge added
+
+considering both top and botom cells
+if(empty || drawer || shelf)
+{
+    no hinge
+}
+else
+{
+    add 1 hinge
+}
+
+///////////////////////////////////////////////////////////////////
+
+delete a cell => remove cell from top row => top = -1
+
+remove bottom panel , back panel, door, 2 mid covers
+
+if left cell is empty => no change
+
+consider topmost non empty cell>> find method to get topmost nonempty cell
+                            top = cell.ID - cols
+                            if top is not empty => top = top - cols
+                            else return cell ID
+
+left cell is empty && right cell is empty => remove 2 side plates
+
+lefft cell is (cupboard or shelf) && right cell is (cupboard or shelf) => remmove 2 mid plates add 2 side plates
+
+left cell is (cupboard or shelf) && right is (empty or drawer) => remove 1 mid plate
+
+left cell is (empty or drawer) && right cell is (cupboard or shelf) => remove 1 mid plate
+
+consider selected cell>>
+if selected cell's door is flipped => 
+
+if bottom cell is drawer => remove 1 mid hinge
+
+if top cell has drawer => remove 1 mid hinge
+
+if top cell is cupboard && bottom cell is cupboard => remove 1 top/bot hinge
+
+if top cell is empty && bottom cell is empty => end of that column, remove 1 top plate
+
+
+
