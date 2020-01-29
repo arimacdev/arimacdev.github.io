@@ -1,0 +1,382 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+          integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <title>visualizer</title>
+
+</head>
+
+<body>
+    <!-- Js Scripts -->
+    <script src="js/pixi.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="js/main.js"></script>
+
+<!-- Main Panel -->
+<div id="main" class="row no-gutters align-items-center page-wrap">
+    <div class="col-md-8 offset-md-2">
+
+        <div class="row no-gutters">
+            <div class="col-md-12 home-topic">
+                <h1>Diy Cupboard</h1>
+                <p>Select your layout</p>
+            </div>
+        </div>
+
+        <div class="row no-gutters img-mar">
+            <div class="col-md-4 img-pad">
+                <button onclick="pick_lockers()" type="button" class="btn link-btn">
+                    <div class="img-box">
+                        <img src="images/img_1.png">
+                    </div>
+                    <div class="img-text">
+                        <h4>Locker Sets</h4>
+                        <p>Single units</p>
+                    </div>
+                </button>
+            </div>
+            <div class="col-md-4 img-pad">
+                <button onclick="pick_drawers()" type="button" class="btn link-btn">
+                    <div class="img-box">
+                        <img src="images/img_2.png">
+                    </div>
+                    <div class="img-text">
+                        <h4>Drawer Units</h4>
+                        <p>drawer</p>
+                    </div>
+                </button>
+            </div>
+            <div class="col-md-4 img-pad">
+                <button onclick="pick_custom()" type="button" class="btn link-btn">
+                    <div class="img-box">
+                        <img src="images/img_3.png">
+                    </div>
+                    <div class="img-text">
+                        <h4>Custom Units</h4>
+                        <p>drawer & cupboard</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<!-- Game -->
+<div id="game" class="d-none game-div">
+    <div class="row bc-wrap">
+        <div class="col-md-12">
+            <a onclick="on_backbutton_clicked()" class="bc-back"><i class="fas fa-arrow-left"></i></a><img src="images/img_1.png" alt="img" id="top_img"><span class="p-name" id="top_lbl">LOCKER SETS</span>
+        </div>
+    </div>
+</div>
+
+<!-- Side Panel -->
+<div id="panel" class="d-none row no-gutters">
+    <div class="col-md-12">
+
+        <div class="row no-gutters topic-head">
+            <h1>Customize Item</h1>
+        </div>
+
+        <div class="row no-gutters wrap-pad">
+            <div class="col-md-12 bor-bottom">
+
+                <div class="row no-gutters align-items-center sub-topic-back">
+                    <div class="col-md-8">
+                        <p class="sub-topic">Specifications</p>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-secondary cm-btn customize-cm-btn active">
+                                <input class="select-unit-radio2" type="radio" name="options2" id="option4_s"
+                                       autocomplete="off" value="1"> cm
+                            </label>
+                            <label class="btn btn-secondary cm-btn customize-cm-btn">
+                                <input class="select-unit-radio2" type="radio" name="options2" id="option5"
+                                       autocomplete="off" value="2"> in
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row no-gutters">
+                    <form class="w-100">
+
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-md-2">
+                                <p class="input-label">Width</p>
+                            </div>
+                            <div class="col-md-1">
+                                <p class="input-label">:</p>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="form-group">
+                                    <input id="width_input_s" type="number" class="form-control customize-input"
+                                           value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-md-2">
+                                <p class="input-label">Height</p>
+                            </div>
+                            <div class="col-md-1">
+                                <p class="input-label">:</p>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="form-group">
+                                    <input id="heigth_input_s" type="number" class="form-control customize-input"
+                                           value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row no-gutters align-items-center mt-3">
+                            <div class="col-md-2">
+                                <p class="input-label">Columns</p>
+                            </div>
+                            <div class="col-md-1">
+                                <p class="input-label">:</p>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="form-group">
+                                    <input id="col_input_s" type="number" min="1" max="30"
+                                           class="form-control customize-input" value="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-md-2">
+                                <p class="input-label">Rows</p>
+                            </div>
+                            <div class="col-md-1">
+                                <p class="input-label">:</p>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="form-group">
+                                    <input id="raw_input_s" type="number" min="1" max="30"
+                                           class="form-control customize-input" value="1">
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+
+            <div class="col-md-12 bor-bottom">
+
+                <div class="row no-gutters align-items-center sub-topic-back">
+                    <div class="col-md-12">
+                        <p class="sub-topic">Colors</p>
+                    </div>
+                </div>
+
+                <div class="row no-gutters">
+                    <div class="col-md-12 colors-box">
+
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn color-radio active color-first" id="_b">
+                                <input type="radio" name="options" id="option1" autocomplete="off" checked id="_b">
+                                <div class="tic-icon" id="_b">
+                                    <i class="far fa-check-circle"></i>
+                                </div>
+                            </label>
+                            <label class="btn color-radio color-second" id="_g">
+                                <input type="radio" name="options" id="option2" autocomplete="off" id="_g">
+                                <div class="tic-icon" id="_g">
+                                    <i class="far fa-check-circle"></i>
+                                </div>
+                            </label>
+                            <label class="btn color-radio color-third" id="_p">
+                                <input type="radio" name="options" id="option3" autocomplete="off" id="_p">
+                                <div class="tic-icon" id="_p">
+                                    <i class="far fa-check-circle"></i>
+                                </div>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-12 bor-bottom border-0">
+
+                <div class="row no-gutters align-items-center sub-topic-back">
+                    <div class="col-md-12">
+                        <p class="sub-topic">Specifications</p>
+                    </div>
+                </div>
+
+                <div class="row no-gutters">
+                    <div class="col-md-12">
+                        <p id="cupboards_txt" class="specification-text">20 * cupboard units</p>
+                        <!-- <p id="locks_txt" class="specification-text">20 * locks</p> -->
+                        <p id="drawers_txt" class="specification-text">20 * drawers</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row no-gutters">
+            <div class="col-md-12 price-text">
+                <p>Price</p>
+                <h1 id="price_txt"></h1>
+            </div>
+        </div>
+
+        <div class="row no-gutters cart-btn-back">
+            <button id="addtocartbtn" type="button" class="btn btn-primary submit-btn">Add to cart</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Config Modal -->
+<div id="configModal" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Specifications</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="close-icon">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row no-gutters">
+                    <div class="col-md-12 text-right mb-4">
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-secondary cm-btn active">
+                                <input class="select-unit-radio" type="radio" name="options" id="option4"
+                                       autocomplete="off" value="1"> cm
+                            </label>
+                            <label class="btn btn-secondary cm-btn">
+                                <input class="select-unit-radio" type="radio" name="options" id="option5"
+                                       autocomplete="off" value="2"> in
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="w-100">
+
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-md-2">
+                            <p class="input-text">Width</p>
+                        </div>
+                        <div class="col-md-1">
+                            <p class="input-text">:</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <input id="width_input" type="number" min="1" max="300" class="form-control modal-input"
+                                       value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-md-2">
+                            <p class="input-text">Height</p>
+                        </div>
+                        <div class="col-md-1">
+                            <p class="input-text">:</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <input id="heigth_input" type="number" min="1" max="300"
+                                       class="form-control modal-input" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters align-items-center mt-3">
+                        <div class="col-md-2">
+                            <p class="input-text">Columns</p>
+                        </div>
+                        <div class="col-md-1">
+                            <p class="input-text">:</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <input id="col_input" type="number" min="1" max="30" class="form-control modal-input"
+                                       value="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-md-2">
+                            <p class="input-text">Rows</p>
+                        </div>
+                        <div class="col-md-1">
+                            <p class="input-text">:</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <input id="raw_input" type="number" min="1" max="30" class="form-control modal-input"
+                                       value="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters">
+                        <button onclick="submitData()" type="button" class="btn btn-primary submit-btn">Submit</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $("#col_input,#raw_input").on("keyup", function(e){
+            console.log($(this).val());
+            if($(this).val()>30){
+                $(this).val(30);
+                console.log($(this).val());
+            }
+        });
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+locker default component names & part numbers
+(rows * cols)*..
+    1* botom plate : 2
+    1* back plate : 3
+    1* door plate - lock bot : 6C
+    1* door hinge - top : 8A
+    1* lock : __
+
+rows*side plate without locck : 4A
+rows*side plate with lock : 4B
+cols*top plate : 5
+(rows * (cols - 1))*mid plate with lock : 12 B
+
+
+drawer default components names and part numbers
+(rows*cols)*..
+    1* bottom plate
+    1* back plate : 3
+    2* drawer - side panel : 4D
+    2* drawer - front plate : 9
+    2* drawer body : 11
+2*rows* side plate no lock
+cols * top plate
+
+
+
+custom default components names and part numbers
+(rows*cols)*..
+    1*bottom plate : 2
+    1*back plate : 3
+    1*door plate no lock
+    1*door hinge top
+
+2*rows*side plate without locck : 4A
+cols*top plate : 5
+(rows * (cols - 1))*mid plate with no lock : 12 B
+
+
+
+
+
+
+
+
+
+
+
+
+common to all types
+
+    4 * middle foot : 1B
+
+
