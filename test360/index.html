@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>360 Video Control Example</title>
+    <meta name="description" content="360 Video — A-Frame">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+   
+
+    <script>
+    var vid, playbtn, seekslider, curtimetext, durtimetext, mutebtn, volumeslider, fullscreenbtn, container;
+    function intializePlayer(){
+      // Set object references
+      vid = document.getElementById("video_1");
+      playbtn = document.getElementById("playpausebtn");
+      seekslider = document.getElementById("seekslider");
+      curtimetext = document.getElementById("curtimetext");
+      durtimetext = document.getElementById("durtimetext");
+      mutebtn = document.getElementById("mutebtn");
+      volumeslider = document.getElementById("volumeslider");
+      fullscreenbtn = document.getElementById("fullscreenbtn")
+      container = document.getElementById("myEmbeddedScene")
+      // Add event listeners
+      playbtn.addEventListener("click",playPause,false);
+      seekslider.addEventListener("change",vidSeek,false);
+      vid.addEventListener("timeupdate",seektimeupdate,false);
+      mutebtn.addEventListener("click",vidmute,false);
+      volumeslider.addEventListener("change",setvolume,false);
+      fullscreenbtn.addEventListener("click",toggleFullScreen,false);
+
+    }
+    window.onload = intializePlayer;
+    function playPause(){
+      if(vid.paused){
+        vid.play();
+        playbtn.style.background = "url(icons_test/pause.png)";
+      } else {
+        vid.pause();
+        playbtn.style.background = "url(icons_test/play.png)";
+      }
+    }
+    function vidSeek(){
+      var seekto = vid.duration * (seekslider.value / 100);
+      vid.currentTime = seekto;
+    }
+    function seektimeupdate(){
+      var nt = vid.currentTime * (100 / vid.duration);
+      seekslider.value = nt;
+      var curmins = Math.floor(vid.currentTime / 60);
+      var cursecs = Math.floor(vid.currentTime - curmins * 60);
+      var durmins = Math.floor(vid.duration / 60);
+      var dursecs = Math.floor(vid.duration - durmins * 60);
+      if(cursecs < 10){ cursecs = "0"+cursecs; }
+      if(dursecs < 10){ dursecs = "0"+dursecs; }
+      if(curmins < 10){ curmins = "0"+curmins; }
+      if(durmins < 10){ durmins = "0"+durmins; }
+      curtimetext.innerHTML = curmins+":"+cursecs;
+      durtimetext.innerHTML = durmins+":"+dursecs;
+    }
+
+    function vidmute(){
+      if(vid.muted){
+        vid.muted = false;
+        mutebtn.style.background = "url(icons_test/sound_on.png)";
+      } else {
+        vid.muted = true;
+        mutebtn.style.background= "url(icons_test/sound_off.png)";
+      }
+    }
+
+    function setvolume(){
+      vid.volume = volumeslider.value / 100;
+    }
+
+    function toggleFullScreen(){
+      if(container.requestFullScreen){
+        container.requestFullScreen();
+      } else if(container.webkitRequestFullScreen){
+        container.webkitRequestFullScreen();
+      } else if(container.mozRequestFullScreen){
+        container.mozRequestFullScreen();
+      }
+    }
+    
+  
+
+    </script>
+
+     <style>
+
+      a-scene {
+
+      top: 0;
+      left: 0;
+      width: 100%;
+      height:100%;
+
+      }
+
+      .container {
+      max-width: 700px;
+      height:350px;
+      margin: 2% auto; 
+
+      }
+
+      .Video{  
+        
+      }
+
+      .outer {
+
+      }
+
+
+      div#video_controls_bar{
+      display:flex;
+      justify-content: space-around;
+      align-items: center;
+      position:relative;
+      bottom:0;
+      background: #333; 
+      padding:10px; 
+      color:#CCC; 
+      font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;   
+      border-style: solid;
+      border-top-width: 0px;
+      border-right-width: px;
+      border-color: black;
+      }
+
+      button#playpausebtn{
+      background:url(icons_test/play.png);
+      border:none;
+      width:24px;
+      height:24px;
+      cursor:pointer;
+      opacity:0.5;
+ 
+
+      }
+
+      button#playpausebtn:hover{ opacity:1; }
+      input#seekslider{ width:40%; margin-left: 2%; margin-top:1.5%;}
+      input#volumeslider{ width: 7%; margin-top:1.5%;}
+
+      input[type='range'] {
+          
+          -webkit-appearance: none !important;
+          background: #000;
+          border:#666 1px solid;
+          height:4px;          
+          margin-top: 2%;
+          opacity:0.5;
+
+      }
+
+      input[type='range']:hover{ opacity:1; }
+
+      input[type='range']::-webkit-slider-thumb {
+          -webkit-appearance: none !important;
+          background: #FFF;
+          height:15px;
+          width:15px;
+        border-radius:100%;
+        cursor:pointer;
+      }
+
+      button#fullscreenbtn{ 
+      background:url(icons_test/fullscreen.png);
+      border:none;
+      width:20px;
+      height:20px;
+      cursor:pointer;
+      opacity:0.5;
+      margin-left: 5%;
+      background-repeat: no-repeat;
+    
+  
+       }
+
+      button#fullscreenbtn:hover{ opacity:1; }
+
+      button#mutebtn{
+      background:url(icons_test/sound_on.png);
+      border:none;
+      width:20px;
+      height:20px;
+      cursor:pointer;
+      opacity:0.5;
+      margin-left: 3%;
+      }
+
+      button#mutebtn:hover{ opacity:1; }
+
+  </style>
+  </head>
+   
+  <body>
+  <div class="outer">
+  <div id="myEmbeddedScene" class ="container" >
+
+    <a-scene embedded vr-mode-ui="enabled: false" >
+      <a-assets>
+        <video id="video_1"  poster="logo.jpg" data-overlay="1" controls crossorigin="anonymous" loop="true" playsinline webkit-playsinline ></video>
+      </a-assets>
+
+      <a-camera>
+          <a-cursor id="cursor" color="yellow"></a-cursor>
+      </a-camera>
+      <a-videosphere src="#video_1" rotation="0 180 0"></a-videosphere>
+      <a-entity video-controls="src:#video_1"></a-entity>     
+    </a-scene>  
+  <div id="video_controls_bar">
+    <button id="playpausebtn"></button>
+    <input id="seekslider" type="range" min="0" max="100" value="0" step="1">
+    <span id="curtimetext">00:00</span> / <span id="durtimetext">00:00</span>
+    <button id="mutebtn"></button>
+    <input id="volumeslider" type="range" min="0" max="100" value="100" step="1">
+    <button id="fullscreenbtn"></button>
+  </div>   
+   </div>
+</div>
+
+ <script>
+    var video = document.getElementById('video_1');
+
+    if(Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource('https://steamtest-inso.streaming.media.azure.net//561d1242-9187-4566-8235-0922ad373d4c/b0761c26-323f-48d5-93a5-7a36f9e6525a.ism/manifest(format=m3u8-aapl)');
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED,function() {
+        video.play();
+      });
+    }
+    else{
+      video.src = 'https://steamtest-inso.streaming.media.azure.net//561d1242-9187-4566-8235-0922ad373d4c/b0761c26-323f-48d5-93a5-7a36f9e6525a.ism/manifest(format=m3u8-aapl)';
+      video.addEventListener('canplaythrough', function () {
+        video.play();
+      });
+    }
+    </script>
+
+  </body>
+</html>
